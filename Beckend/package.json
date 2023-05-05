@@ -1,0 +1,17 @@
+{
+  "name": "beckend",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "tsc && node ./compiledSourceJS/Beckend/mongoose-connection.js"
+  },
+  "author": "Matteo Pagano",
+  "license": "ISC",
+  "dependencies": {
+    "mongoose": "^7.1.0"
+  },
+  "devDependencies": {
+    "@types/mongoose": "^5.11.97"
+  }
+}
