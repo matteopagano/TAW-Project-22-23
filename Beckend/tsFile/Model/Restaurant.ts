@@ -1,4 +1,4 @@
-import { Schema, model, Document, SchemaTypes} from 'mongoose';
+import { Schema, model, Document} from 'mongoose';
 
 
 export interface Restaurant extends Document {
@@ -15,25 +15,33 @@ export interface Restaurant extends Document {
 
 const restaurantSchema = new Schema<Restaurant>( {
     restaurantName: {
-        type: String,
+        type: Schema.Types.String,
         required: true,
     },
-    usersList: [{
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref : 'User'
-    }],
+    usersList: {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'User'
+            }
+        ],
+        required : true
+    },
     
     owner: {
         type: Schema.Types.ObjectId,
         required: true,
         ref : 'Owner'
     },
-    tablesList: [{
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref : 'Table'
-    }],
+    tablesList: {
+        type : [{
+            type: Schema.Types.ObjectId,
+            required: false,
+            ref : 'Table'
+        }],
+        required : true
+    },
 })
 
 

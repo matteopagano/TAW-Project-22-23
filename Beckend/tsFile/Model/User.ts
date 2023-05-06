@@ -5,21 +5,24 @@ import { Schema, model, Document} from 'mongoose';
 //ricette = recipes
 //ricetta = recipe
 
-export enum Role {
-    COOK = 'cook',
-    WAITER = 'waiter',
+
+export enum RoleType{
     CASHIER = 'cashier',
-    BARTENDER = 'bartender'
+    OWNER = 'owner',
+    WAITER = 'waiter',
+    COOK = 'cook',
+    BARTENDER = 'bartender',
 }
 
 const options = { discriminatorKey: 'role' };
 
 export interface User extends Document {
-    readonly _id: Schema.Types.ObjectId,
-    digest: string;
+    readonly _id: Schema.Types.ObjectId;
+    username : string;
     email: string;
-    role: Role;
-    idRestaurant: Schema.Types.ObjectId;
+    digest: string;
+    salt : string;
+    role: string;
 }
 
 export interface DishCooked {
@@ -35,66 +38,126 @@ export interface DrinkPrepared {
 }
 
 export interface Cook extends User{
-    //dishesCooked : [{qt : int, idItem: ObjectId, dateC : Date}]
-    dishesCooked : DishCooked[]
+    dishesCooked : DishCooked[],
+    idRestaurant: Schema.Types.ObjectId,
+    
 }
 
 export interface Bartender extends User{
-    //drinkPrepared : [{qt : int, idItem: ObjectId}]
-    drinkPrepared : DrinkPrepared[]
+    drinkPrepared : DrinkPrepared[],
+    idRestaurant: Schema.Types.ObjectId
+    
 }
 
 export interface Waiter extends User{
-    //ordersTaken :[{idOrder : ObjectId}] 
-    //tablesObservered : [{idTable : ObectId}]
     ordersTaken : Schema.Types.ObjectId[],
     tablesObservered : Schema.Types.ObjectId[],
+    idRestaurant: Schema.Types.ObjectId
+    
 }
 
 export interface Cashier extends User{
-    //receiptsPrinted : [{idReceipe: ObjectId}]
     receiptsPrinted : Schema.Types.ObjectId[],
+    idRestaurant: Schema.Types.ObjectId
+    
+}
+
+export interface Owner extends User{
+    employeesList : Schema.Types.ObjectId[],
+    restaurantOwn: Schema.Types.ObjectId,
+    
 }
 
 const cookSchema = new Schema<Cook>({
-    //dishesCooked : [{qt : int, idItem: ObjectId, dateC : Date}]
-    dishesCooked : [{qt : Number, idItem : {type : Schema.Types.ObjectId, ref : 'Dishe'}, dateFinished : Date}]
+    dishesCooked : {
+        type : [
+            {
+                qt : {type : Schema.Types.Number, required : true},
+                idItem : {type : Schema.Types.ObjectId, ref : 'Dish', required : true},
+                dateFinished : {type : Schema.Types.Date, required : true}
+            }
+        ]
+    },
+    idRestaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+    
 }, options)
 
 const bartenderSchema = new Schema<Bartender>({
-    //drinkPrepared : [{qt : int, idItem: ObjectId}]
-    drinkPrepared : [{qt : Number, idItem : {type : Schema.Types.ObjectId, ref : 'Drink'}, dateFinished : Date}]
+    drinkPrepared : {
+        type : [
+            {
+                qt : {type : Schema.Types.Number, required : true},
+                idItem : {type : Schema.Types.ObjectId, ref : 'Drink', required : true},
+                dateFinished : {type : Schema.Types.Date, required : true}
+            }
+        ]
+    },
+    idRestaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+    
 }, options)
 
 const waiterSchema = new Schema<Waiter>({
-    //ordersTaken :[{idOrder : ObjectId}] 
-    //tablesObservered : [{idTable : ObectId}]
-    ordersTaken :[{idOrder : {type : Schema.Types.ObjectId, ref : 'Order'}}],
-    tablesObservered : [{idTable : {type : Schema.Types.ObjectId, ref : 'Table'}}]
+    ordersTaken : { 
+        type : [
+            {
+                idOrder : {type : Schema.Types.ObjectId, ref : 'Order', required : true}
+            }
+        ],
+        required: true
+    },
+        
+    tablesObservered : {
+        type : [
+            {
+                idTable : {type : Schema.Types.ObjectId, ref : 'Table', required : true}
+            }
+        ],
+        required : true
+    },
+    idRestaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+    
+
 }, options)
 
 //ricette = recipes
 //ricetta = recipe
 
 const cashierSchema = new Schema<Cashier>({
-    //receiptsPrinted : [{idReceipe: ObjectId}]
-    receiptsPrinted : [{idReceipe : {type : Schema.Types.ObjectId, ref : 'Recipe'}}]
+    receiptsPrinted : {
+        type:[
+            {type : Schema.Types.ObjectId, ref : 'Recipe', required: true}
+        ],
+        required : true
+    },
+    idRestaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+    
+}, options)
+
+const ownerSchema = new Schema<Owner>({
+    employeesList : {
+        type:[
+            {type : Schema.Types.ObjectId, ref : 'User'}
+        ],
+        required : true
+    },
+    restaurantOwn: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: false },
+    
 }, options)
 
 
-
 const userSchema = new Schema<User>({
-    digest: { type: String, required: true },
-    email: { type: String, required: true },
-    role: { type: String, enum: Role, required: true },
-    idRestaurant: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: true }
+    username: { type: Schema.Types.String, required: true },
+    email: { type: Schema.Types.String, required: true },
+    digest: { type: Schema.Types.String, required: true },
+    salt: { type: Schema.Types.String, required: true },
+    role: { type: Schema.Types.String, enum : RoleType, required: true },
 }, options);
-
 
 
 export const UserModel = model<User>('User', userSchema);
 
-export const CookModel = UserModel.discriminator<Cook>('Cook', cookSchema);
-export const WaiterModel = UserModel.discriminator<Waiter>('Waiter', waiterSchema);
-export const CashierModel = UserModel.discriminator<Cashier>('Cashier', cashierSchema);
-export const BartenderModel = UserModel.discriminator<Bartender>('Bartender', bartenderSchema);
+export const CookModel = UserModel.discriminator<Cook>('Cook', cookSchema, RoleType.COOK);
+export const WaiterModel = UserModel.discriminator<Waiter>('Waiter', waiterSchema,  RoleType.WAITER);
+export const CashierModel = UserModel.discriminator<Cashier>('Cashier', cashierSchema,  RoleType.CASHIER);
+export const BartenderModel = UserModel.discriminator<Bartender>('Bartender', bartenderSchema,  RoleType.BARTENDER);
+export const OwnerModel = UserModel.discriminator<Owner>('Owner', ownerSchema,  RoleType.OWNER);

@@ -1,32 +1,59 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ItemModel = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-const itemSchema = new mongoose_1.default.Schema({
+exports.DrinkModel = exports.DishModel = exports.ItemModel = exports.ItemType = void 0;
+const mongoose_1 = require("mongoose");
+const options = { discriminatorKey: 'type' };
+var ItemType;
+(function (ItemType) {
+    ItemType["DISH"] = "dish";
+    ItemType["DRINK"] = "drink";
+})(ItemType = exports.ItemType || (exports.ItemType = {}));
+const itemSchema = new mongoose_1.Schema({
     name: {
-        type: mongoose_1.default.SchemaTypes.String,
-        required: true
-    },
-    price: {
-        type: mongoose_1.default.SchemaTypes.String,
+        type: mongoose_1.Schema.Types.String,
         required: true,
         unique: true
     },
-    type: {
-        type: [mongoose_1.default.SchemaTypes.String],
+    price: {
+        type: mongoose_1.Schema.Types.Number,
         required: true
     },
-    allergenes: [{
-            type: mongoose_1.default.SchemaTypes.String,
-            required: false,
-            ref: 'Allergene'
-        }],
+    itemType: {
+        type: mongoose_1.Schema.Types.String,
+        enum: ItemType,
+        required: true
+    },
+    allergenes: {
+        type: [
+            {
+                type: mongoose_1.Schema.Types.String,
+                required: true,
+                ref: 'Allergene'
+            }
+        ],
+        required: true
+    },
     idRestaurant: {
-        type: mongoose_1.default.SchemaTypes.String,
+        type: mongoose_1.Schema.Types.String,
         required: true,
     }
-});
-exports.ItemModel = mongoose_1.default.model('Item', itemSchema);
+}, options);
+const DishSchema = new mongoose_1.Schema({
+    cooksList: {
+        type: [
+            { type: mongoose_1.Schema.Types.ObjectId, ref: 'Cook', required: true }
+        ],
+        required: true
+    }
+}, options);
+const Drinkchema = new mongoose_1.Schema({
+    bartendersList: {
+        type: [
+            { type: mongoose_1.Schema.Types.ObjectId, ref: 'Bartender' }
+        ],
+        required: true
+    }
+}, options);
+exports.ItemModel = (0, mongoose_1.model)('Item', itemSchema);
+exports.DishModel = exports.ItemModel.discriminator('Dish', DishSchema);
+exports.DrinkModel = exports.ItemModel.discriminator('Drink', Drinkchema);

@@ -1,35 +1,40 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OrderModel = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-var State;
-(function (State) {
-    State["READY"] = "ready";
-    State["SERVED"] = "served";
-    State["INPROGRESS"] = "inProgress";
-    State["NOTSTARTED"] = "notStarted";
-})(State || (State = {}));
-const orderSchema = new mongoose_1.default.Schema({
+const mongoose_1 = require("mongoose");
+var StateOrder;
+(function (StateOrder) {
+    StateOrder["READY"] = "ready";
+    StateOrder["SERVED"] = "served";
+    StateOrder["INPROGRESS"] = "inProgress";
+    StateOrder["NOTSTARTED"] = "notStarted";
+})(StateOrder || (StateOrder = {}));
+var StateItem;
+(function (StateItem) {
+    StateItem["COMPLETED"] = "completed";
+    StateItem["NOTCOMPLETED"] = "notcompleted";
+})(StateItem || (StateItem = {}));
+const orderSchema = new mongoose_1.Schema({
     idTable: {
-        type: mongoose_1.default.Schema.Types.ObjectId,
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true
     },
-    itemList: //From the off documetation -> [] array
-    [{
-            qt: { type: Number, required: true },
-            idItem: { type: mongoose_1.default.Schema.Types.ObjectId, ref: 'Item', required: true },
-            state: { type: String, enum: State, required: true } // From the official documentation
-        }],
+    itemList: {
+        type: [{
+                qt: { type: Number, required: true },
+                idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Item', required: true },
+                state: { type: mongoose_1.Schema.Types.String, enum: StateItem, required: true } // From the official documentation
+            }],
+        required: true
+    },
     state: {
-        type: String,
+        type: mongoose_1.Schema.Types.String,
+        enum: StateOrder,
         required: true
     },
     date: {
-        type: Date,
+        type: mongoose_1.Schema.Types.Date,
         required: true
     }
 });
-exports.OrderModel = mongoose_1.default.model('Order', orderSchema);
+exports.OrderModel = (0, mongoose_1.model)('Order', orderSchema);

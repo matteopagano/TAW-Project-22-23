@@ -1,21 +1,27 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document} from 'mongoose';
 
-export interface Allergene extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
+export interface Allergene extends Document {
+    readonly _id: Schema.Types.ObjectId,
     allergene: string,
-    isPresentOn : mongoose.Schema.Types.ObjectId[]
+    isPresentOn : Schema.Types.ObjectId[]
 }
 
-const tagSchema = new mongoose.Schema<Allergene>({
-    allergene: {
-      type: mongoose.SchemaTypes.String,
+const allergeneSchema = new Schema<Allergene>({
+    allergene : {
+      type: Schema.Types.String,
       required: true,
     },
-    isPresentOn: [{
-        type: mongoose.SchemaTypes.ObjectId,
-        required: false, 
-        ref : 'Item'
-    }]
+    isPresentOn : {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false, 
+                ref : 'Item'
+            },
+        ],
+        required : true
+
+    }   
 });
   
-export const TagModel = mongoose.model<Allergene>('Allergene', tagSchema);
+export const AllergeneModel = model<Allergene>('Allergene', allergeneSchema);

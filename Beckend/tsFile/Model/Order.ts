@@ -1,48 +1,55 @@
-import mongoose from "mongoose";
-import { Allergene } from "./Allergene";
+import { Schema, model, Document} from 'mongoose';
 
 interface itemElement {
   qt: number,
-  idItem: mongoose.Schema.Types.ObjectId,
-  state: string
+  idItem: Schema.Types.ObjectId,
+  state: StateOrder
 }
 
-enum State {
+enum StateOrder {
     READY = 'ready',
     SERVED = 'served',
     INPROGRESS = 'inProgress',
     NOTSTARTED = 'notStarted'
 }
 
-export interface Order extends mongoose.Document {
-  readonly _id: mongoose.Schema.Types.ObjectId;
-  idTable: mongoose.Schema.Types.ObjectId;
-  itemList: [itemElement];
+enum StateItem {
+    COMPLETED = 'completed',
+    NOTCOMPLETED = 'notcompleted'
+}
+
+export interface Order extends Document {
+  readonly _id: Schema.Types.ObjectId;
+  idTable: Schema.Types.ObjectId;
+  itemList: itemElement[];
   state: string;
   date: Date;
 }
 
-const orderSchema = new mongoose.Schema({
+const orderSchema = new Schema({
     idTable: {
-      type: mongoose.Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       required: true
     },
-    itemList: //From the off documetation -> [] array
-        [{
+    itemList: {
+        type : [{
             qt : {type: Number,required: true},
-            idItem : {type : mongoose.Schema.Types.ObjectId,ref : 'Item',required: true},
-            state : {type: String, enum: State, required: true} // From the official documentation
+            idItem : {type : Schema.Types.ObjectId, ref : 'Item', required: true},
+            state : {type : Schema.Types.String, enum : StateItem, required : true} // From the official documentation
             
-        }]
+        }],
+        required : true
+    }
     ,
     state: {
-      type: String,
-      required: true
+      type : Schema.Types.String,
+      enum : StateOrder,
+      required : true
     },
     date: {
-      type: Date,
+      type: Schema.Types.Date,
       required: true
     }
   });
   
-  export const OrderModel = mongoose.model<Order>('Order', orderSchema);
+  export const OrderModel = model<Order>('Order', orderSchema);

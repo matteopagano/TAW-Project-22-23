@@ -1,19 +1,21 @@
 "use strict";
-var __importDefault = (this && this.__importDefault) || function (mod) {
-    return (mod && mod.__esModule) ? mod : { "default": mod };
-};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.TagModel = void 0;
-const mongoose_1 = __importDefault(require("mongoose"));
-const tagSchema = new mongoose_1.default.Schema({
+exports.AllergeneModel = void 0;
+const mongoose_1 = require("mongoose");
+const allergeneSchema = new mongoose_1.Schema({
     allergene: {
-        type: mongoose_1.default.SchemaTypes.String,
+        type: mongoose_1.Schema.Types.String,
         required: true,
     },
-    isPresentOn: [{
-            type: mongoose_1.default.SchemaTypes.ObjectId,
-            required: false,
-            ref: 'Item'
-        }]
+    isPresentOn: {
+        type: [
+            {
+                type: mongoose_1.Schema.Types.ObjectId,
+                required: false,
+                ref: 'Item'
+            },
+        ],
+        required: true
+    }
 });
-exports.TagModel = mongoose_1.default.model('Allergene', tagSchema);
+exports.AllergeneModel = (0, mongoose_1.model)('Allergene', allergeneSchema);

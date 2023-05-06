@@ -1,4 +1,4 @@
-import { Schema, model, Document, SchemaTypes} from 'mongoose';
+import { Schema, model, Document} from 'mongoose';
 
 
 interface itemElement {
@@ -29,17 +29,20 @@ const recipeSchema = new Schema<Recipe>( {
         ref : 'Cashier'
     },
     
-    itemsPurchased:  [{
-        qt : {
-            type : Number,
-            required : true,
-        },
-        idItem : {
-            type: Schema.Types.ObjectId,
-            required: true,
-            ref : 'Item'
-        }
-    }],
+    itemsPurchased:  {
+        type : [{
+            qt : {
+                type : Schema.Types.Number,
+                required : true,
+            },
+            idItem : {
+                type: Schema.Types.ObjectId,
+                required: true,
+                ref : 'Item'
+            }
+        }],
+        required : true
+    },
     idDay:  {
         type : Schema.Types.ObjectId,
         required : true,

@@ -1,45 +1,91 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.BartenderModel = exports.CashierModel = exports.WaiterModel = exports.CookModel = exports.UserModel = exports.Role = void 0;
+exports.OwnerModel = exports.BartenderModel = exports.CashierModel = exports.WaiterModel = exports.CookModel = exports.UserModel = exports.RoleType = void 0;
 const mongoose_1 = require("mongoose");
 //ricette = recipes
 //ricetta = recipe
-var Role;
-(function (Role) {
-    Role["COOK"] = "cook";
-    Role["WAITER"] = "waiter";
-    Role["CASHIER"] = "cashier";
-    Role["BARTENDER"] = "bartender";
-})(Role = exports.Role || (exports.Role = {}));
+var RoleType;
+(function (RoleType) {
+    RoleType["CASHIER"] = "cashier";
+    RoleType["OWNER"] = "owner";
+    RoleType["WAITER"] = "waiter";
+    RoleType["COOK"] = "cook";
+    RoleType["BARTENDER"] = "bartender";
+})(RoleType = exports.RoleType || (exports.RoleType = {}));
 const options = { discriminatorKey: 'role' };
 const cookSchema = new mongoose_1.Schema({
-    //dishesCooked : [{qt : int, idItem: ObjectId, dateC : Date}]
-    dishesCooked: [{ qt: Number, idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Dishe' }, dateFinished: Date }]
+    dishesCooked: {
+        type: [
+            {
+                qt: { type: mongoose_1.Schema.Types.Number, required: true },
+                idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Dish', required: true },
+                dateFinished: { type: mongoose_1.Schema.Types.Date, required: true }
+            }
+        ]
+    },
+    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
 }, options);
 const bartenderSchema = new mongoose_1.Schema({
-    //drinkPrepared : [{qt : int, idItem: ObjectId}]
-    drinkPrepared: [{ qt: Number, idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Drink' }, dateFinished: Date }]
+    drinkPrepared: {
+        type: [
+            {
+                qt: { type: mongoose_1.Schema.Types.Number, required: true },
+                idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Drink', required: true },
+                dateFinished: { type: mongoose_1.Schema.Types.Date, required: true }
+            }
+        ]
+    },
+    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
 }, options);
 const waiterSchema = new mongoose_1.Schema({
-    //ordersTaken :[{idOrder : ObjectId}] 
-    //tablesObservered : [{idTable : ObectId}]
-    ordersTaken: [{ idOrder: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Order' } }],
-    tablesObservered: [{ idTable: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Table' } }]
+    ordersTaken: {
+        type: [
+            {
+                idOrder: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Order', required: true }
+            }
+        ],
+        required: true
+    },
+    tablesObservered: {
+        type: [
+            {
+                idTable: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Table', required: true }
+            }
+        ],
+        required: true
+    },
+    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
 }, options);
 //ricette = recipes
 //ricetta = recipe
 const cashierSchema = new mongoose_1.Schema({
-    //receiptsPrinted : [{idReceipe: ObjectId}]
-    receiptsPrinted: [{ idReceipe: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Recipe' } }]
+    receiptsPrinted: {
+        type: [
+            { type: mongoose_1.Schema.Types.ObjectId, ref: 'Recipe', required: true }
+        ],
+        required: true
+    },
+    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
+}, options);
+const ownerSchema = new mongoose_1.Schema({
+    employeesList: {
+        type: [
+            { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
+        ],
+        required: true
+    },
+    restaurantOwn: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: false },
 }, options);
 const userSchema = new mongoose_1.Schema({
-    digest: { type: String, required: true },
-    email: { type: String, required: true },
-    role: { type: String, enum: Role, required: true },
-    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true }
+    username: { type: mongoose_1.Schema.Types.String, required: true },
+    email: { type: mongoose_1.Schema.Types.String, required: true },
+    digest: { type: mongoose_1.Schema.Types.String, required: true },
+    salt: { type: mongoose_1.Schema.Types.String, required: true },
+    role: { type: mongoose_1.Schema.Types.String, enum: RoleType, required: true },
 }, options);
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);
-exports.CookModel = exports.UserModel.discriminator('Cook', cookSchema);
-exports.WaiterModel = exports.UserModel.discriminator('Waiter', waiterSchema);
-exports.CashierModel = exports.UserModel.discriminator('Cashier', cashierSchema);
-exports.BartenderModel = exports.UserModel.discriminator('Bartender', bartenderSchema);
+exports.CookModel = exports.UserModel.discriminator('Cook', cookSchema, RoleType.COOK);
+exports.WaiterModel = exports.UserModel.discriminator('Waiter', waiterSchema, RoleType.WAITER);
+exports.CashierModel = exports.UserModel.discriminator('Cashier', cashierSchema, RoleType.CASHIER);
+exports.BartenderModel = exports.UserModel.discriminator('Bartender', bartenderSchema, RoleType.BARTENDER);
+exports.OwnerModel = exports.UserModel.discriminator('Owner', ownerSchema, RoleType.OWNER);

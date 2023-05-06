@@ -1,6 +1,4 @@
 import { Schema, model, Document, SchemaTypes} from 'mongoose';
-
-
 export interface Table extends Document {
 
     readonly _id: Schema.Types.ObjectId,
@@ -12,7 +10,6 @@ export interface Table extends Document {
     waitressList : Schema.Types.ObjectId[],
     restaurantId : Schema.Types.ObjectId
 
-    
 }
 
 const tableSchema = new Schema<Table>( {
@@ -29,16 +26,25 @@ const tableSchema = new Schema<Table>( {
         type: Number,
         required: true,
     },
-    orderList: [{
-        type: Schema.Types.ObjectId,
-        required: false,
-        ref : 'Order'
-    }],
-    waitressList: [{
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref : 'Waiter'
-    }],
+    orderList: {
+        type:[
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'Order'
+            }
+        ], required : true
+    },
+    waitressList: {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'Waiter'
+            }
+        ], 
+        required : true
+    },
     restaurantId: {
         type: Schema.Types.ObjectId,
         required: true,

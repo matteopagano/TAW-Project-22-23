@@ -1,38 +1,46 @@
-import mongoose from 'mongoose';
+import { Schema, model, Document} from 'mongoose';
 
-export interface Day extends mongoose.Document {
-    readonly _id: mongoose.Schema.Types.ObjectId,
+export interface Day extends Document {
+    readonly _id: Schema.Types.ObjectId,
     date: Date,
-    orderList : mongoose.Schema.Types.ObjectId[],
-    recipeList : mongoose.Schema.Types.ObjectId[],
-    idRestaurant : mongoose.Schema.Types.ObjectId
+    orderList : Schema.Types.ObjectId[],
+    recipeList : Schema.Types.ObjectId[],
+    idRestaurant : Schema.Types.ObjectId
 }
 
 
 
-const daySchema = new mongoose.Schema<Day>({
+const daySchema = new Schema<Day>({
     date: {
-      type: mongoose.SchemaTypes.Date,
-      required: true,
+      type: Schema.Types.Date,
+      required: true
     },
-    orderList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order', 
-      },
-    ],
-    recipeList: [
-      {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recipe', 
-      },
-    ],
+    orderList: {
+        type : [
+                {
+                    type: Schema.Types.ObjectId,
+                    required: true,
+                    ref: 'Order'
+                },
+        ],
+        required: true,
+    },
+    recipeList: { 
+        type :[
+                {
+                    type: Schema.Types.ObjectId,
+                    required: true,
+                    ref: 'Recipe'
+                },
+        ],
+        required: true,
+    },
     idRestaurant: {
-      type: mongoose.Schema.Types.ObjectId,
-      ref: 'Restaurant', // Replace 'Restaurant' with the actual name of your Restaurant model
+      type: Schema.Types.ObjectId,
       required: true,
+      ref: 'Restaurant'
     },
 });
   
-export const DaysModel = mongoose.model<Day>('Day', daySchema);
+export const DayModel = model<Day>('Day', daySchema);
 
