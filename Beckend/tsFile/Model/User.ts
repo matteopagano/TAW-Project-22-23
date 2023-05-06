@@ -15,6 +15,7 @@ export enum Role {
 const options = { discriminatorKey: 'role' };
 
 export interface User extends Document {
+    readonly _id: Schema.Types.ObjectId,
     digest: string;
     email: string;
     role: Role;
