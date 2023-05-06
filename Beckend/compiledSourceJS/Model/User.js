@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.OwnerModel = exports.BartenderModel = exports.CashierModel = exports.WaiterModel = exports.CookModel = exports.UserModel = exports.RoleType = void 0;
+exports.OwnerModel = exports.BartenderModel = exports.CashierModel = exports.WaiterModel = exports.CookModel = exports.UserModel = exports.isOwner = exports.RoleType = void 0;
 const mongoose_1 = require("mongoose");
 var RoleType;
 (function (RoleType) {
@@ -75,6 +75,18 @@ const userSchema = new mongoose_1.Schema({
     salt: { type: mongoose_1.Schema.Types.String, required: true },
     role: { type: mongoose_1.Schema.Types.String, enum: RoleType, required: true },
 }, options);
+function isOwner(owner) {
+    const partialUser = owner; // creare un oggetto Partial<User> dall'argomento passato
+    // verificare se tutte le proprietà obbligatorie di User sono presenti in partialUser
+    return partialUser &&
+        typeof partialUser.username === 'string' &&
+        typeof partialUser.email === 'string' &&
+        typeof partialUser.digest === 'string' &&
+        typeof partialUser.role === 'string' &&
+        typeof partialUser.salt === 'string' &&
+        partialUser.restaurantOwn instanceof mongoose_1.Schema.Types.ObjectId;
+}
+exports.isOwner = isOwner;
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);
 exports.CookModel = exports.UserModel.discriminator('Cook', cookSchema, RoleType.COOK);
 exports.WaiterModel = exports.UserModel.discriminator('Waiter', waiterSchema, RoleType.WAITER);

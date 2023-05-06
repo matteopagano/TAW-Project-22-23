@@ -139,6 +139,17 @@ const userSchema = new Schema<User>({
     role: { type: Schema.Types.String, enum : RoleType, required: true },
 }, options);
 
+export function isOwner(owner: any): owner is Owner {
+    const partialUser: Partial<Owner> = owner; // creare un oggetto Partial<User> dall'argomento passato
+    // verificare se tutte le proprietà obbligatorie di User sono presenti in partialUser
+    return partialUser && 
+           typeof partialUser.username === 'string' &&
+           typeof partialUser.email === 'string' &&
+           typeof partialUser.digest === 'string' &&
+           typeof partialUser.role === 'string' &&
+           typeof partialUser.salt === 'string' &&
+           partialUser.restaurantOwn instanceof Schema.Types.ObjectId;
+}
 
 export const UserModel = model<User>('User', userSchema);
 
@@ -147,3 +158,4 @@ export const WaiterModel = UserModel.discriminator<Waiter>('Waiter', waiterSchem
 export const CashierModel = UserModel.discriminator<Cashier>('Cashier', cashierSchema,  RoleType.CASHIER);
 export const BartenderModel = UserModel.discriminator<Bartender>('Bartender', bartenderSchema,  RoleType.BARTENDER);
 export const OwnerModel = UserModel.discriminator<Owner>('Owner', ownerSchema,  RoleType.OWNER);
+
