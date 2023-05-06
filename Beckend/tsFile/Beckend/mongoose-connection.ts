@@ -1,4 +1,5 @@
 import mongoose from "mongoose"
+import * as User from '../Model/User';
 import {ItemModel} from '../Model/Item'
 
 mongoose.connect("mongodb://localhost:27017/MioDB", )
@@ -12,6 +13,7 @@ mongoose.connect("mongodb://localhost:27017/MioDB", )
 
 mongoose.connection.once('open', () => {
     
+
     const newItem1 = new ItemModel({
       name: "Carbonara",
       price: 101,
@@ -20,6 +22,8 @@ mongoose.connection.once('open', () => {
       idRestaurant : "ciao"
     })
     newItem1.save();
+    
+
 
     console.log('Connessione al database aperta!');
 });

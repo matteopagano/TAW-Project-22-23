@@ -1,6 +1,6 @@
 import mongoose from 'mongoose';
 
-export interface Days extends mongoose.Document {
+export interface Day extends mongoose.Document {
     readonly _id: mongoose.Schema.Types.ObjectId,
     date: Date,
     orderList : mongoose.Schema.Types.ObjectId[],
@@ -8,9 +8,9 @@ export interface Days extends mongoose.Document {
     idRestaurant : mongoose.Schema.Types.ObjectId
 }
 
-// days.ts
 
-const daysSchema = new mongoose.Schema<Days>({
+
+const daySchema = new mongoose.Schema<Day>({
     date: {
       type: mongoose.SchemaTypes.Date,
       required: true,
@@ -18,13 +18,13 @@ const daysSchema = new mongoose.Schema<Days>({
     orderList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Order', // Replace 'Order' with the actual name of your Order model
+        ref: 'Order', 
       },
     ],
     recipeList: [
       {
         type: mongoose.Schema.Types.ObjectId,
-        ref: 'Recipe', // Replace 'Recipe' with the actual name of your Recipe model
+        ref: 'Recipe', 
       },
     ],
     idRestaurant: {
@@ -34,5 +34,5 @@ const daysSchema = new mongoose.Schema<Days>({
     },
 });
   
-export const DaysModel = mongoose.model<Days>('Days', daysSchema);
+export const DaysModel = mongoose.model<Day>('Day', daySchema);
 

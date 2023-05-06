@@ -7,6 +7,13 @@ interface itemElement {
   state: string
 }
 
+enum State {
+    READY = 'ready',
+    SERVED = 'served',
+    INPROGRESS = 'inProgress',
+    NOTSTARTED = 'notStarted'
+}
+
 export interface Order extends mongoose.Document {
   readonly _id: mongoose.Schema.Types.ObjectId;
   idTable: mongoose.Schema.Types.ObjectId;
@@ -20,14 +27,14 @@ const orderSchema = new mongoose.Schema({
       type: mongoose.Schema.Types.ObjectId,
       required: true
     },
-    itemList: {
-        type: [new mongoose.Schema({
-          qt: Number,
-          idItem: mongoose.Schema.Types.ObjectId,
-          state: String
-        })],
-        required: true
-    },
+    itemList: //From the off documetation -> [] array
+        [{
+            qt : {type: Number,required: true},
+            idItem : {type : mongoose.Schema.Types.ObjectId,ref : 'Item',required: true},
+            state : {type: String, enum: State, required: true} // From the official documentation
+            
+        }]
+    ,
     state: {
       type: String,
       required: true
