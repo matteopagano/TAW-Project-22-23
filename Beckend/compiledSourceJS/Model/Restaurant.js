@@ -7,7 +7,7 @@ const restaurantSchema = new mongoose_1.Schema({
         type: mongoose_1.Schema.Types.String,
         required: true,
     },
-    usersList: {
+    employeesList: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
@@ -30,5 +30,21 @@ const restaurantSchema = new mongoose_1.Schema({
             }],
         required: true
     },
+    daysList: {
+        type: [{
+                type: mongoose_1.Schema.Types.ObjectId,
+                required: false,
+                ref: 'Day'
+            }],
+        required: true
+    },
+    itemsList: {
+        type: [{
+                type: mongoose_1.Schema.Types.ObjectId,
+                required: false,
+                ref: 'Item'
+            }],
+        required: true
+    }
 });
 exports.RestaurantModel = (0, mongoose_1.model)('Restaurant', restaurantSchema);

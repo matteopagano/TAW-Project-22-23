@@ -17,7 +17,8 @@ var StateItem;
 const orderSchema = new mongoose_1.Schema({
     idTable: {
         type: mongoose_1.Schema.Types.ObjectId,
-        required: true
+        required: true,
+        ref: "Table"
     },
     itemList: {
         type: [{
@@ -33,7 +34,13 @@ const orderSchema = new mongoose_1.Schema({
         required: true
     },
     date: {
-        type: mongoose_1.Schema.Types.Date,
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Day",
+        required: true
+    },
+    idWaiter: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        ref: "Waiter",
         required: true
     }
 });

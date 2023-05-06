@@ -8,7 +8,8 @@ export interface Table extends Document {
     maxSeats : number,
     orderList : Schema.Types.ObjectId[],
     waitressList : Schema.Types.ObjectId[],
-    restaurantId : Schema.Types.ObjectId
+    restaurantId : Schema.Types.ObjectId,
+    recipesId : Schema.Types.ObjectId
 
 }
 
@@ -50,6 +51,11 @@ const tableSchema = new Schema<Table>( {
         required: true,
         ref : 'Restaurant'
     },
+    recipesId: {
+        type: Schema.Types.ObjectId,
+        required: true,
+        ref : 'Recipe'
+    }
 
 })
 

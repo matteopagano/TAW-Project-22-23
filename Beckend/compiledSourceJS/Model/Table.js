@@ -39,5 +39,10 @@ const tableSchema = new mongoose_1.Schema({
         required: true,
         ref: 'Restaurant'
     },
+    recipesId: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: true,
+        ref: 'Recipe'
+    }
 });
 exports.TableModel = (0, mongoose_1.model)('Table', tableSchema);

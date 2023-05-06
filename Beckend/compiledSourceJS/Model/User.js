@@ -2,8 +2,6 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.OwnerModel = exports.BartenderModel = exports.CashierModel = exports.WaiterModel = exports.CookModel = exports.UserModel = exports.RoleType = void 0;
 const mongoose_1 = require("mongoose");
-//ricette = recipes
-//ricetta = recipe
 var RoleType;
 (function (RoleType) {
     RoleType["CASHIER"] = "cashier";
@@ -68,12 +66,6 @@ const cashierSchema = new mongoose_1.Schema({
     idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true },
 }, options);
 const ownerSchema = new mongoose_1.Schema({
-    employeesList: {
-        type: [
-            { type: mongoose_1.Schema.Types.ObjectId, ref: 'User' }
-        ],
-        required: true
-    },
     restaurantOwn: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: false },
 }, options);
 const userSchema = new mongoose_1.Schema({

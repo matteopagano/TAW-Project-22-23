@@ -4,7 +4,7 @@ import { Schema, model, Document} from 'mongoose';
 interface itemElement {
     qt: number,
     idItem: Schema.Types.ObjectId,
-  }
+}
 export interface Recipe extends Document {
 
     readonly _id: Schema.Types.ObjectId,

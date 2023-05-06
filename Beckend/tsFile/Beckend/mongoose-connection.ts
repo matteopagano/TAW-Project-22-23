@@ -7,7 +7,7 @@ import {OrderModel} from '../Model/Order';
 import {RecipeModel} from '../Model/Recipe';
 import {RestaurantModel} from '../Model/Restaurant';
 import {TableModel} from '../Model/Table';
-import {OwnerModel, CashierModel, CookModel, BartenderModel, WaiterModel, Owner, RoleType} from '../Model/User';
+import {OwnerModel, CashierModel, CookModel, BartenderModel, WaiterModel, Owner, RoleType, UserModel} from '../Model/User';
 
 
 
@@ -22,27 +22,26 @@ mongoose.connect("mongodb://localhost:27017/MioDB", )
 
 mongoose.connection.once('open', () => {
     
-    
-
-    const nuovoProprietario : Owner = new OwnerModel({
-      username : "matteo Pagano",
-      email : "metiupaga8@gmail.com",
-      digest : "prova",
-      role : RoleType.OWNER,
-      salt : "saleprova",
-      employeesList : [],
-      restaurantOwn : null,
-    })
-
-    nuovoProprietario.save()
-      .then(() => {
-        return OwnerModel.findOne({email:"metiupaga8@gmail.com"})
-      })
-      .then((u) => {console.log(u?.email)})
-
-     
-
-    
+    UserModel.findOne({username:"matteo Pagano"}).exec()
+      .then(
+        (user)=>{
+          if(!user){
+            console.log("Utente matteo non trovato")
+            const nuovoProprietario : Owner = new OwnerModel({
+              username : "matteo Pagano",
+              email : "metiupaga8@gmail.com",
+              digest : "prova",
+              role : RoleType.OWNER,
+              salt : "saleprova",
+              employeesList : [],
+              restaurantOwn : null,
+            })
+            nuovoProprietario.save()
+          }else{
+            console.log("trovato utente matteo")
+          }
+        }
+      )
 
     console.log('Connessione al database aperta!');
 });

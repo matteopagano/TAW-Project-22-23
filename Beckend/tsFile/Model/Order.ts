@@ -23,13 +23,15 @@ export interface Order extends Document {
   idTable: Schema.Types.ObjectId;
   itemList: itemElement[];
   state: string;
-  date: Date;
+  date: Schema.Types.ObjectId;
+  idWaiter : Schema.Types.ObjectId;
 }
 
 const orderSchema = new Schema({
     idTable: {
       type: Schema.Types.ObjectId,
-      required: true
+      required: true,
+      ref : "Table"
     },
     itemList: {
         type : [{
@@ -47,9 +49,15 @@ const orderSchema = new Schema({
       required : true
     },
     date: {
-      type: Schema.Types.Date,
+      type : Schema.Types.ObjectId,
+      ref : "Day",
       required: true
-    }
+    },
+    idWaiter: {
+        type : Schema.Types.ObjectId,
+        ref : "Waiter",
+        required: true
+      }
   });
   
   export const OrderModel = model<Order>('Order', orderSchema);

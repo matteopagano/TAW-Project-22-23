@@ -1,11 +1,5 @@
 import { Schema, model, Document} from 'mongoose';
 
-
-
-//ricette = recipes
-//ricetta = recipe
-
-
 export enum RoleType{
     CASHIER = 'cashier',
     OWNER = 'owner',
@@ -15,14 +9,13 @@ export enum RoleType{
 }
 
 const options = { discriminatorKey: 'role' };
-
 export interface User extends Document {
     readonly _id: Schema.Types.ObjectId;
     username : string;
     email: string;
     digest: string;
-    salt : string;
     role: string;
+    salt : string;
 }
 
 export interface DishCooked {
@@ -63,9 +56,7 @@ export interface Cashier extends User{
 }
 
 export interface Owner extends User{
-    employeesList : Schema.Types.ObjectId[],
     restaurantOwn: Schema.Types.ObjectId,
-    
 }
 
 const cookSchema = new Schema<Cook>({
@@ -134,12 +125,7 @@ const cashierSchema = new Schema<Cashier>({
 }, options)
 
 const ownerSchema = new Schema<Owner>({
-    employeesList : {
-        type:[
-            {type : Schema.Types.ObjectId, ref : 'User'}
-        ],
-        required : true
-    },
+    
     restaurantOwn: { type: Schema.Types.ObjectId, ref: 'Restaurant', required: false },
     
 }, options)

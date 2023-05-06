@@ -2,15 +2,13 @@ import { Schema, model, Document} from 'mongoose';
 
 
 export interface Restaurant extends Document {
-
     readonly _id: Schema.Types.ObjectId,
-
     restaurantName : string,
-    usersList : Schema.Types.ObjectId[],
+    employeesList : Schema.Types.ObjectId[],
     owner : Schema.Types.ObjectId,
-    tablesList : Schema.Types.ObjectId[]
-
-    
+    tablesList : Schema.Types.ObjectId[],
+    daysList : Schema.Types.ObjectId[],
+    itemsList : Schema.Types.ObjectId[]
 }
 
 const restaurantSchema = new Schema<Restaurant>( {
@@ -18,7 +16,7 @@ const restaurantSchema = new Schema<Restaurant>( {
         type: Schema.Types.String,
         required: true,
     },
-    usersList: {
+    employeesList: {
         type : [
             {
                 type: Schema.Types.ObjectId,
@@ -42,6 +40,22 @@ const restaurantSchema = new Schema<Restaurant>( {
         }],
         required : true
     },
+    daysList: {
+        type : [{
+            type: Schema.Types.ObjectId,
+            required: false,
+            ref : 'Day'
+        }],
+        required : true
+    },
+    itemsList: {
+        type : [{
+            type: Schema.Types.ObjectId,
+            required: false,
+            ref : 'Item'
+        }],
+        required : true
+    }
 })
 
 

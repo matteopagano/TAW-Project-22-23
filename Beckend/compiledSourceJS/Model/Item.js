@@ -26,7 +26,7 @@ const itemSchema = new mongoose_1.Schema({
     allergenes: {
         type: [
             {
-                type: mongoose_1.Schema.Types.String,
+                type: mongoose_1.Schema.Types.ObjectId,
                 required: true,
                 ref: 'Allergene'
             }
@@ -34,9 +34,20 @@ const itemSchema = new mongoose_1.Schema({
         required: true
     },
     idRestaurant: {
-        type: mongoose_1.Schema.Types.String,
+        type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-    }
+        ref: 'Restaurant'
+    },
+    ordersList: {
+        type: [
+            {
+                type: mongoose_1.Schema.Types.ObjectId,
+                required: true,
+                ref: 'Order'
+            }
+        ],
+        required: true
+    },
 }, options);
 const DishSchema = new mongoose_1.Schema({
     cooksList: {
