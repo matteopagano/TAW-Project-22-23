@@ -27,15 +27,19 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
-//ENDPOINTS
-const endpoints_1 = require("./endpoints");
+const Endpoints = __importStar(require("./endpoints"));
+const Middlewares = __importStar(require("./middleware"));
+const Restaurant = __importStar(require("../Model/Restaurant"));
 const User = __importStar(require("../Model/User"));
+const Owner = __importStar(require("../Model/Owner"));
 const express = require("express");
 let app = express();
 const http = require("http");
 app.use(express.json());
-app.get('/', endpoints_1.root);
-app.post('/owner', endpoints_1.postOwner);
+app.get('/', Endpoints.root);
+app.get('/login', Middlewares.basicAuthentication, Endpoints.login);
+app.get('/restaurant/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getRestaurantById);
+app.get('/restaurant/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getEmployeesByRestaurant);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
     res.status(err.statusCode || 500).json(err);
@@ -46,16 +50,6 @@ app.use((req, res, next) => {
 function InitExpressServer() {
     let server = http.createServer(app);
     server.listen(8080, () => console.log("HTTP Server started on port 8080"));
-    // To start an HTTPS server we create an https.Server instance 
-    // passing the express application middleware. Then, we start listening
-    // on port 8443
-    //
-    /*
-    https.createServer({
-      key: fs.readFileSync('keys/key.pem'),
-      cert: fs.readFileSync('keys/cert.pem')
-    }, app).listen(8443);
-    */
 }
 mongoose_1.default.connect("mongodb://localhost:27017/MioDB")
     .then(() => {
@@ -66,24 +60,45 @@ mongoose_1.default.connect("mongodb://localhost:27017/MioDB")
 });
 mongoose_1.default.connection.once('open', () => {
     console.log('Connessione al database aperta!');
-    User.UserModel.findOne({ username: "matteo Pagano" }).exec()
+    User.UserModel.findOne({ username: "matteo Pagano" })
         .then((user) => {
         if (!user) {
             console.log("Utente matteo non trovato");
-            const nuovoProprietario = new User.OwnerModel({
+            const nuovoProprietario = new Owner.OwnerModel({
                 username: "matteo Pagano",
                 email: "metiupaga8@gmail.com",
-                digest: "prova",
                 role: User.RoleType.OWNER,
-                salt: "saleprova",
                 employeesList: [],
                 restaurantOwn: null,
             });
-            nuovoProprietario.save();
+            nuovoProprietario.setPassword("admin");
+            return nuovoProprietario.save();
         }
         else {
             console.log("trovato utente matteo");
         }
+    })
+        .then((user1) => {
+        console.log(user1);
+        Restaurant.RestaurantModel.findOne({ restaurantName: "D'alessio" })
+            .then((restaurant) => {
+            if (!restaurant) {
+                const nuovaPizzeria = new Restaurant.RestaurantModel({
+                    restaurantName: "D'alessio",
+                    employeesList: [],
+                    ownerId: user1._id,
+                    tablesList: [],
+                    DaysList: [],
+                    itemsList: []
+                });
+                nuovaPizzeria.save();
+                user1.restaurantOwn = nuovaPizzeria._id;
+                user1.save();
+            }
+            else {
+                console.log("Pizzeria gia esistente");
+            }
+        });
     })
         .then(() => {
         InitExpressServer();

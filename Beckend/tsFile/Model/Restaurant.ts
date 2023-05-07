@@ -5,7 +5,7 @@ export interface Restaurant extends Document {
     readonly _id: Schema.Types.ObjectId,
     restaurantName : string,
     employeesList : Schema.Types.ObjectId[],
-    owner : Schema.Types.ObjectId,
+    ownerId : Schema.Types.ObjectId,
     tablesList : Schema.Types.ObjectId[],
     daysList : Schema.Types.ObjectId[],
     itemsList : Schema.Types.ObjectId[]
@@ -27,7 +27,7 @@ const restaurantSchema = new Schema<Restaurant>( {
         required : true
     },
     
-    owner: {
+    ownerId: {
         type: Schema.Types.ObjectId,
         required: true,
         ref : 'Owner'
