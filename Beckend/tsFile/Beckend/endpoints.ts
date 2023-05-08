@@ -8,6 +8,7 @@ import {RecipeModel} from '../Model/Recipe';
 import * as Restaurant from '../Model/Restaurant';
 import {TableModel} from '../Model/Table';
 import * as User from '../Model/User';
+import * as Cook from '../Model/Cook';
 import { Schema, model, Document} from 'mongoose';
 import jsonwebtoken = require('jsonwebtoken'); //For sign the jwt data
 import * as Owner from '../Model/Owner';
@@ -16,7 +17,6 @@ import * as Utilities from './utilities';
 const result = require('dotenv').config({ path: './compiledSourceJS/Beckend/.env' })
 
 if (result.error) {
-    console.log(process.cwd())
     console.log("Unable to load \".env\" file. Please provide one to store the JWT secret key");
     process.exit(-1);
     
@@ -56,124 +56,76 @@ export function login(req : Request, res : Response, next : NextFunction) {
     return res.status(200).json( {error:false, errormessage:"", token: tokenSigned} );
 }
 
-export function getRestaurantById(req, res , next ) : void {
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((user)=>{
-            if(user.isOwnerOf(req.params.idr)){
-                Restaurant.RestaurantModel.findById(req.params.idr)
-                    .then((restaurant) => {
-                        if(restaurant){
-                            return res.status(200).json(restaurant)
-                        }else{
-                            return next({statusCode:404, error: true, errormessage: "Any restaurant found"})
-                        }
-                    })
-                    .catch((error)=>{
-                        return next({statusCode:404, error: true, errormessage: "DB error"})
-                    })
-    
-            }else{
-                return next({statusCode:404, error: true, errormessage: "Not your restaurant"})
-            }   
-        })
-}
-
-export function getEmployeesByRestaurant(req, res , next ) : void {
-    
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((user)=>{
-            if(user.isOwnerOf(req.params.idr)){
-                Restaurant.RestaurantModel.findById(req.params.idr)
-                    .then((restaurant) => {
-                        if(restaurant){
-
-                            console.log(restaurant.employeesList)
-                            return res.status(200).json(restaurant.employeesList)
-                        }else{
-                            return next({statusCode:404, error: true, errormessage: "Any restaurant found"})
-                        }
-                    })
-                    .catch((error)=>{
-                        return next({statusCode:404, error: true, errormessage: "DB error"})
-                    })
-    
-            }else{
-                return next({statusCode:404, error: true, errormessage: "Not your restaurant"})
-            }   
-        })
-}
-
-export function createRestaurant(req, res , next) : void {
-    console.log("sono nel createRestaurant e vuol dire che l'owner non ha gia un restaurant se sono arrivato qua")
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((owner) => {
-            const newRestaurant = new Restaurant.RestaurantModel({
-                restaurantName : req.body.restaurantName,
-                employeesList : [],
-                ownerId : owner._id,
-                tablesList : [],
-                daysList : [],
-                itemsList : []
-            })
-            newRestaurant.save()
-                .then(() => {
-                    owner.restaurantOwn = newRestaurant._id;
-                    owner.save()
-                })
-                .then(() => {
-                        return res.status(200).json(newRestaurant._id)
-                })
-                .catch(() => {
-                    return next({statusCode : 404, error: true, errormessage: "DB error while posting new restaurant"})
-                })
-        }
-        )
-        .catch(() => {
-            return next({statusCode : 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id});
-        })
-            
-}
-
-export function createStaffMember(req, res , next) : void {
-    const username = req.params.username;
-    const email = req.params.email;
-    const role = req.params.role;
-    console.log(username + " " +email+ " "+ role )
-    console.log("provo a creare")
-    Owner.OwnerModel.findById(req.auth._id)
-    .then((owner) => {
-        if(owner){
-            console.log(req.params.role)
-            switch(req.params.role){
-                case User.RoleType.COOK : 
-                    const newPassword = Utilities.generateRandomString(8)
-                    return Utilities.createCook(username, email, newPassword, owner.restaurantOwn)
-                    .then((cook) => {
-                        Restaurant.RestaurantModel.findById(cook.idRestaurant)
-                        .then((restaurant) => {
-                            restaurant.employeesList.push(cook._id)
-                            restaurant.save();
-                        })
-                        .then(() => {
-                            return res.status(200).json({ error: false, errormessage: "", newCook : {username : username, email : email, newPassword : newPassword} })
-                        })
-                        .catch((error) => {
-                            return next({statusCode : 404, error: true, errormessage: error});
-                        })
-                    })
-                    .catch((error) => {
-                        return next({statusCode : 404, error: true, errormessage: "error while creating new cook"});
-                    });
-                    break;
-            }
-        }else{
-            return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + req.auth._id});
-        }
+export async function getRestaurantById(req, res , next ){
+    const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+    if(owner.isOwnerOf(req.params.idr)){
+        const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(req.params.idr)
         
+        if(restaurant){
+            return res.status(200).json(restaurant)
+        }else{
+            return next({statusCode:404, error: true, errormessage: "Any restaurant found"})
+        } 
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Not your restaurant"})
+    }
+}
+
+export async function getEmployeesByRestaurant(req, res , next ){
+    
+    const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+    
+    if(owner.isOwnerOf(req.params.idr)){
+        const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(req.params.idr)
+        if(restaurant){
+            return res.status(200).json(restaurant.employeesList)
+        }else{
+            return next({statusCode:404, error: true, errormessage: "Any restaurant found"})
+        }
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Not your restaurant"})
+    }
+}
+
+export async function createRestaurant(req, res , next) {
+    const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+    
+    const newRestaurant = new Restaurant.RestaurantModel({
+        restaurantName : req.body.restaurantName,
+        employeesList : [],
+        ownerId : owner._id,
+        tablesList : [],
+        daysList : [],
+        itemsList : []
     })
-    .catch((error) => {
-        return next({statusCode : 404, error: true, errormessage: error});
-    })
+    await newRestaurant.save()
+    owner.restaurantOwn = newRestaurant._id;
+    await owner.save()
+    return res.status(200).json(newRestaurant._id)     
+}
+
+export async function createStaffMember(req, res , next) {
+
+    const username = req.body.username;
+    const email = req.body.email;
+    const role = req.body.role;
+
+    const newPassword = Utilities.generateRandomString(8)
+    const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+    let cook : Cook.Cook;
+    
+    if(owner){
+        switch(role){
+            case User.RoleType.COOK : 
+                cook = await Utilities.createCook(username, email, newPassword, owner.restaurantOwn)
+                const restaurant = await Restaurant.RestaurantModel.findById(cook.idRestaurant.toString())
+                Utilities.addEmployeeToARestaurant(cook._id,restaurant._id)
+                break;
+        }
+        return res.status(200).json({idNewCook : cook._id, usernameNewCook : cook.username, email : cook.email, passwordToChange : newPassword});
+    }else{
+        return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + req.auth._id});
+    }
 }
 
 

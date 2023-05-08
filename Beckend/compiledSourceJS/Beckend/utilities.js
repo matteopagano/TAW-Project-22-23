@@ -22,11 +22,20 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createCook = exports.generateRandomString = void 0;
-const mongoose_1 = require("mongoose");
+exports.addEmployeeToARestaurant = exports.createCook = exports.generateRandomString = void 0;
 const Cook = __importStar(require("../Model/Cook"));
 const User = __importStar(require("../Model/User"));
+const Restaurant = __importStar(require("../Model/Restaurant"));
 function generateRandomString(n) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -42,9 +51,17 @@ function createCook(username, email, password, idRestaurant) {
         email: email,
         role: User.RoleType.COOK,
         dishesCooked: [],
-        idRestaurant: mongoose_1.Schema.Types.ObjectId
+        idRestaurant: idRestaurant
     });
     newCook.setPassword(password);
     return newCook.save();
 }
 exports.createCook = createCook;
+function addEmployeeToARestaurant(idUser, idRestaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const restaurantFound = yield Restaurant.RestaurantModel.findById(idRestaurant.toString());
+        restaurantFound.employeesList.push(idUser);
+        yield restaurantFound.save();
+    });
+}
+exports.addEmployeeToARestaurant = addEmployeeToARestaurant;

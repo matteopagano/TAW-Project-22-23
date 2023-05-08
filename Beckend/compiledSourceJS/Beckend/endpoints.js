@@ -22,6 +22,15 @@ var __importStar = (this && this.__importStar) || function (mod) {
     __setModuleDefault(result, mod);
     return result;
 };
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.getOrdersByRestaurantAndDay = exports.getDaysByRestaurant = exports.getTablesByRestaurant = exports.createStaffMember = exports.createRestaurant = exports.getEmployeesByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
 const Restaurant = __importStar(require("../Model/Restaurant"));
@@ -31,7 +40,6 @@ const Owner = __importStar(require("../Model/Owner"));
 const Utilities = __importStar(require("./utilities"));
 const result = require('dotenv').config({ path: './compiledSourceJS/Beckend/.env' });
 if (result.error) {
-    console.log(process.cwd());
     console.log("Unable to load \".env\" file. Please provide one to store the JWT secret key");
     process.exit(-1);
 }
@@ -92,7 +100,6 @@ function getEmployeesByRestaurant(req, res, next) {
             Restaurant.RestaurantModel.findById(req.params.idr)
                 .then((restaurant) => {
                 if (restaurant) {
-                    console.log(restaurant.employeesList);
                     return res.status(200).json(restaurant.employeesList);
                 }
                 else {
@@ -110,7 +117,6 @@ function getEmployeesByRestaurant(req, res, next) {
 }
 exports.getEmployeesByRestaurant = getEmployeesByRestaurant;
 function createRestaurant(req, res, next) {
-    console.log("sono nel createRestaurant e vuol dire che l'owner non ha gia un restaurant se sono arrivato qua");
     Owner.OwnerModel.findById(req.auth._id)
         .then((owner) => {
         const newRestaurant = new Restaurant.RestaurantModel({
@@ -139,44 +145,26 @@ function createRestaurant(req, res, next) {
 }
 exports.createRestaurant = createRestaurant;
 function createStaffMember(req, res, next) {
-    const username = req.params.username;
-    const email = req.params.email;
-    const role = req.params.role;
-    console.log(username + " " + email + " " + role);
-    console.log("provo a creare");
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((owner) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const username = req.body.username;
+        const email = req.body.email;
+        const role = req.body.role;
+        const newPassword = Utilities.generateRandomString(8);
+        const owner = yield Owner.OwnerModel.findById(req.auth._id);
+        let cook;
         if (owner) {
-            console.log(req.params.role);
-            switch (req.params.role) {
+            switch (role) {
                 case User.RoleType.COOK:
-                    const newPassword = Utilities.generateRandomString(8);
-                    return Utilities.createCook(username, email, newPassword, owner.restaurantOwn)
-                        .then((cook) => {
-                        Restaurant.RestaurantModel.findById(cook.idRestaurant)
-                            .then((restaurant) => {
-                            restaurant.employeesList.push(cook._id);
-                            restaurant.save();
-                        })
-                            .then(() => {
-                            return res.status(200).json({ error: false, errormessage: "", newCook: { username: username, email: email, newPassword: newPassword } });
-                        })
-                            .catch((error) => {
-                            return next({ statusCode: 404, error: true, errormessage: error });
-                        });
-                    })
-                        .catch((error) => {
-                        return next({ statusCode: 404, error: true, errormessage: "error while creating new cook" });
-                    });
+                    cook = yield Utilities.createCook(username, email, newPassword, owner.restaurantOwn);
+                    const restaurant = yield Restaurant.RestaurantModel.findById(cook.idRestaurant.toString());
+                    yield Utilities.addEmployeeToARestaurant(cook._id, restaurant._id);
                     break;
             }
+            return res.status(200).json({ idNewCook: cook._id, usernameNewCook: cook.username, email: cook.email, passwordToChange: newPassword });
         }
         else {
             return next({ statusCode: 404, error: true, errormessage: "no owner find ownerId:" + req.auth._id });
         }
-    })
-        .catch((error) => {
-        return next({ statusCode: 404, error: true, errormessage: error });
     });
 }
 exports.createStaffMember = createStaffMember;

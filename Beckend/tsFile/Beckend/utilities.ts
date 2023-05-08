@@ -12,15 +12,21 @@ export function generateRandomString(n) {
     return result;
   }
 
-export function createCook(username : string, email : string, password : string, idRestaurant : Schema.Types.ObjectId) : Promise<Cook.Cook> {
+export async function createCook(username : string, email : string, password : string, idRestaurant : Schema.Types.ObjectId) : Promise<Cook.Cook> {
     const newCook : Cook.Cook =  new Cook.CookModel({
         username : username,
         email : email,
         role : User.RoleType.COOK,
         dishesCooked : [],
-        idRestaurant : Schema.Types.ObjectId
+        idRestaurant : idRestaurant
     });
     newCook.setPassword(password);
-    return newCook.save();
+    return await newCook.save();
+}
+
+export async function addEmployeeToARestaurant(idUser : Schema.Types.ObjectId, idRestaurant : Schema.Types.ObjectId){
+  const restaurantFound : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant.toString())
+  restaurantFound.employeesList.push(idUser); 
+  await restaurantFound.save() 
 }
 

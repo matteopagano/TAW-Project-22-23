@@ -35,7 +35,6 @@ const Waiter_1 = require("../Model/Waiter");
 const express_jwt_1 = require("express-jwt");
 const mongoose_1 = require("mongoose");
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
-    console.log("New login attempt from " + username);
     User.UserModel.findOne({ email: username })
         .then((user) => {
         if (!user) {
@@ -60,7 +59,6 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
                     user = new Waiter_1.WaiterModel(user);
                     break;
             }
-            console.log(user);
             return done(null, user);
         }
         return done(null, false, { statusCode: 500, error: true, errormessage: "Invalid password" });
@@ -74,6 +72,8 @@ exports.verifyJWT = (0, express_jwt_1.expressjwt)({
     algorithms: ["HS256"]
 });
 function isOwnerMiddleware(req, res, next) {
+    console.log("Printo i params : ");
+    console.log(req.params);
     const user = new User.UserModel(req.auth);
     if (user.isOwner()) {
         return next();
@@ -104,15 +104,12 @@ function isOwnerOfThisRestaurant(req, res, next) {
 }
 exports.isOwnerOfThisRestaurant = isOwnerOfThisRestaurant;
 function hasNotAlreadyARestaurant(req, res, next) {
-    console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante");
     Owner.OwnerModel.findById(req.auth._id)
         .then((owner) => {
         if (!owner.hasAlreadyARestaurant()) {
-            console.log("non ha gia ristoranti");
             next();
         }
         else {
-            console.log("ha gia ristoranti");
             return next({ statusCode: 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString() });
         }
     })
@@ -122,15 +119,12 @@ function hasNotAlreadyARestaurant(req, res, next) {
 }
 exports.hasNotAlreadyARestaurant = hasNotAlreadyARestaurant;
 function hasAlreadyARestaurant(req, res, next) {
-    console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante");
     Owner.OwnerModel.findById(req.auth._id)
         .then((owner) => {
         if (owner.hasAlreadyARestaurant()) {
-            console.log("ha gia ristoranti");
             next();
         }
         else {
-            console.log("non ha gia ristoranti");
             return next({ statusCode: 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString() });
         }
     })

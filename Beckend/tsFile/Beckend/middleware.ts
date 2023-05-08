@@ -11,35 +11,30 @@ import { Schema, model, Document} from 'mongoose';
 import * as Restaurant from '../Model/Restaurant';
 
 passport.use( new passportHTTP.BasicStrategy(
-    function(username : string, password : string, done : Function) {
+    async function(username : string, password : string, done : Function) {
   
-      console.log("New login attempt from " + username );
-      User.UserModel.findOne( {email: username})
-        .then ((user) => {
+      let user : User.User = await User.UserModel.findOne( {email: username})
+      
         
-        if( !user ) {
-          return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid user"});
-        }
-        console.log(user)
+      if( !user ) {
+        return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid user"});
+      }
+      console.log(user)
   
-        if(user.isPasswordCorrect(password)){
+      if(user.isPasswordCorrect(password)){
 
-          switch (user.role){
-            case 'owner' : user = new Owner.OwnerModel(user); break;
-            case 'bartender' : user = new BartenderModel(user); break;
-            case 'cashier' : user = new CashierModel(user); break;
-            case 'cook' : user = new CookModel(user); break;
-            case 'waiter' : user = new WaiterModel(user); break;
-          }
-          console.log(user)
-          return done(null, user);
+        switch (user.role){
+          case 'owner' : user = new Owner.OwnerModel(user); break;
+          case 'bartender' : user = new BartenderModel(user); break;
+          case 'cashier' : user = new CashierModel(user); break;
+          case 'cook' : user = new CookModel(user); break;
+          case 'waiter' : user = new WaiterModel(user); break;
         }
+        return done(null, user);
+      }else{
   
         return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid password"});
-      })
-      .catch((err) => {
-        return done( {statusCode: 500, error: true, errormessage:err} );
-      })
+      }
     }
 ));
 
@@ -49,6 +44,8 @@ export const verifyJWT = jwt({
 });
 
 export function isOwnerMiddleware(req , res , next){
+  console.log("Printo i params : ")
+  console.log(req.params)
   const user : User.User = new User.UserModel(req.auth)
   if(user.isOwner()){
     return next();
@@ -76,40 +73,22 @@ export function isOwnerOfThisRestaurant(req , res , next){
     })
 }
 
-export function hasNotAlreadyARestaurant(req , res , next){
-  console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante")
-  Owner.OwnerModel.findById(req.auth._id)
-        .then((owner) => {
-            if(!owner.hasAlreadyARestaurant()){
-                console.log("non ha gia ristoranti")
-                next();
-            }else{
-                console.log("ha gia ristoranti")
-                return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
-            }
-        })
-        .catch(() => {
-            return next({statusCode : 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id});
-        })
+export async function hasNotAlreadyARestaurant(req , res , next){
+  const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+  if(!owner.hasAlreadyARestaurant()){
+    next();
+  }else{
+    return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
+  }
 }
 
-export function hasAlreadyARestaurant(req , res , next){
-  console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante")
-  Owner.OwnerModel.findById(req.auth._id)
-        .then((owner) => {
-            if(owner.hasAlreadyARestaurant()){
-                console.log("ha gia ristoranti")
-                next();
-            }else{
-                console.log("non ha gia ristoranti")
-                return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
-            }
-        })
-        .catch(() => {
-            return next({statusCode : 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id});
-        })
+export async function hasAlreadyARestaurant(req , res , next){
+  const owner : Owner.Owner = await Owner.OwnerModel.findById(req.auth._id)
+  if(owner.hasAlreadyARestaurant()){
+    next();
+  }else{
+    return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
+  }
 }
-
-
 
 export const basicAuthentication = passport.authenticate('basic', { session: false })
