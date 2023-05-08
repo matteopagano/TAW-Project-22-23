@@ -28,9 +28,12 @@ app.use(bodyParser.json());
 
 app.get('/', Endpoints.root)
 app.get('/login', Middlewares.basicAuthentication, Endpoints.login)
-app.get('/restaurant/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getRestaurantById)
-app.get('/restaurant/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getEmployeesByRestaurant)
-app.post('/restaurant', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.createRestaurant)
+
+app.get('/restaurants/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware,Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getRestaurantById)
+app.get('/restaurants/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getEmployeesByRestaurant)
+
+app.post('/restaurants', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasNotAlreadyARestaurant, Endpoints.createRestaurant)
+app.post('/restaurants/:idr/users', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.createStaffMember);
 
 app.use( function(err : any, req : Request, res : Response, next : NextFunction) {
 
@@ -79,40 +82,9 @@ mongoose.connection.once('open', () => {
           }
         }
       )
-      .then(
-        (user1)=>{
-        console.log(user1)
-        Restaurant.RestaurantModel.findOne({restaurantName:"D'alessio"})
-          .then((restaurant) => {
-            if(!restaurant){
-              const nuovaPizzeria : Restaurant.Restaurant = new Restaurant.RestaurantModel({
-                restaurantName : "D'alessio",
-                employeesList : [],
-                ownerId : user1._id,
-                tablesList : [],
-                DaysList : [],
-                itemsList : []
-              })
-              const nuovoProprietario : Cashier.Cashier = new Cashier.CashierModel({
-                username : "Alice Pagano",
-                email : "alicepaga@gmail.com",
-                role : User.RoleType.WAITER,
-                employeesList : [],
-                restaurantOwn : null,
-              })
-              nuovaPizzeria.save()
-              user1.restaurantOwn = nuovaPizzeria._id
-              user1.save()
-            }else{
-              console.log("Pizzeria gia esistente")
-            }
-          })
-      })
       .then(() => {
         InitExpressServer();
       })
 
     
 });
-
-console.log("hellop world");

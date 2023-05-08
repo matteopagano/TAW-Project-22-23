@@ -1,12 +1,14 @@
 import passport = require('passport');           // authentication middleware for Express
 import passportHTTP = require('passport-http');
 import * as User from '../Model/User';
-import { OwnerModel } from '../Model/Owner';
+import * as Owner from '../Model/Owner';
 import { BartenderModel } from '../Model/Bartender';
 import { CashierModel } from '../Model/Cashier';
 import { CookModel } from '../Model/Cook';
 import { WaiterModel } from '../Model/Waiter';
 import { expressjwt as jwt } from 'express-jwt';  
+import { Schema, model, Document} from 'mongoose';
+import * as Restaurant from '../Model/Restaurant';
 
 passport.use( new passportHTTP.BasicStrategy(
     function(username : string, password : string, done : Function) {
@@ -23,7 +25,7 @@ passport.use( new passportHTTP.BasicStrategy(
         if(user.isPasswordCorrect(password)){
 
           switch (user.role){
-            case 'owner' : user = new OwnerModel(user); break;
+            case 'owner' : user = new Owner.OwnerModel(user); break;
             case 'bartender' : user = new BartenderModel(user); break;
             case 'cashier' : user = new CashierModel(user); break;
             case 'cook' : user = new CookModel(user); break;
@@ -47,23 +49,67 @@ export const verifyJWT = jwt({
 });
 
 export function isOwnerMiddleware(req , res , next){
-  console.log( "STAMPO SUER" )
-  console.log(req.auth)
-  //User.UserModel.find
-
-  
-
   const user : User.User = new User.UserModel(req.auth)
-
-  console.log("user :" + user)
-  
   if(user.isOwner()){
     return next();
   }else{
     return next({ statusCode:404, error: true, errormessage: "You are not Owner" });
   }
-
 }
+
+export function isOwnerOfThisRestaurant(req , res , next){
+  Owner.OwnerModel.findById(req.auth._id)
+    .then((ownerFind) => {
+      if(ownerFind){
+        if(ownerFind.isOwnerOf(req.params.idr)){
+          return next();
+        }else{
+          next({ statusCode:404, error: true, errormessage: "You are not owner of id: " + req.params.idr  + " restaurant."})
+        }
+      }else{
+        next({ statusCode:404, error: true, errormessage: "User not found" })
+      }
+      const idRestaurant : Schema.Types.ObjectId = new Schema.Types.ObjectId(req.params.idr)
+
+    }).catch((error)=>{
+      next({ statusCode:404, error: true, errormessage: "error in the DB" })
+    })
+}
+
+export function hasNotAlreadyARestaurant(req , res , next){
+  console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante")
+  Owner.OwnerModel.findById(req.auth._id)
+        .then((owner) => {
+            if(!owner.hasAlreadyARestaurant()){
+                console.log("non ha gia ristoranti")
+                next();
+            }else{
+                console.log("ha gia ristoranti")
+                return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
+            }
+        })
+        .catch(() => {
+            return next({statusCode : 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id});
+        })
+}
+
+export function hasAlreadyARestaurant(req , res , next){
+  console.log("sono in hasAlreadyARestaurant e provo a capire se ha gia un ristorante")
+  Owner.OwnerModel.findById(req.auth._id)
+        .then((owner) => {
+            if(owner.hasAlreadyARestaurant()){
+                console.log("ha gia ristoranti")
+                next();
+            }else{
+                console.log("non ha gia ristoranti")
+                return next({statusCode : 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString()})
+            }
+        })
+        .catch(() => {
+            return next({statusCode : 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id});
+        })
+}
+
 
 
 export const basicAuthentication = passport.authenticate('basic', { session: false })

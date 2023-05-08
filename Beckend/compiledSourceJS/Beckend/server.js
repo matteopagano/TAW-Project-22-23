@@ -29,17 +29,21 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const mongoose_1 = __importDefault(require("mongoose"));
 const Endpoints = __importStar(require("./endpoints"));
 const Middlewares = __importStar(require("./middleware"));
-const Restaurant = __importStar(require("../Model/Restaurant"));
 const User = __importStar(require("../Model/User"));
 const Owner = __importStar(require("../Model/Owner"));
 const express = require("express");
 let app = express();
 const http = require("http");
+const bodyParser = require('body-parser');
 app.use(express.json());
+app.use(bodyParser.urlencoded({ extended: false }));
+app.use(bodyParser.json());
 app.get('/', Endpoints.root);
 app.get('/login', Middlewares.basicAuthentication, Endpoints.login);
-app.get('/restaurant/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getRestaurantById);
-app.get('/restaurant/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Endpoints.getEmployeesByRestaurant);
+app.get('/restaurants/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getRestaurantById);
+app.get('/restaurants/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getEmployeesByRestaurant);
+app.post('/restaurants', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasNotAlreadyARestaurant, Endpoints.createRestaurant);
+app.post('/restaurants/:idr/users', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.createStaffMember);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
     res.status(err.statusCode || 500).json(err);
@@ -78,30 +82,7 @@ mongoose_1.default.connection.once('open', () => {
             console.log("trovato utente matteo");
         }
     })
-        .then((user1) => {
-        console.log(user1);
-        Restaurant.RestaurantModel.findOne({ restaurantName: "D'alessio" })
-            .then((restaurant) => {
-            if (!restaurant) {
-                const nuovaPizzeria = new Restaurant.RestaurantModel({
-                    restaurantName: "D'alessio",
-                    employeesList: [],
-                    ownerId: user1._id,
-                    tablesList: [],
-                    DaysList: [],
-                    itemsList: []
-                });
-                nuovaPizzeria.save();
-                user1.restaurantOwn = nuovaPizzeria._id;
-                user1.save();
-            }
-            else {
-                console.log("Pizzeria gia esistente");
-            }
-        });
-    })
         .then(() => {
         InitExpressServer();
     });
 });
-console.log("hellop world");
