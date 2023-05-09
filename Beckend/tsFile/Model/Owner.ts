@@ -5,6 +5,8 @@ export interface Owner extends User{
     restaurantOwn: Schema.Types.ObjectId;
     isOwnerOf : (restaurantId : string) => boolean;
     hasAlreadyARestaurant : () => boolean;
+    hasARestaurant : () => boolean;
+    setRestaurantOwn : (idRestaurantOwn : Schema.Types.ObjectId) => void;
 }
 
 const ownerSchema = new Schema<Owner>({
@@ -20,13 +22,16 @@ ownerSchema.methods.isOwnerOf = function(restaurantId): boolean {
 }
 
 ownerSchema.methods.hasAlreadyARestaurant = function(): boolean {
-    console.log(this.restaurantOwn)
-    if(this.restaurantOwn != null){
+    if(this.restaurantOwn !== null){
         return true;
     }else{
         return false;
     }
     
+}
+
+ownerSchema.methods.setRestaurantOwn = function(idRestaurantOwn : Schema.Types.ObjectId): void {
+    this.restaurantOwn = idRestaurantOwn;
 }
 
 export const OwnerModel = UserModel.discriminator<Owner>('Owner', ownerSchema,  RoleType.OWNER);

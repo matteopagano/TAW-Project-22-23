@@ -32,13 +32,14 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrdersByRestaurantAndDay = exports.getDaysByRestaurant = exports.getTablesByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
+exports.getDaysListByRestaurant = exports.createDayAndAddToARestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
 const Restaurant = __importStar(require("../Model/Restaurant"));
 const User = __importStar(require("../Model/User"));
 const Cook = __importStar(require("../Model/Cook"));
 const Waiter = __importStar(require("../Model/Waiter"));
 const Cashier = __importStar(require("../Model/Cashier"));
 const Bartender = __importStar(require("../Model/Bartender"));
+const Day = __importStar(require("../Model/Day"));
 const jsonwebtoken = require("jsonwebtoken"); //For sign the jwt data
 const Owner = __importStar(require("../Model/Owner"));
 const Utilities = __importStar(require("./utilities"));
@@ -76,31 +77,23 @@ function login(req, res, next) {
 exports.login = login;
 function getRestaurantById(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        if (owner.isOwnerOf(req.params.idr)) {
-            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
-            if (restaurant) {
-                return res.status(200).json(restaurant);
-            }
-            else {
-                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-            }
+        const idRestorantParameter = req.params.idr;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestorantParameter);
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", restaurant: restaurant });
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+            return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
         }
     });
 }
 exports.getRestaurantById = getRestaurantById;
 function getCooksByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
-        yield restaurant.populate('cookList');
+        const idRistoranteParameter = req.params.idr;
+        const restaurant = yield (Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('cookList'));
         if (restaurant) {
-            return res.status(200).json(restaurant.cookList);
+            return res.status(200).json({ error: false, errormessage: "", cooks: restaurant.getCookList() });
         }
         else {
             return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
@@ -110,60 +103,39 @@ function getCooksByRestaurant(req, res, next) {
 exports.getCooksByRestaurant = getCooksByRestaurant;
 function getWaitersByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        if (owner.isOwnerOf(req.params.idr)) {
-            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
-            yield restaurant.populate('waiterList');
-            if (restaurant) {
-                return res.status(200).json(restaurant.waiterList);
-            }
-            else {
-                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-            }
+        const idRistoranteParameter = req.params.idr;
+        const restaurant = yield (Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('waiterList'));
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", waiters: restaurant.getWaiterList() });
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+            return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
         }
     });
 }
 exports.getWaitersByRestaurant = getWaitersByRestaurant;
 function getCashiersByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        if (owner.isOwnerOf(req.params.idr)) {
-            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
-            yield restaurant.populate('cashierList');
-            if (restaurant) {
-                return res.status(200).json(restaurant.cashierList);
-            }
-            else {
-                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-            }
+        const idRistoranteParameter = req.params.idr;
+        const restaurant = yield (Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('cashierList'));
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", cashiers: restaurant.getCashierList() });
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+            return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
         }
     });
 }
 exports.getCashiersByRestaurant = getCashiersByRestaurant;
 function getBartenderByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        if (owner.isOwnerOf(req.params.idr)) {
-            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
-            yield restaurant.populate('bartenderList');
-            if (restaurant) {
-                return res.status(200).json(restaurant.bartenderList);
-            }
-            else {
-                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-            }
+        const idRistoranteParameter = req.params.idr;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('bartenderList');
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", bartenders: restaurant.getBartenderList() });
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+            return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
         }
     });
 }
@@ -171,19 +143,26 @@ exports.getBartenderByRestaurant = getBartenderByRestaurant;
 function createRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const customRequest = req; // For error type at compile time
-        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
-        const newRestaurant = new Restaurant.RestaurantModel({
-            restaurantName: req.body.restaurantName,
-            employeesList: [],
-            ownerId: owner._id,
-            tablesList: [],
-            daysList: [],
-            itemsList: []
-        });
-        yield newRestaurant.save();
-        owner.restaurantOwn = newRestaurant._id;
-        yield owner.save();
-        return res.status(200).json({ restaurantId: newRestaurant._id });
+        const idOwner = customRequest.auth._id;
+        const restaurantNameBody = req.body.restaurantName;
+        const owner = yield Owner.OwnerModel.findById(idOwner);
+        if (Restaurant.RestaurantModel.checkNameCorrectness(restaurantNameBody)) {
+            const newRestaurant = new Restaurant.RestaurantModel({
+                restaurantName: restaurantNameBody,
+                employeesList: [],
+                ownerId: owner.getId(),
+                tablesList: [],
+                daysList: [],
+                itemsList: []
+            });
+            owner.setRestaurantOwn(newRestaurant.getId());
+            yield owner.save();
+            yield newRestaurant.save();
+            return res.status(200).json({ error: false, errormessage: "", newRestaurantId: newRestaurant.getId() });
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " + restaurantNameBody });
+        }
     });
 }
 exports.createRestaurant = createRestaurant;
@@ -323,12 +302,57 @@ function deleteBartenderAndRemoveFromRestaurant(req, res, next) {
     });
 }
 exports.deleteBartenderAndRemoveFromRestaurant = deleteBartenderAndRemoveFromRestaurant;
-function getTablesByRestaurant(req, res, next) {
+function createDayAndAddToARestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(owner.restaurantOwn).populate("daysList");
+        console.log("printod io bono");
+        console.log(restaurant.daysList);
+        if (!/^\d{4}-\d{2}-\d{2}$/.test(req.body.date)) {
+            return next({ statusCode: 404, error: true, errormessage: "not valid date" });
+        }
+        const newDate = new Date(req.body.date);
+        let alreadyExist = false;
+        restaurant.daysList.forEach((item) => {
+            item = item;
+            if (item.date.getTime() === newDate.getTime()) {
+                alreadyExist = true;
+            }
+        });
+        const newDay = new Day.DayModel({
+            date: newDate,
+            ordersList: [],
+            recipeList: [],
+            idRestaurant: owner.restaurantOwn
+        });
+        if (newDay.isValidDate()) {
+            if (!alreadyExist) {
+                yield newDay.save();
+                restaurant.daysList.push(newDay._id);
+                yield restaurant.save();
+                return res.status(200).json({ valid: true });
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Day " + newDay.date + " already present in restaurant:" + restaurant._id });
+            }
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "not valid date" });
+        }
+    });
 }
-exports.getTablesByRestaurant = getTablesByRestaurant;
-function getDaysByRestaurant(req, res, next) {
+exports.createDayAndAddToARestaurant = createDayAndAddToARestaurant;
+function getDaysListByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr).populate("daysList");
+        if (restaurant) {
+            return res.status(200).json(restaurant.daysList);
+        }
+        else {
+            console.log("debugf");
+            return next({ statusCode: 404, error: true, errormessage: "not valid restaurant" });
+        }
+    });
 }
-exports.getDaysByRestaurant = getDaysByRestaurant;
-function getOrdersByRestaurantAndDay(req, res, next) {
-}
-exports.getOrdersByRestaurantAndDay = getOrdersByRestaurantAndDay;
+exports.getDaysListByRestaurant = getDaysListByRestaurant;

@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basicAuthentication = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasAlreadyARestaurant = exports.hasNotAlreadyARestaurant = exports.isOwnerOfThisRestaurant = exports.isOwner = exports.verifyJWT = void 0;
+exports.basicAuthentication = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isOwnerOfThisRestaurant = exports.isOwner = exports.verifyJWT = void 0;
 const passport = require("passport"); // authentication middleware for Express
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
@@ -80,8 +80,6 @@ exports.verifyJWT = (0, express_jwt_1.expressjwt)({
     algorithms: ["HS256"]
 });
 function isOwner(req, res, next) {
-    console.log("Printo i params : ");
-    console.log(req.params);
     const user = new User.UserModel(req.auth);
     if (user.isOwner()) {
         return next();
@@ -93,18 +91,20 @@ function isOwner(req, res, next) {
 exports.isOwner = isOwner;
 function isOwnerOfThisRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const owner = yield Owner.OwnerModel.findById(req.auth._id);
-        if (owner) {
-            if (owner.restaurantOwn === null) {
-                return next({ statusCode: 404, error: true, errormessage: "owner:" + owner._id + " has  non restaurant" });
-            }
-            else {
-                if (owner.isOwnerOf(req.params.idr)) {
+        const idOwnerAuthenticated = req.auth._id;
+        const idRistoranteParameter = req.params.idr;
+        const ownerAuthenticated = yield Owner.OwnerModel.findById(idOwnerAuthenticated);
+        if (ownerAuthenticated !== null) {
+            if (ownerAuthenticated.hasAlreadyARestaurant()) {
+                if (ownerAuthenticated.isOwnerOf(idRistoranteParameter)) {
                     return next();
                 }
                 else {
-                    next({ statusCode: 404, error: true, errormessage: "You are not owner of id: " + req.params.idr + " restaurant." });
+                    next({ statusCode: 404, error: true, errormessage: "You are not owner of id: " + idRistoranteParameter + " restaurant." });
                 }
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "owner:" + ownerAuthenticated._id + " has not restaurant" });
             }
         }
         else {
@@ -115,7 +115,8 @@ function isOwnerOfThisRestaurant(req, res, next) {
 exports.isOwnerOfThisRestaurant = isOwnerOfThisRestaurant;
 function hasNotAlreadyARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const owner = yield Owner.OwnerModel.findById(req.auth._id);
+        const idOwner = req.auth._id;
+        const owner = yield Owner.OwnerModel.findById(idOwner);
         if (owner) {
             if (!owner.hasAlreadyARestaurant()) {
                 next();
@@ -130,23 +131,6 @@ function hasNotAlreadyARestaurant(req, res, next) {
     });
 }
 exports.hasNotAlreadyARestaurant = hasNotAlreadyARestaurant;
-function hasAlreadyARestaurant(req, res, next) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const owner = yield Owner.OwnerModel.findById(req.auth._id);
-        if (owner) {
-            if (owner.hasAlreadyARestaurant()) {
-                next();
-            }
-            else {
-                return next({ statusCode: 404, error: true, errormessage: "Owner: " + owner._id + " doesn't have already a restaurant." });
-            }
-        }
-        else {
-            return next({ statusCode: 404, error: true, errormessage: "Owner with id: " + req.auth._id + " doesn't exist" });
-        }
-    });
-}
-exports.hasAlreadyARestaurant = hasAlreadyARestaurant;
 function isCookMemberOfThatRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         console.log("debug 2");

@@ -54,6 +54,8 @@ app.delete('/restaurants/:idr/cooks/:idu', Middlewares.verifyJWT, Middlewares.is
 app.delete('/restaurants/:idr/waiters/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isWaiterMemberOfThatRestaurant, Endpoints.deleteWaiterAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/cashiers/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isCashierMemberOfThatRestaurant, Endpoints.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isBartenderMemberOfThatRestaurant, Endpoints.deleteBartenderAndRemoveFromRestaurant);
+app.post('/restaurants/:idr/days', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createDayAndAddToARestaurant);
+app.get('/restaurants/:idr/days', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getDaysListByRestaurant);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
     res.status(err.statusCode || 500).json(err);

@@ -1,4 +1,5 @@
-import { Schema, model, Document, Types} from 'mongoose';
+import { Schema, model, Document, Types, Model} from 'mongoose';
+import { isValid, parseISO, isSameDay } from 'date-fns';
 
 
 export interface Restaurant extends Document {
@@ -12,6 +13,13 @@ export interface Restaurant extends Document {
     tablesList : Schema.Types.ObjectId[],
     daysList : Schema.Types.ObjectId[],
     itemsList : Schema.Types.ObjectId[],
+    
+    getId : () => Schema.Types.ObjectId;
+
+    getCookList : () => any;
+    getWaiterList : () => any;
+    getCashierList : () => any;
+    getBartenderList : () => any;
 
     isCookPresent : (cook : string) => boolean,
     isWaiterPresent : (waiter : string) => boolean,
@@ -22,9 +30,14 @@ export interface Restaurant extends Document {
     removeWaiter : (waiter : string) => boolean,
     removeCashier : (cashier : string) => boolean,
     removeBartender : (bartender : string) => boolean;
+
 }
 
-const restaurantSchema = new Schema<Restaurant>( {
+interface staticMethod extends Model<Restaurant> {
+    checkNameCorrectness(restaurantName : string): number;
+}
+
+const restaurantSchema = new Schema<Restaurant, staticMethod>( {
     restaurantName: {
         type: Schema.Types.String,
         required: true,
@@ -69,7 +82,6 @@ const restaurantSchema = new Schema<Restaurant>( {
         ],
         required : true
     },
-    
     ownerId: {
         type: Schema.Types.ObjectId,
         required: true,
@@ -99,7 +111,8 @@ const restaurantSchema = new Schema<Restaurant>( {
         }],
         required : true
     }
-})
+}
+)
 
 restaurantSchema.methods.isCookPresent = function( cookId : string ) : boolean {
     try{
@@ -179,4 +192,35 @@ restaurantSchema.methods.removeBartender = function( bartender : string ) : bool
     }
 }
 
-export const RestaurantModel = model('Restaurant', restaurantSchema)
+restaurantSchema.methods.getCookList = function(){
+    return this.cookList;
+}
+restaurantSchema.methods.getWaiterList = function(){
+    return this.waiterList;
+}
+restaurantSchema.methods.getCashierList = function(){
+    return this.cashierList;
+}
+restaurantSchema.methods.getBartenderList = function(){
+    return this.bartenderList;
+}
+
+restaurantSchema.methods.getId = function(){
+    return this._id;
+}
+
+restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(restaurantName : string) : boolean {
+    const isNotNull : boolean = restaurantName.length !== null
+    if(!isNotNull){
+        return false
+    }else{
+        const isLessThan16 : boolean = restaurantName.length <= 15
+        return isLessThan16;
+    }
+        
+
+    
+});
+
+
+export const RestaurantModel = model<Restaurant, staticMethod>('Restaurant', restaurantSchema)

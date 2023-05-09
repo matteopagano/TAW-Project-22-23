@@ -33,4 +33,7 @@ userSchema.methods.isPasswordCorrect = function (password) {
 userSchema.methods.isOwner = function () {
     return this.role === 'owner';
 };
+userSchema.methods.getId = function () {
+    return this._id;
+};
 exports.UserModel = (0, mongoose_1.model)('User', userSchema);

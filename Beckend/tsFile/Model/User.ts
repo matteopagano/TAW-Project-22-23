@@ -21,6 +21,7 @@ export interface User extends Document {
     setPassword: (password : string) => void;
     isPasswordCorrect: (password : string) => boolean;
     isOwner: () => boolean;
+    getId: () => Schema.Types.ObjectId;
 }
 
 const userSchema = new Schema<User>({
@@ -48,6 +49,10 @@ userSchema.methods.isPasswordCorrect = function( password : string ):boolean {
 
 userSchema.methods.isOwner = function(): boolean {
     return this.role === 'owner';
+}
+
+userSchema.methods.getId = function(): Schema.Types.ObjectId {
+    return this._id
 }
 
 

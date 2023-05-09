@@ -37,7 +37,6 @@ app.get('/restaurants/:idr/bartenders', Middlewares.verifyJWT, Middlewares.isOwn
 
 app.post('/restaurants', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.hasNotAlreadyARestaurant, Endpoints.createRestaurant)
 
-
 app.post('/restaurants/:idr/cooks', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createCookAndAddToARestaurant);
 app.post('/restaurants/:idr/waiters', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createWaiterAndAddToARestaurant);
 app.post('/restaurants/:idr/cashiers', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createCashierAndAddToARestaurant);
@@ -47,6 +46,9 @@ app.delete('/restaurants/:idr/cooks/:idu', Middlewares.verifyJWT, Middlewares.is
 app.delete('/restaurants/:idr/waiters/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isWaiterMemberOfThatRestaurant, Endpoints.deleteWaiterAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/cashiers/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isCashierMemberOfThatRestaurant, Endpoints.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isBartenderMemberOfThatRestaurant, Endpoints.deleteBartenderAndRemoveFromRestaurant);
+
+app.post('/restaurants/:idr/days', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createDayAndAddToARestaurant);
+app.get('/restaurants/:idr/days', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getDaysListByRestaurant);
 
 
 

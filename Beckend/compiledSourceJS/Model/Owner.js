@@ -12,12 +12,14 @@ ownerSchema.methods.isOwnerOf = function (restaurantId) {
     return this.restaurantOwn.toString() === restaurantId;
 };
 ownerSchema.methods.hasAlreadyARestaurant = function () {
-    console.log(this.restaurantOwn);
-    if (this.restaurantOwn != null) {
+    if (this.restaurantOwn !== null) {
         return true;
     }
     else {
         return false;
     }
+};
+ownerSchema.methods.setRestaurantOwn = function (idRestaurantOwn) {
+    this.restaurantOwn = idRestaurantOwn;
 };
 exports.OwnerModel = User_1.UserModel.discriminator('Owner', ownerSchema, User_1.RoleType.OWNER);

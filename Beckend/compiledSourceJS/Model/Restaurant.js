@@ -149,4 +149,29 @@ restaurantSchema.methods.removeBartender = function (bartender) {
         return false;
     }
 };
+restaurantSchema.methods.getCookList = function () {
+    return this.cookList;
+};
+restaurantSchema.methods.getWaiterList = function () {
+    return this.waiterList;
+};
+restaurantSchema.methods.getCashierList = function () {
+    return this.cashierList;
+};
+restaurantSchema.methods.getBartenderList = function () {
+    return this.bartenderList;
+};
+restaurantSchema.methods.getId = function () {
+    return this._id;
+};
+restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(restaurantName) {
+    const isNotNull = restaurantName.length !== null;
+    if (!isNotNull) {
+        return false;
+    }
+    else {
+        const isLessThan16 = restaurantName.length <= 15;
+        return isLessThan16;
+    }
+});
 exports.RestaurantModel = (0, mongoose_1.model)('Restaurant', restaurantSchema);

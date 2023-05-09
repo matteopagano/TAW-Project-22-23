@@ -1,11 +1,13 @@
 import { Schema, model, Document} from 'mongoose';
+import { isValid, parseISO } from 'date-fns';
 
 export interface Day extends Document {
-    readonly _id: Schema.Types.ObjectId,
-    date: Date,
-    orderList : Schema.Types.ObjectId[],
-    recipeList : Schema.Types.ObjectId[],
-    idRestaurant : Schema.Types.ObjectId
+    readonly _id: Schema.Types.ObjectId;
+    date: Date;
+    orderList : Schema.Types.ObjectId[];
+    recipeList : Schema.Types.ObjectId[];
+    idRestaurant : Schema.Types.ObjectId;
+    isValidDate : () => boolean,
 }
 
 
@@ -42,5 +44,19 @@ const daySchema = new Schema<Day>({
     },
 });
   
+
+daySchema.methods.isValidDate = function () : boolean {
+
+    
+    
+    // Parse della data dalla stringa di input
+    
+    // Verifica se la data è valida
+    if (isValid(this.date)) {
+        return true
+    } else {
+        return false
+    }
+}
 export const DayModel = model<Day>('Day', daySchema);
 
