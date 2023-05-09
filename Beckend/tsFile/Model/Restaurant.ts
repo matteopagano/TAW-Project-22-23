@@ -1,14 +1,27 @@
-import { Schema, model, Document} from 'mongoose';
+import { Schema, model, Document, Types} from 'mongoose';
 
 
 export interface Restaurant extends Document {
     readonly _id: Schema.Types.ObjectId,
     restaurantName : string,
-    employeesList : Schema.Types.ObjectId[],
+    cookList : Schema.Types.ObjectId[],
+    waiterList : Schema.Types.ObjectId[],
+    cashierList : Schema.Types.ObjectId[],
+    bartenderList : Schema.Types.ObjectId[],
     ownerId : Schema.Types.ObjectId,
     tablesList : Schema.Types.ObjectId[],
     daysList : Schema.Types.ObjectId[],
-    itemsList : Schema.Types.ObjectId[]
+    itemsList : Schema.Types.ObjectId[],
+
+    isCookPresent : (cook : string) => boolean,
+    isWaiterPresent : (waiter : string) => boolean,
+    isCashierPresent : (cashier : string) => boolean,
+    isBartenderPresent : (bartender : string) => boolean;
+
+    removeCook : (cook : string) => boolean,
+    removeWaiter : (waiter : string) => boolean,
+    removeCashier : (cashier : string) => boolean,
+    removeBartender : (bartender : string) => boolean;
 }
 
 const restaurantSchema = new Schema<Restaurant>( {
@@ -16,12 +29,42 @@ const restaurantSchema = new Schema<Restaurant>( {
         type: Schema.Types.String,
         required: true,
     },
-    employeesList: {
+    cookList: {
         type : [
             {
                 type: Schema.Types.ObjectId,
                 required: false,
-                ref : 'User'
+                ref : 'Cook'
+            }
+        ],
+        required : true
+    },
+    waiterList: {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'Waiter'
+            }
+        ],
+        required : true
+    },
+    cashierList: {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'Cashier'
+            }
+        ],
+        required : true
+    },
+    bartenderList: {
+        type : [
+            {
+                type: Schema.Types.ObjectId,
+                required: false,
+                ref : 'Bartender'
             }
         ],
         required : true
@@ -58,5 +101,82 @@ const restaurantSchema = new Schema<Restaurant>( {
     }
 })
 
+restaurantSchema.methods.isCookPresent = function( cookId : string ) : boolean {
+    try{
+        return this.cookList.includes(new Types.ObjectId(cookId));
+    }catch{
+        return false;
+    }
+    
+    
+}
+
+restaurantSchema.methods.isWaiterPresent = function( waiterId : string ) : boolean {
+    try{
+        return this.waiterList.includes(new Types.ObjectId(waiterId));
+    }catch{
+        return false;
+    }
+}
+
+restaurantSchema.methods.isCashierPresent = function( cashierId : string ) : boolean {
+    try{
+        return this.cashierList.includes(new Types.ObjectId(cashierId));
+    }catch{
+        return false;
+    }
+}
+
+restaurantSchema.methods.isBartenderPresent = function( bartenderId : string ) : boolean {
+    try{
+        return this.bartenderList.includes(new Types.ObjectId(bartenderId));
+    }catch{
+        return false;
+    }
+}
+
+restaurantSchema.methods.removeCook = function( cookId : string ) : boolean {
+    let index = this.cookList.indexOf(new Types.ObjectId(cookId));
+
+    if (index !== -1) {
+        this.cookList.splice(index, 1);
+        return true
+    }else{
+        return false
+    }
+}
+
+restaurantSchema.methods.removeWaiter = function( waiter : string ) : boolean {
+    let index = this.waiterList.indexOf(new Types.ObjectId(waiter));
+
+    if (index !== -1) {
+        this.waiterList.splice(index, 1);
+        return true
+    }else{
+        return false
+    }
+}
+
+restaurantSchema.methods.removeCashier = function( cashier : string ) : boolean {
+    let index = this.cashierList.indexOf(new Types.ObjectId(cashier));
+
+    if (index !== -1) {
+        this.cashierList.splice(index, 1);
+        return true
+    }else{
+        return false
+    }
+}
+
+restaurantSchema.methods.removeBartender = function( bartender : string ) : boolean {
+    let index = this.bartenderList.indexOf(new Types.ObjectId(bartender));
+
+    if (index !== -1) {
+        this.bartenderList.splice(index, 1);
+        return true
+    }else{
+        return false
+    }
+}
 
 export const RestaurantModel = model('Restaurant', restaurantSchema)

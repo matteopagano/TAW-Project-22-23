@@ -13,7 +13,7 @@ ownerSchema.methods.isOwnerOf = function (restaurantId) {
 };
 ownerSchema.methods.hasAlreadyARestaurant = function () {
     console.log(this.restaurantOwn);
-    if (this.restaurantOwn) {
+    if (this.restaurantOwn != null) {
         return true;
     }
     else {

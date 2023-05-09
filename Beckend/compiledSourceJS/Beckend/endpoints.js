@@ -32,9 +32,13 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.getOrdersByRestaurantAndDay = exports.getDaysByRestaurant = exports.getTablesByRestaurant = exports.createStaffMember = exports.createRestaurant = exports.getEmployeesByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
+exports.getOrdersByRestaurantAndDay = exports.getDaysByRestaurant = exports.getTablesByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
 const Restaurant = __importStar(require("../Model/Restaurant"));
 const User = __importStar(require("../Model/User"));
+const Cook = __importStar(require("../Model/Cook"));
+const Waiter = __importStar(require("../Model/Waiter"));
+const Cashier = __importStar(require("../Model/Cashier"));
+const Bartender = __importStar(require("../Model/Bartender"));
 const jsonwebtoken = require("jsonwebtoken"); //For sign the jwt data
 const Owner = __importStar(require("../Model/Owner"));
 const Utilities = __importStar(require("./utilities"));
@@ -71,21 +75,17 @@ function login(req, res, next) {
 }
 exports.login = login;
 function getRestaurantById(req, res, next) {
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((user) => {
-        if (user.isOwnerOf(req.params.idr)) {
-            Restaurant.RestaurantModel.findById(req.params.idr)
-                .then((restaurant) => {
-                if (restaurant) {
-                    return res.status(200).json(restaurant);
-                }
-                else {
-                    return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-                }
-            })
-                .catch((error) => {
-                return next({ statusCode: 404, error: true, errormessage: "DB error" });
-            });
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        if (owner.isOwnerOf(req.params.idr)) {
+            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
+            if (restaurant) {
+                return res.status(200).json(restaurant);
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
+            }
         }
         else {
             return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
@@ -93,32 +93,85 @@ function getRestaurantById(req, res, next) {
     });
 }
 exports.getRestaurantById = getRestaurantById;
-function getEmployeesByRestaurant(req, res, next) {
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((user) => {
-        if (user.isOwnerOf(req.params.idr)) {
-            Restaurant.RestaurantModel.findById(req.params.idr)
-                .then((restaurant) => {
-                if (restaurant) {
-                    return res.status(200).json(restaurant.employeesList);
-                }
-                else {
-                    return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
-                }
-            })
-                .catch((error) => {
-                return next({ statusCode: 404, error: true, errormessage: "DB error" });
-            });
+function getCooksByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
+        yield restaurant.populate('cookList');
+        if (restaurant) {
+            return res.status(200).json(restaurant.cookList);
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
+        }
+    });
+}
+exports.getCooksByRestaurant = getCooksByRestaurant;
+function getWaitersByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        if (owner.isOwnerOf(req.params.idr)) {
+            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
+            yield restaurant.populate('waiterList');
+            if (restaurant) {
+                return res.status(200).json(restaurant.waiterList);
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
+            }
         }
         else {
             return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
         }
     });
 }
-exports.getEmployeesByRestaurant = getEmployeesByRestaurant;
+exports.getWaitersByRestaurant = getWaitersByRestaurant;
+function getCashiersByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        if (owner.isOwnerOf(req.params.idr)) {
+            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
+            yield restaurant.populate('cashierList');
+            if (restaurant) {
+                return res.status(200).json(restaurant.cashierList);
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
+            }
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+        }
+    });
+}
+exports.getCashiersByRestaurant = getCashiersByRestaurant;
+function getBartenderByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        if (owner.isOwnerOf(req.params.idr)) {
+            const restaurant = yield Restaurant.RestaurantModel.findById(req.params.idr);
+            yield restaurant.populate('bartenderList');
+            if (restaurant) {
+                return res.status(200).json(restaurant.bartenderList);
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Any restaurant found" });
+            }
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Not your restaurant" });
+        }
+    });
+}
+exports.getBartenderByRestaurant = getBartenderByRestaurant;
 function createRestaurant(req, res, next) {
-    Owner.OwnerModel.findById(req.auth._id)
-        .then((owner) => {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
         const newRestaurant = new Restaurant.RestaurantModel({
             restaurantName: req.body.restaurantName,
             employeesList: [],
@@ -127,47 +180,149 @@ function createRestaurant(req, res, next) {
             daysList: [],
             itemsList: []
         });
-        newRestaurant.save()
-            .then(() => {
-            owner.restaurantOwn = newRestaurant._id;
-            owner.save();
-        })
-            .then(() => {
-            return res.status(200).json(newRestaurant._id);
-        })
-            .catch(() => {
-            return next({ statusCode: 404, error: true, errormessage: "DB error while posting new restaurant" });
-        });
-    })
-        .catch(() => {
-        return next({ statusCode: 404, error: true, errormessage: "error while searching owner ownerId:" + req.auth._id });
+        yield newRestaurant.save();
+        owner.restaurantOwn = newRestaurant._id;
+        yield owner.save();
+        return res.status(200).json({ restaurantId: newRestaurant._id });
     });
 }
 exports.createRestaurant = createRestaurant;
-function createStaffMember(req, res, next) {
+function createCookAndAddToARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
         const username = req.body.username;
         const email = req.body.email;
         const role = req.body.role;
         const newPassword = Utilities.generateRandomString(8);
-        const owner = yield Owner.OwnerModel.findById(req.auth._id);
-        let cook;
-        if (owner) {
-            switch (role) {
-                case User.RoleType.COOK:
-                    cook = yield Utilities.createCook(username, email, newPassword, owner.restaurantOwn);
-                    const restaurant = yield Restaurant.RestaurantModel.findById(cook.idRestaurant.toString());
-                    yield Utilities.addEmployeeToARestaurant(cook._id, restaurant._id);
-                    break;
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString());
+        const cook = yield Utilities.createCook(username, email, newPassword, owner.restaurantOwn);
+        Utilities.addCookToARestaurant(cook, restaurant);
+        return res.status(200).json({ idNewCook: cook._id, usernameNewCook: cook.username, email: cook.email, passwordToChange: newPassword });
+        //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
+    });
+}
+exports.createCookAndAddToARestaurant = createCookAndAddToARestaurant;
+function createWaiterAndAddToARestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const username = req.body.username;
+        const email = req.body.email;
+        const role = req.body.role;
+        const newPassword = Utilities.generateRandomString(8);
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString());
+        const waiter = yield Utilities.createWaiter(username, email, newPassword, owner.restaurantOwn);
+        Utilities.addWaiterToARestaurant(waiter, restaurant);
+        return res.status(200).json({ idNewCook: waiter._id, usernameNewCook: waiter.username, email: waiter.email, passwordToChange: newPassword });
+        //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
+    });
+}
+exports.createWaiterAndAddToARestaurant = createWaiterAndAddToARestaurant;
+function createCashierAndAddToARestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const username = req.body.username;
+        const email = req.body.email;
+        const role = req.body.role;
+        const newPassword = Utilities.generateRandomString(8);
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString());
+        const cashier = yield Utilities.createCashier(username, email, newPassword, owner.restaurantOwn);
+        Utilities.addCashierToARestaurant(cashier, restaurant);
+        return res.status(200).json({ idNewCook: cashier._id, usernameNewCook: cashier.username, email: cashier.email, passwordToChange: newPassword });
+        //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
+    });
+}
+exports.createCashierAndAddToARestaurant = createCashierAndAddToARestaurant;
+function createBartenderAndAddToARestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const customRequest = req; // For error type at compile time
+        const username = req.body.username;
+        const email = req.body.email;
+        const role = req.body.role;
+        const newPassword = Utilities.generateRandomString(8);
+        const owner = yield Owner.OwnerModel.findById(customRequest.auth._id);
+        const restaurant = yield Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString());
+        const bartender = yield Utilities.createBartender(username, email, newPassword, owner.restaurantOwn);
+        Utilities.addBartenderToARestaurant(bartender, restaurant);
+        return res.status(200).json({ idNewCook: bartender._id, usernameNewCook: bartender.username, email: bartender.email, passwordToChange: newPassword });
+        //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
+    });
+}
+exports.createBartenderAndAddToARestaurant = createBartenderAndAddToARestaurant;
+function deleteCookAndRemoveFromRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const idCook = req.params.idu;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        if (restaurant.isCookPresent(idCook)) {
+            if (restaurant.removeCook(idCook)) {
+                yield restaurant.save();
+                yield Cook.CookModel.deleteOne({ _id: idCook });
+                return res.status(200).json({ idCookDeleted: idCook });
             }
-            return res.status(200).json({ idNewCook: cook._id, usernameNewCook: cook.username, email: cook.email, passwordToChange: newPassword });
-        }
-        else {
-            return next({ statusCode: 404, error: true, errormessage: "no owner find ownerId:" + req.auth._id });
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Cook not deleted" });
+            }
         }
     });
 }
-exports.createStaffMember = createStaffMember;
+exports.deleteCookAndRemoveFromRestaurant = deleteCookAndRemoveFromRestaurant;
+function deleteWaiterAndRemoveFromRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const idWaiter = req.params.idu;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        if (restaurant.isWaiterPresent(idWaiter)) {
+            if (restaurant.removeWaiter(idWaiter)) {
+                yield restaurant.save();
+                yield Waiter.WaiterModel.deleteOne({ _id: idWaiter });
+                return res.status(200).json({ idWaiterDeleted: idWaiter });
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Cook not deleted" });
+            }
+        }
+    });
+}
+exports.deleteWaiterAndRemoveFromRestaurant = deleteWaiterAndRemoveFromRestaurant;
+function deleteCashierAndRemoveFromRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const idCashier = req.params.idu;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        if (restaurant.isCashierPresent(idCashier)) {
+            if (restaurant.removeCashier(idCashier)) {
+                yield restaurant.save();
+                yield Cashier.CashierModel.deleteOne({ _id: idCashier });
+                return res.status(200).json({ idCashierDeleted: idCashier });
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Cook not deleted" });
+            }
+        }
+    });
+}
+exports.deleteCashierAndRemoveFromRestaurant = deleteCashierAndRemoveFromRestaurant;
+function deleteBartenderAndRemoveFromRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const idBartender = req.params.idu;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        if (restaurant.isBartenderPresent(idBartender)) {
+            if (restaurant.removeBartender(idBartender)) {
+                yield restaurant.save();
+                yield Bartender.BartenderModel.deleteOne({ _id: idBartender });
+                return res.status(200).json({ idCBartenderDeleted: idBartender });
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "Cook not deleted" });
+            }
+        }
+    });
+}
+exports.deleteBartenderAndRemoveFromRestaurant = deleteBartenderAndRemoveFromRestaurant;
 function getTablesByRestaurant(req, res, next) {
 }
 exports.getTablesByRestaurant = getTablesByRestaurant;

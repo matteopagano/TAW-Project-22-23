@@ -21,7 +21,7 @@ ownerSchema.methods.isOwnerOf = function(restaurantId): boolean {
 
 ownerSchema.methods.hasAlreadyARestaurant = function(): boolean {
     console.log(this.restaurantOwn)
-    if(this.restaurantOwn){
+    if(this.restaurantOwn != null){
         return true;
     }else{
         return false;

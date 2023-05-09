@@ -32,10 +32,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.addEmployeeToARestaurant = exports.createCook = exports.generateRandomString = void 0;
-const Cook = __importStar(require("../Model/Cook"));
+exports.deleteEmployeeFromRestaurant = exports.addBartenderToARestaurant = exports.addCashierToARestaurant = exports.addWaiterToARestaurant = exports.addCookToARestaurant = exports.createBartender = exports.createCashier = exports.createWaiter = exports.createCook = exports.generateRandomString = void 0;
 const User = __importStar(require("../Model/User"));
-const Restaurant = __importStar(require("../Model/Restaurant"));
+const Cook = __importStar(require("../Model/Cook"));
+const Waiter = __importStar(require("../Model/Waiter"));
+const Cashier = __importStar(require("../Model/Cashier"));
+const Bartender = __importStar(require("../Model/Bartender"));
 function generateRandomString(n) {
     const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
@@ -46,22 +48,99 @@ function generateRandomString(n) {
 }
 exports.generateRandomString = generateRandomString;
 function createCook(username, email, password, idRestaurant) {
-    const newCook = new Cook.CookModel({
-        username: username,
-        email: email,
-        role: User.RoleType.COOK,
-        dishesCooked: [],
-        idRestaurant: idRestaurant
+    return __awaiter(this, void 0, void 0, function* () {
+        const newCook = new Cook.CookModel({
+            username: username,
+            email: email,
+            role: User.RoleType.COOK,
+            dishesCooked: [],
+            idRestaurant: idRestaurant
+        });
+        newCook.setPassword(password);
+        return yield newCook.save();
     });
-    newCook.setPassword(password);
-    return newCook.save();
 }
 exports.createCook = createCook;
-function addEmployeeToARestaurant(idUser, idRestaurant) {
+function createWaiter(username, email, password, idRestaurant) {
     return __awaiter(this, void 0, void 0, function* () {
-        const restaurantFound = yield Restaurant.RestaurantModel.findById(idRestaurant.toString());
-        restaurantFound.employeesList.push(idUser);
-        yield restaurantFound.save();
+        const newWaiter = new Waiter.WaiterModel({
+            username: username,
+            email: email,
+            role: User.RoleType.WAITER,
+            ordersTaken: [],
+            tablesObservered: [],
+            idRestaurant: idRestaurant
+        });
+        newWaiter.setPassword(password);
+        return yield newWaiter.save();
     });
 }
-exports.addEmployeeToARestaurant = addEmployeeToARestaurant;
+exports.createWaiter = createWaiter;
+function createCashier(username, email, password, idRestaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newCashier = new Cashier.CashierModel({
+            username: username,
+            email: email,
+            role: User.RoleType.CASHIER,
+            receiptsPrinted: [],
+            idRestaurant: idRestaurant
+        });
+        newCashier.setPassword(password);
+        return yield newCashier.save();
+    });
+}
+exports.createCashier = createCashier;
+function createBartender(username, email, password, idRestaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const newBartender = new Bartender.BartenderModel({
+            username: username,
+            email: email,
+            role: User.RoleType.BARTENDER,
+            drinkPrepared: [],
+            idRestaurant: idRestaurant
+        });
+        newBartender.setPassword(password);
+        return yield newBartender.save();
+    });
+}
+exports.createBartender = createBartender;
+function addCookToARestaurant(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.cookList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addCookToARestaurant = addCookToARestaurant;
+function addWaiterToARestaurant(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.waiterList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addWaiterToARestaurant = addWaiterToARestaurant;
+function addCashierToARestaurant(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.cashierList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addCashierToARestaurant = addCashierToARestaurant;
+function addBartenderToARestaurant(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.bartenderList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addBartenderToARestaurant = addBartenderToARestaurant;
+function deleteEmployeeFromRestaurant(idUser, idRestaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        /*const restaurantFound : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant.toString())
+        const index = restaurantFound.employeesList.indexOf(idUser);
+        if (index !== -1) {
+          restaurantFound.employeesList.splice(index, 1);
+        }
+        await restaurantFound.save()
+        */
+    });
+}
+exports.deleteEmployeeFromRestaurant = deleteEmployeeFromRestaurant;

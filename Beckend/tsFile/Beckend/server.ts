@@ -29,11 +29,26 @@ app.use(bodyParser.json());
 app.get('/', Endpoints.root)
 app.get('/login', Middlewares.basicAuthentication, Endpoints.login)
 
-app.get('/restaurants/:idr', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware,Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getRestaurantById)
-app.get('/restaurants/:idr/employees', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.getEmployeesByRestaurant)
+app.get('/restaurants/:idr', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getRestaurantById)
+app.get('/restaurants/:idr/cooks', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getCooksByRestaurant)
+app.get('/restaurants/:idr/waiters', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getWaitersByRestaurant)
+app.get('/restaurants/:idr/cashiers', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getCashiersByRestaurant)
+app.get('/restaurants/:idr/bartenders', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.getBartenderByRestaurant)
 
-app.post('/restaurants', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasNotAlreadyARestaurant, Endpoints.createRestaurant)
-app.post('/restaurants/:idr/users', Middlewares.verifyJWT, Middlewares.isOwnerMiddleware, Middlewares.hasAlreadyARestaurant, Middlewares.isOwnerOfThisRestaurant, Endpoints.createStaffMember);
+app.post('/restaurants', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.hasNotAlreadyARestaurant, Endpoints.createRestaurant)
+
+
+app.post('/restaurants/:idr/cooks', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createCookAndAddToARestaurant);
+app.post('/restaurants/:idr/waiters', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createWaiterAndAddToARestaurant);
+app.post('/restaurants/:idr/cashiers', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createCashierAndAddToARestaurant);
+app.post('/restaurants/:idr/bartenders', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Endpoints.createBartenderAndAddToARestaurant);
+
+app.delete('/restaurants/:idr/cooks/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isCookMemberOfThatRestaurant, Endpoints.deleteCookAndRemoveFromRestaurant);
+app.delete('/restaurants/:idr/waiters/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isWaiterMemberOfThatRestaurant, Endpoints.deleteWaiterAndRemoveFromRestaurant);
+app.delete('/restaurants/:idr/cashiers/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isCashierMemberOfThatRestaurant, Endpoints.deleteCashierAndRemoveFromRestaurant);
+app.delete('/restaurants/:idr/bartenders/:idu', Middlewares.verifyJWT, Middlewares.isOwner, Middlewares.isOwnerOfThisRestaurant, Middlewares.isBartenderMemberOfThatRestaurant, Endpoints.deleteBartenderAndRemoveFromRestaurant);
+
+
 
 app.use( function(err : any, req : Request, res : Response, next : NextFunction) {
 
