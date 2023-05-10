@@ -140,4 +140,37 @@ export async function isBartenderMemberOfThatRestaurant(req , res , next){
   }
 }
 
+export async function isDayOfThatRestaurant(req , res , next){
+
+  const idDayToRemove = req.params.idd;
+  const restaurantIdInWhichRemoveDay = req.params.idr
+  const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(restaurantIdInWhichRemoveDay)
+
+  if(restaurant.isDayPresent(idDayToRemove)){
+    next();
+  }else{
+    next({ statusCode:404, error: true, errormessage: "day " + idDayToRemove + " is not day of " + restaurantIdInWhichRemoveDay })
+  }
+}
+
+export function isValidRestaurantInput(req , res , next){
+  const restaurantNameBody = req.body.restaurantName
+  if(Restaurant.checkNameCorrectness(restaurantNameBody)){
+    next()
+  }else{
+    return next({statusCode:404, error: true, errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " + restaurantNameBody})
+  }
+}
+
+export async function isUserAlreadyExist(req , res , next){
+  const emailBody = req.body.email
+  const userFind = await User.UserModel.findOne({email : emailBody})
+
+  if(!userFind){
+    next()
+  }else{
+    return next({statusCode:404, error: true, errormessage: "User : " + emailBody + " already exist."})
+  }
+}
+
 export const basicAuthentication = passport.authenticate('basic', { session: false })

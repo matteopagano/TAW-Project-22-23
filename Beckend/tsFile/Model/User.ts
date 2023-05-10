@@ -1,5 +1,7 @@
 import { Schema, model, Document} from 'mongoose';
 import crypto = require('crypto');
+import * as emailValidator from 'email-validator';
+import * as usernameValidator from '@digitalcube/username-validator';
 
 
 export enum RoleType{
@@ -22,6 +24,9 @@ export interface User extends Document {
     isPasswordCorrect: (password : string) => boolean;
     isOwner: () => boolean;
     getId: () => Schema.Types.ObjectId;
+    getUsername : () => string
+    getEmail : () => string
+    getRole : () => string
 }
 
 const userSchema = new Schema<User>({
@@ -55,7 +60,37 @@ userSchema.methods.getId = function(): Schema.Types.ObjectId {
     return this._id
 }
 
+userSchema.methods.getUsername = function(): Schema.Types.ObjectId {
+    return this.username
+}
 
+userSchema.methods.getEmail = function(): Schema.Types.ObjectId {
+    return this.email
+}
+
+userSchema.methods.getRole = function(): Schema.Types.ObjectId {
+    return this.role
+}
+
+export function checkEmailCorrectness(email : string){
+    return emailValidator.validate(email)
+}
+
+export async function checkNameCorrectness(name : string) : Promise<boolean> {
+    const isNotNull : boolean = name.length !== null
+    if(!isNotNull){
+        return false
+    }else{
+        try {
+            await usernameValidator.validateUsername(name)
+            const isLessThan16 : boolean = name.length <= 15
+            return isLessThan16;
+        } catch (e) {
+            return false
+        }
+        
+    }
+}
 
 export const UserModel = model<User>('User', userSchema);
 

@@ -8,45 +8,38 @@ interface itemElement {
 export interface Recipe extends Document {
 
     readonly _id: Schema.Types.ObjectId,
-
-    idTable : Schema.Types.ObjectId,
     idCashier : Schema.Types.ObjectId,
-    itemsPurchased : itemElement[],
-    idDay : Schema.Types.ObjectId
+    dateOfPrinting : Date,
+    ordersList : Schema.Types.ObjectId[],
+    idGroup : Schema.Types.ObjectId
 
-    
 }
 
 const recipeSchema = new Schema<Recipe>( {
-    idTable: {
-        type: Schema.Types.ObjectId,
-        required: true,
-        ref : 'Table'
-    },
     idCashier: {
         type: Schema.Types.ObjectId,
         required: true,
         ref : 'Cashier'
     },
+    dateOfPrinting: {
+        type: Schema.Types.Date,
+        required: true,
+    },
     
-    itemsPurchased:  {
-        type : [{
-            qt : {
-                type : Schema.Types.Number,
-                required : true,
-            },
-            idItem : {
+    ordersList: {
+        type : [
+            {
                 type: Schema.Types.ObjectId,
-                required: true,
-                ref : 'Item'
+                required: false,
+                ref : 'Order'
             }
-        }],
+        ], 
         required : true
     },
-    idDay:  {
+    idGroup:  {
         type : Schema.Types.ObjectId,
         required : true,
-        ref : 'Day'
+        ref : 'Group'
     }
 })
 

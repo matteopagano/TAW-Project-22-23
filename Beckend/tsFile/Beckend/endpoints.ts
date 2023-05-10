@@ -1,7 +1,7 @@
 
 
 import { Request, Response, NextFunction } from 'express';
-import {Types} from 'mongoose'
+import { Types } from 'mongoose';
 import {AllergeneModel} from '../Model/Allergene';
 import {DayModel} from '../Model/Day';
 import {ItemModel , ItemType, Item} from '../Model/Item';
@@ -121,175 +121,146 @@ export async function getBartenderByRestaurant(req : Request, res : Response , n
 }
 
 export async function createRestaurant(req : Request, res : Response, next : NextFunction) {
+
+    //If i reached this point all the middleware have done correctly all the input checks and are correct
     const customRequest = req as Request & { auth: any }; // For error type at compile time
     const idOwner = customRequest.auth._id
     const restaurantNameBody = req.body.restaurantName
-
     const owner : Owner.Owner = await Owner.OwnerModel.findById(idOwner)
-    
-    if(Restaurant.RestaurantModel.checkNameCorrectness(restaurantNameBody)){
-        const newRestaurant = new Restaurant.RestaurantModel({
-            restaurantName : restaurantNameBody,
-            employeesList : [],
-            ownerId : owner.getId(),
-            tablesList : [],
-            daysList : [],
-            itemsList : []
-        })
-        owner.setRestaurantOwn(newRestaurant.getId())
-        await owner.save()
-        await newRestaurant.save()
-        return res.status(200).json({error: false, errormessage: "", newRestaurantId : newRestaurant.getId()})  
-    }else{
-        return next({statusCode:404, error: true, errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " + restaurantNameBody})
-    }
-
-       
+    const newRestaurant = Restaurant.newRestaurant(restaurantNameBody, owner)
+    owner.setRestaurantOwn(newRestaurant.getId())
+    await owner.save()
+    await newRestaurant.save()
+    return res.status(200).json({error: false, errormessage: "", newRestaurantId : newRestaurant.getId()})    
 }
 
 export async function createCookAndAddToARestaurant(req : Request, res : Response , next : NextFunction) {
-    const customRequest = req as Request & { auth: any }; // For error type at compile time
+    const restaurantId : string = req.params.idr
     const username = req.body.username;
     const email = req.body.email;
-    const role = req.body.role;
+
+    const checkName : boolean = await User.checkNameCorrectness(username)
+    const checkEmail : boolean = User.checkEmailCorrectness(email)
+    if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
+        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+    }
 
     const newPassword = Utilities.generateRandomString(8)
-    const owner : Owner.Owner = await Owner.OwnerModel.findById(customRequest.auth._id)
-    
-    const restaurant = await Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString())
-    const cook : Cook.Cook = await Utilities.createCook(username, email, newPassword, owner.restaurantOwn)
-    Utilities.addCookToARestaurant(cook,restaurant)
-    return res.status(200).json({idNewCook : cook._id, usernameNewCook : cook.username, email : cook.email, passwordToChange : newPassword});
-    //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
-    
+    const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
+    const cook : Cook.Cook = await Cook.createCookAndSave(username, email, newPassword, new Types.ObjectId(restaurantId))
+    await Restaurant.addCookToARestaurantAndSave(cook, restaurant)
+    return res.status(200).json({error: false, errormessage: "", idNewCook : cook.getId(), usernameNewCook : cook.getUsername(), email : cook.getEmail(), passwordToChange : newPassword});
 }
 
 export async function createWaiterAndAddToARestaurant(req : Request, res : Response , next : NextFunction) {
-    const customRequest = req as Request & { auth: any }; // For error type at compile time
+    const restaurantId : string = req.params.idr
     const username = req.body.username;
     const email = req.body.email;
-    const role = req.body.role;
-
+    if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
+        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+    }
     const newPassword = Utilities.generateRandomString(8)
-    const owner : Owner.Owner = await Owner.OwnerModel.findById(customRequest.auth._id)
-    
-    const restaurant = await Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString())
-    const waiter : Waiter.Waiter = await Utilities.createWaiter(username, email, newPassword, owner.restaurantOwn)
-    Utilities.addWaiterToARestaurant(waiter, restaurant)
-    return res.status(200).json({idNewCook : waiter._id, usernameNewCook : waiter.username, email : waiter.email, passwordToChange : newPassword});
-    //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
-    
+    const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
+    const waiter : Waiter.Waiter = await Waiter.createWaiterAndSave(username, email, newPassword, new Types.ObjectId(restaurantId))
+    await Restaurant.addWaiterToARestaurantAndSave(waiter, restaurant)
+    return res.status(200).json({error: false, errormessage: "", idNewWaiter : waiter.getId(), usernameNewWaiter : waiter.getUsername(), emailNewWaiter : waiter.getEmail(), passwordToChange : newPassword});   
 }
 
 export async function createCashierAndAddToARestaurant(req : Request, res : Response , next : NextFunction) {
-    const customRequest = req as Request & { auth: any }; // For error type at compile time
+    const restaurantId : string = req.params.idr
     const username = req.body.username;
     const email = req.body.email;
-    const role = req.body.role;
-
+    if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
+        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+    }
     const newPassword = Utilities.generateRandomString(8)
-    const owner : Owner.Owner = await Owner.OwnerModel.findById(customRequest.auth._id)
-    
-    const restaurant = await Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString())
-    const cashier : Cashier.Cashier = await Utilities.createCashier(username, email, newPassword, owner.restaurantOwn)
-    Utilities.addCashierToARestaurant(cashier,restaurant)
-    return res.status(200).json({idNewCook : cashier._id, usernameNewCook : cashier.username, email : cashier.email, passwordToChange : newPassword});
-    //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
-    
+    const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
+    const cashier : Cashier.Cashier = await Cashier.createCashierAndSave(username, email, newPassword, new Types.ObjectId(restaurantId))
+    Restaurant.addCashierToARestaurantAndSave(cashier, restaurant)
+    return res.status(200).json({error: false, errormessage: "", idNewCashier : cashier.getId(), usernameNewCashier : cashier.getUsername(), emailnewCashier : cashier.getEmail(), passwordToChange : newPassword});
 }
 
 export async function createBartenderAndAddToARestaurant(req : Request, res : Response , next : NextFunction) {
-    const customRequest = req as Request & { auth: any }; // For error type at compile time
+    const restaurantId : string = req.params.idr
     const username = req.body.username;
     const email = req.body.email;
-    const role = req.body.role;
-
+    if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
+        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+    }
     const newPassword = Utilities.generateRandomString(8)
-    const owner : Owner.Owner = await Owner.OwnerModel.findById(customRequest.auth._id)
-    
-    
+    const owner : Owner.Owner = await Owner.OwnerModel.findById(restaurantId)
     const restaurant = await Restaurant.RestaurantModel.findById(owner.restaurantOwn.toString())
-    const bartender : Bartender.Bartender = await Utilities.createBartender(username, email, newPassword, owner.restaurantOwn)
-    Utilities.addBartenderToARestaurant(bartender,restaurant)
-    return res.status(200).json({idNewCook : bartender._id, usernameNewCook : bartender.username, email : bartender.email, passwordToChange : newPassword});
-    //return next({statusCode : 404, error: true, errormessage: "no owner find ownerId:" + customRequest.auth._id});
-    
+    const bartender : Bartender.Bartender = await Bartender.createBartenderAndSave(username, email, newPassword, new Types.ObjectId(restaurantId))
+    Restaurant.addBartenderToARestaurantAndSave(bartender,restaurant)
+    return res.status(200).json({error: false, errormessage: "", idNewBartender : bartender.getId(), usernameNewBartender : bartender.getUsername(), emailNewBartender : bartender.getEmail(), passwordToChange : newPassword});
 }
-
 
 export async function deleteCookAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
     const idRestaurant = req.params.idr;
     const idCook = req.params.idu;
-
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant);
 
-
-    if(restaurant.isCookPresent(idCook)){
-        if(restaurant.removeCook(idCook)){
-            await restaurant.save()
-            await Cook.CookModel.deleteOne({_id : idCook})
-            return res.status(200).json({idCookDeleted : idCook});
-        }else{
-            return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
-        }
-        
+    if(restaurant.removeCook(idCook)){
+        await restaurant.save()
+        await Cook.CookModel.deleteOne({_id : idCook})
+        return res.status(200).json({error: false, errormessage: "", idCookDeleted : idCook});
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
     }
+        
+    
 }
 
 export async function deleteWaiterAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
     const idRestaurant = req.params.idr;
     const idWaiter = req.params.idu;
-
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant);
-
-
-    if(restaurant.isWaiterPresent(idWaiter)){
-        if(restaurant.removeWaiter(idWaiter)){
-            await restaurant.save()
-            await Waiter.WaiterModel.deleteOne({_id : idWaiter})
-            return res.status(200).json({idWaiterDeleted : idWaiter});
-        }else{
-            return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
-        }
-        
+    if(restaurant.removeWaiter(idWaiter)){
+        await restaurant.save()
+        await Waiter.WaiterModel.deleteOne({_id : idWaiter})
+        return res.status(200).json({error: false, errormessage: "", idWaiterDeleted : idWaiter});
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
     }
 }
 
 export async function deleteCashierAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
     const idRestaurant = req.params.idr;
     const idCashier = req.params.idu;
-
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant);
-
-
-    if(restaurant.isCashierPresent(idCashier)){
-        if(restaurant.removeCashier(idCashier)){
-            await restaurant.save()
-            await Cashier.CashierModel.deleteOne({_id : idCashier})
-            return res.status(200).json({idCashierDeleted : idCashier});
-        }else{
-            return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
-        }
-        
+    if(restaurant.removeCashier(idCashier)){
+        await restaurant.save()
+        await Cashier.CashierModel.deleteOne({_id : idCashier})
+        return res.status(200).json({error: false, errormessage: "", idCashierDeleted : idCashier});
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
     }
 }
 
 export async function deleteBartenderAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
     const idRestaurant = req.params.idr;
     const idBartender = req.params.idu;
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant);
+    if(restaurant.removeBartender(idBartender)){
+        await restaurant.save()
+        await Bartender.BartenderModel.deleteOne({_id : idBartender})
+        return res.status(200).json({error: false, errormessage: "", idBartenderDeleted : idBartender});
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
+    }
+}
 
+export async function removeDayAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
+    const idRestaurant = req.params.idr;
+    const idDay = req.params.idd;
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant);
 
-
-    if(restaurant.isBartenderPresent(idBartender)){
-        if(restaurant.removeBartender(idBartender)){
-            await restaurant.save()
-            await Bartender.BartenderModel.deleteOne({_id : idBartender})
-            return res.status(200).json({idCBartenderDeleted : idBartender});
-        }else{
-            return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
-        }
-        
+    if(restaurant.removeDay(idDay)){
+        await restaurant.save()
+        await Day.DayModel.deleteOne({_id : idDay})
+        return res.status(200).json({error: false, errormessage: "", idDayDeleted : idDay});
+    }else{
+        return next({statusCode:404, error: true, errormessage: "Cook not deleted"})
     }
 }
 
@@ -298,11 +269,7 @@ export async function createDayAndAddToARestaurant(req : Request, res : Response
 
     const owner : Owner.Owner = await Owner.OwnerModel.findById(customRequest.auth._id)
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(owner.restaurantOwn).populate("daysList")
-    console.log("printod io bono")
-    console.log(restaurant.daysList)
-
     
-
     if (!/^\d{4}-\d{2}-\d{2}$/.test(req.body.date)) {  
         return next({statusCode:404, error: true, errormessage: "not valid date"})
     }
@@ -332,7 +299,7 @@ export async function createDayAndAddToARestaurant(req : Request, res : Response
             await newDay.save()
             restaurant.daysList.push(newDay._id)
             await restaurant.save()
-            return res.status(200).json({valid : true})
+            return res.status(200).json({error: false, errormessage: "", idDayAdded : newDay._id})
         }else{
             return next({statusCode:404, error: true, errormessage: "Day " + newDay.date + " already present in restaurant:" + restaurant._id})
         }
@@ -351,7 +318,7 @@ export async function getDaysListByRestaurant(req : Request, res : Response , ne
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(req.params.idr).populate("daysList")
 
     if(restaurant){
-        return res.status(200).json(restaurant.daysList)
+        return res.status(200).json({error: false, errormessage: "", days : restaurant.daysList})
     }else{
         console.log("debugf")
         return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
@@ -359,7 +326,24 @@ export async function getDaysListByRestaurant(req : Request, res : Response , ne
 
 }
 
+export async function getTablesListByRestaurant(req : Request, res : Response , next : NextFunction){
+    const idTableParam = req.params.idr
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idTableParam).populate("tablesList")
 
+    if(restaurant){
+        return res.status(200).json({error: false, errormessage: "", days : restaurant.daysList})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
+    }
 
+}
+
+export async function createTableAndAddToARestaurant(req : Request, res : Response , next : NextFunction) {
+    const tableNumber = req.body.tableNumber
+    const maxSeats = req.body.maxSeats
+    const idRestaurant = req.params.idr
+
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant)
+}
 
 

@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basicAuthentication = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isOwnerOfThisRestaurant = exports.isOwner = exports.verifyJWT = void 0;
+exports.basicAuthentication = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isOwnerOfThisRestaurant = exports.isOwner = exports.verifyJWT = void 0;
 const passport = require("passport"); // authentication middleware for Express
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
@@ -188,4 +188,41 @@ function isBartenderMemberOfThatRestaurant(req, res, next) {
     });
 }
 exports.isBartenderMemberOfThatRestaurant = isBartenderMemberOfThatRestaurant;
+function isDayOfThatRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idDayToRemove = req.params.idd;
+        const restaurantIdInWhichRemoveDay = req.params.idr;
+        const restaurant = yield Restaurant.RestaurantModel.findById(restaurantIdInWhichRemoveDay);
+        if (restaurant.isDayPresent(idDayToRemove)) {
+            next();
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "day " + idDayToRemove + " is not day of " + restaurantIdInWhichRemoveDay });
+        }
+    });
+}
+exports.isDayOfThatRestaurant = isDayOfThatRestaurant;
+function isValidRestaurantInput(req, res, next) {
+    const restaurantNameBody = req.body.restaurantName;
+    if (Restaurant.checkNameCorrectness(restaurantNameBody)) {
+        next();
+    }
+    else {
+        return next({ statusCode: 404, error: true, errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " + restaurantNameBody });
+    }
+}
+exports.isValidRestaurantInput = isValidRestaurantInput;
+function isUserAlreadyExist(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const emailBody = req.body.email;
+        const userFind = yield User.UserModel.findOne({ email: emailBody });
+        if (!userFind) {
+            next();
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "User : " + emailBody + " already exist." });
+        }
+    });
+}
+exports.isUserAlreadyExist = isUserAlreadyExist;
 exports.basicAuthentication = passport.authenticate('basic', { session: false });

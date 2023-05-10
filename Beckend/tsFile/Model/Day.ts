@@ -1,7 +1,7 @@
 import { Schema, model, Document} from 'mongoose';
 import { isValid, parseISO } from 'date-fns';
 
-export interface Day extends Document {
+export interface DataDaysSchema extends Document {
     readonly _id: Schema.Types.ObjectId;
     date: Date;
     orderList : Schema.Types.ObjectId[];
@@ -12,7 +12,7 @@ export interface Day extends Document {
 
 
 
-const daySchema = new Schema<Day>({
+const DataDaysSchemaSchema = new Schema<DataDaysSchema>({
     date: {
       type: Schema.Types.Date,
       required: true
@@ -45,10 +45,7 @@ const daySchema = new Schema<Day>({
 });
   
 
-daySchema.methods.isValidDate = function () : boolean {
-
-    
-    
+DataDaysSchemaSchema.methods.isValidDate = function () : boolean {
     // Parse della data dalla stringa di input
     
     // Verifica se la data è valida
@@ -58,5 +55,7 @@ daySchema.methods.isValidDate = function () : boolean {
         return false
     }
 }
-export const DayModel = model<Day>('Day', daySchema);
+
+
+export const DataDaysSchemaModel = model<DataDaysSchema>('DataDaysSchema', DataDaysSchemaSchema);
 

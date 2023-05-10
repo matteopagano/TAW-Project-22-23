@@ -1,6 +1,15 @@
 "use strict";
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RestaurantModel = void 0;
+exports.RestaurantModel = exports.addBartenderToARestaurantAndSave = exports.addCashierToARestaurantAndSave = exports.addWaiterToARestaurantAndSave = exports.addCookToARestaurantAndSave = exports.newRestaurant = exports.checkNameCorrectness = void 0;
 const mongoose_1 = require("mongoose");
 const restaurantSchema = new mongoose_1.Schema({
     restaurantName: {
@@ -109,6 +118,14 @@ restaurantSchema.methods.isBartenderPresent = function (bartenderId) {
         return false;
     }
 };
+restaurantSchema.methods.isDayPresent = function (dayId) {
+    try {
+        return this.daysList.includes(new mongoose_1.Types.ObjectId(dayId));
+    }
+    catch (_a) {
+        return false;
+    }
+};
 restaurantSchema.methods.removeCook = function (cookId) {
     let index = this.cookList.indexOf(new mongoose_1.Types.ObjectId(cookId));
     if (index !== -1) {
@@ -149,6 +166,16 @@ restaurantSchema.methods.removeBartender = function (bartender) {
         return false;
     }
 };
+restaurantSchema.methods.removeDay = function (day) {
+    let index = this.daysList.indexOf(new mongoose_1.Types.ObjectId(day));
+    if (index !== -1) {
+        this.daysList.splice(index, 1);
+        return true;
+    }
+    else {
+        return false;
+    }
+};
 restaurantSchema.methods.getCookList = function () {
     return this.cookList;
 };
@@ -164,7 +191,7 @@ restaurantSchema.methods.getBartenderList = function () {
 restaurantSchema.methods.getId = function () {
     return this._id;
 };
-restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(restaurantName) {
+function checkNameCorrectness(restaurantName) {
     const isNotNull = restaurantName.length !== null;
     if (!isNotNull) {
         return false;
@@ -173,5 +200,46 @@ restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(re
         const isLessThan16 = restaurantName.length <= 15;
         return isLessThan16;
     }
-});
+}
+exports.checkNameCorrectness = checkNameCorrectness;
+function newRestaurant(restaurantName, idOwner) {
+    const newRestaurant = new exports.RestaurantModel({
+        restaurantName: restaurantName,
+        employeesList: [],
+        ownerId: idOwner.getId(),
+        tablesList: [],
+        daysList: [],
+        itemsList: []
+    });
+    return newRestaurant;
+}
+exports.newRestaurant = newRestaurant;
+function addCookToARestaurantAndSave(cook, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.cookList.push(cook.getId());
+        yield restaurant.save();
+    });
+}
+exports.addCookToARestaurantAndSave = addCookToARestaurantAndSave;
+function addWaiterToARestaurantAndSave(waiter, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.waiterList.push(waiter.getId());
+        yield restaurant.save();
+    });
+}
+exports.addWaiterToARestaurantAndSave = addWaiterToARestaurantAndSave;
+function addCashierToARestaurantAndSave(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.cashierList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addCashierToARestaurantAndSave = addCashierToARestaurantAndSave;
+function addBartenderToARestaurantAndSave(user, restaurant) {
+    return __awaiter(this, void 0, void 0, function* () {
+        restaurant.bartenderList.push(user._id);
+        yield restaurant.save();
+    });
+}
+exports.addBartenderToARestaurantAndSave = addBartenderToARestaurantAndSave;
 exports.RestaurantModel = (0, mongoose_1.model)('Restaurant', restaurantSchema);

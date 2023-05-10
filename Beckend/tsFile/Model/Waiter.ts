@@ -1,5 +1,5 @@
 import {User, options, RoleType, UserModel} from './User'
-import { Schema, model, Document} from 'mongoose';
+import { Schema, model, Document, Types} from 'mongoose';
 
 export interface Waiter extends User{
     ordersTaken : Schema.Types.ObjectId[],
@@ -30,5 +30,18 @@ const waiterSchema = new Schema<Waiter>({
     
 
 }, options)
+
+export async function createWaiterAndSave(username : string, email : string, password : string, idRestaurant : Types.ObjectId) : Promise<Waiter> {
+    const newWaiter : Waiter =  new WaiterModel({
+        username : username,
+        email : email,
+        role : RoleType.WAITER,
+        ordersTaken : [],
+        tablesObservered : [],
+        idRestaurant : idRestaurant
+    });
+    newWaiter.setPassword(password);
+    return await newWaiter.save();
+}
 
 export const WaiterModel = UserModel.discriminator<Waiter>('Waiter', waiterSchema,  RoleType.WAITER);

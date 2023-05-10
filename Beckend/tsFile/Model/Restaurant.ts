@@ -1,9 +1,15 @@
 import { Schema, model, Document, Types, Model} from 'mongoose';
 import { isValid, parseISO, isSameDay } from 'date-fns';
+import * as Owner from '../Model/Owner';
+import * as Cook from '../Model/Cook';
+import * as Waiter from '../Model/Waiter';
+import * as Cashier from '../Model/Cashier';
+import * as Bartender from '../Model/Bartender';
 
 
 export interface Restaurant extends Document {
     readonly _id: Schema.Types.ObjectId,
+
     restaurantName : string,
     cookList : Schema.Types.ObjectId[],
     waiterList : Schema.Types.ObjectId[],
@@ -15,7 +21,6 @@ export interface Restaurant extends Document {
     itemsList : Schema.Types.ObjectId[],
     
     getId : () => Schema.Types.ObjectId;
-
     getCookList : () => any;
     getWaiterList : () => any;
     getCashierList : () => any;
@@ -25,19 +30,19 @@ export interface Restaurant extends Document {
     isWaiterPresent : (waiter : string) => boolean,
     isCashierPresent : (cashier : string) => boolean,
     isBartenderPresent : (bartender : string) => boolean;
+    isDayPresent : (bartender : string) => boolean;
 
     removeCook : (cook : string) => boolean,
     removeWaiter : (waiter : string) => boolean,
     removeCashier : (cashier : string) => boolean,
     removeBartender : (bartender : string) => boolean;
+    removeDay: (day : string) => boolean;
+
+    
 
 }
 
-interface staticMethod extends Model<Restaurant> {
-    checkNameCorrectness(restaurantName : string): number;
-}
-
-const restaurantSchema = new Schema<Restaurant, staticMethod>( {
+const restaurantSchema = new Schema<Restaurant>( {
     restaurantName: {
         type: Schema.Types.String,
         required: true,
@@ -95,14 +100,6 @@ const restaurantSchema = new Schema<Restaurant, staticMethod>( {
         }],
         required : true
     },
-    daysList: {
-        type : [{
-            type: Schema.Types.ObjectId,
-            required: false,
-            ref : 'Day'
-        }],
-        required : true
-    },
     itemsList: {
         type : [{
             type: Schema.Types.ObjectId,
@@ -143,6 +140,14 @@ restaurantSchema.methods.isCashierPresent = function( cashierId : string ) : boo
 restaurantSchema.methods.isBartenderPresent = function( bartenderId : string ) : boolean {
     try{
         return this.bartenderList.includes(new Types.ObjectId(bartenderId));
+    }catch{
+        return false;
+    }
+}
+
+restaurantSchema.methods.isDayPresent = function( dayId : string ) : boolean {
+    try{
+        return this.daysList.includes(new Types.ObjectId(dayId));
     }catch{
         return false;
     }
@@ -192,6 +197,17 @@ restaurantSchema.methods.removeBartender = function( bartender : string ) : bool
     }
 }
 
+restaurantSchema.methods.removeDay = function( day : string ) : boolean {
+    let index = this.daysList.indexOf(new Types.ObjectId(day));
+
+    if (index !== -1) {
+        this.daysList.splice(index, 1);
+        return true
+    }else{
+        return false
+    }
+}
+
 restaurantSchema.methods.getCookList = function(){
     return this.cookList;
 }
@@ -209,7 +225,7 @@ restaurantSchema.methods.getId = function(){
     return this._id;
 }
 
-restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(restaurantName : string) : boolean {
+export function checkNameCorrectness(restaurantName : string) : boolean {
     const isNotNull : boolean = restaurantName.length !== null
     if(!isNotNull){
         return false
@@ -217,10 +233,38 @@ restaurantSchema.static('checkNameCorrectness', function checkNameCorrectness(re
         const isLessThan16 : boolean = restaurantName.length <= 15
         return isLessThan16;
     }
-        
+}
 
-    
-});
+export function newRestaurant(restaurantName : string, idOwner : Owner.Owner) : Restaurant {
+    const newRestaurant : Restaurant = new RestaurantModel({
+        restaurantName : restaurantName,
+        employeesList : [],
+        ownerId : idOwner.getId(),
+        tablesList : [],
+        daysList : [],
+        itemsList : []
+    })
+    return newRestaurant;
+}
 
+export async function addCookToARestaurantAndSave(cook : Cook.Cook, restaurant : Restaurant){
+    restaurant.cookList.push(cook.getId()); 
+    await restaurant.save() 
+  }
 
-export const RestaurantModel = model<Restaurant, staticMethod>('Restaurant', restaurantSchema)
+export async function addWaiterToARestaurantAndSave(waiter : Waiter.Waiter, restaurant : Restaurant){
+    restaurant.waiterList.push(waiter.getId()); 
+    await restaurant.save() 
+}
+
+export async function addCashierToARestaurantAndSave(user : Cashier.Cashier, restaurant : Restaurant){
+    restaurant.cashierList.push(user._id); 
+    await restaurant.save() 
+}
+
+export async function addBartenderToARestaurantAndSave(user : Bartender.Bartender, restaurant : Restaurant){
+    restaurant.bartenderList.push(user._id); 
+    await restaurant.save() 
+}
+
+export const RestaurantModel = model<Restaurant>('Restaurant', restaurantSchema)

@@ -1,4 +1,4 @@
-import { Schema, model, Document, SchemaTypes} from 'mongoose';
+import { Schema, model, Document, SchemaTypes, Types} from 'mongoose';
 export interface Table extends Document {
 
     readonly _id: Schema.Types.ObjectId,
@@ -6,10 +6,8 @@ export interface Table extends Document {
     tableNumber : string,
     isFree : boolean,
     maxSeats : number,
-    orderList : Schema.Types.ObjectId[],
-    waitressList : Schema.Types.ObjectId[],
     restaurantId : Schema.Types.ObjectId,
-    recipesId : Schema.Types.ObjectId
+    groupcIdCurrentlyPresent : Schema.Types.ObjectId
 
 }
 
@@ -27,37 +25,31 @@ const tableSchema = new Schema<Table>( {
         type: Number,
         required: true,
     },
-    orderList: {
-        type:[
-            {
-                type: Schema.Types.ObjectId,
-                required: false,
-                ref : 'Order'
-            }
-        ], required : true
-    },
-    waitressList: {
-        type : [
-            {
-                type: Schema.Types.ObjectId,
-                required: false,
-                ref : 'Waiter'
-            }
-        ], 
-        required : true
-    },
+    
+    
     restaurantId: {
         type: Schema.Types.ObjectId,
         required: true,
         ref : 'Restaurant'
     },
-    recipesId: {
+    groupcIdCurrentlyPresent: {
         type: Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref : 'Recipe'
     }
 
 })
 
+export async function createTableAndSave(tableNumber : number, maxSeats : number, idRestaurant : Types.ObjectId) : Promise<Table> {
+    const newTable : Table =  new TableModel({
+        tableNumber : tableNumber,
+        isFree : true,
+        maxSeats : maxSeats,
+        restaurantId : idRestaurant,
+        groupIdCurrentlyPresent : null
+    });
+
+    return await newTable.save();
+}
 
 export const TableModel = model('Table', tableSchema)

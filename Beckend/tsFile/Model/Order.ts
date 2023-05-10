@@ -1,9 +1,10 @@
 import { Schema, model, Document} from 'mongoose';
 
 interface itemElement {
-  qt: number,
+  dateFinish: Date,
   idItem: Schema.Types.ObjectId,
   state: StateOrder
+  completedBy: Schema.Types.ObjectId
 }
 
 enum StateOrder {
@@ -20,44 +21,53 @@ enum StateItem {
 
 export interface Order extends Document {
   readonly _id: Schema.Types.ObjectId;
-  idTable: Schema.Types.ObjectId;
-  itemList: itemElement[];
-  state: string;
-  date: Schema.Types.ObjectId;
-  idWaiter : Schema.Types.ObjectId;
+  idGroup: Schema.Types.ObjectId;
+  idWaiter: Schema.Types.ObjectId;
+  itemsList: itemElement[];
+  dateCompleted: Date;
+  dateReceived: Date;
+  state: StateOrder;
+  receipId : Schema.Types.ObjectId;
 }
 
 const orderSchema = new Schema({
-    idTable: {
+    idGroup: {
       type: Schema.Types.ObjectId,
       required: true,
-      ref : "Table"
+      ref : "Group"
+    },
+    idWaiter: {
+      type : Schema.Types.ObjectId,
+      ref : "Waiter",
+      required: true
     },
     itemList: {
         type : [{
-            qt : {type: Number,required: true},
+            dateFinish : {type: Schema.Types.Date,required: true},
             idItem : {type : Schema.Types.ObjectId, ref : 'Item', required: true},
-            state : {type : Schema.Types.String, enum : StateItem, required : true} // From the official documentation
-            
+            state : {type : Schema.Types.String, enum : StateItem, required : true}, // From the official documentation
+            completedBy : {type : Schema.Types.ObjectId, ref : 'User', required : true} // From the official documentation
         }],
         required : true
-    }
-    ,
+    },
+    dateCompleted: {
+      type : Schema.Types.Date,
+      required : true
+    },
+    dateNotCompleted: {
+      type : Schema.Types.Date,
+      required : true
+    },
     state: {
       type : Schema.Types.String,
       enum : StateOrder,
       required : true
     },
-    date: {
+    recipeId: {
       type : Schema.Types.ObjectId,
-      ref : "Day",
+      ref : "Recipe",
       required: true
     },
-    idWaiter: {
-        type : Schema.Types.ObjectId,
-        ref : "Waiter",
-        required: true
-      }
   });
   
   export const OrderModel = model<Order>('Order', orderSchema);
