@@ -5,10 +5,11 @@ import * as Owner from '../Model/Owner';
 import { BartenderModel } from '../Model/Bartender';
 import { CashierModel } from '../Model/Cashier';
 import { CookModel } from '../Model/Cook';
-import { WaiterModel } from '../Model/Waiter';
+import * as Waiter from '../Model/Waiter';
 import { expressjwt as jwt } from 'express-jwt';  
 import { Schema, model, Document} from 'mongoose';
 import * as Restaurant from '../Model/Restaurant';
+import * as Group from '../Model/Group';
 
 passport.use( new passportHTTP.BasicStrategy(
     async function(username : string, password : string, done : Function) {
@@ -19,7 +20,6 @@ passport.use( new passportHTTP.BasicStrategy(
       if( !user ) {
         return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid user"});
       }
-      console.log(user)
   
       if(user.isPasswordCorrect(password)){
 
@@ -28,7 +28,7 @@ passport.use( new passportHTTP.BasicStrategy(
           case 'bartender' : user = new BartenderModel(user); break;
           case 'cashier' : user = new CashierModel(user); break;
           case 'cook' : user = new CookModel(user); break;
-          case 'waiter' : user = new WaiterModel(user); break;
+          case 'waiter' : user = new Waiter.WaiterModel(user); break;
         }
         return done(null, user);
       }else{
@@ -52,6 +52,15 @@ export function isOwner(req , res , next){
   }
 }
 
+export function isWaiter(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isWaiter()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Waiter" });
+  }
+}
+
 export async function isOwnerOfThisRestaurant(req , res , next){
   const idOwnerAuthenticated = req.auth._id
   const idRistoranteParameter = req.params.idr ;
@@ -69,6 +78,33 @@ export async function isOwnerOfThisRestaurant(req , res , next){
     }
   }else{
     next({ statusCode:404, error: true, errormessage: "User not found" })
+  }
+}
+
+export async function isCustomerRestaurantTheSameAsWaiter(req , res , next){
+
+  const idWaiterAuthenticated = req.auth._id
+  const idRistoranteParameter = req.params.idr ;
+  const idCustomerGroup = req.params.idc
+
+
+  const customerGroup : Group.Group = await Group.GroupModel.findById(idCustomerGroup)
+  const waiterAuthenticated : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
+
+
+  if(waiterAuthenticated !== null){
+    if(customerGroup !== null){
+      if(waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "customerGroup not found not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "Waiter not found" })
   }
 }
 
@@ -93,7 +129,6 @@ export async function hasNotAlreadyARestaurant(req , res , next){
 
 export async function isCookMemberOfThatRestaurant(req , res , next){
 
-  console.log("debug 2")
   const cookIdToRemove = req.params.idu;
   const restaurantIdInWhichRemoveCook = req.params.idr
   const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(restaurantIdInWhichRemoveCook)

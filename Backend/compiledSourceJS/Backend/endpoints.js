@@ -32,11 +32,12 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTablesAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
+exports.createOrderAndAddToACustomerGroup = exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTablesAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
 const mongoose_1 = require("mongoose");
 const Restaurant = __importStar(require("../Model/Restaurant"));
 const Table = __importStar(require("../Model/Table"));
 const Item = __importStar(require("../Model/Item"));
+const Order = __importStar(require("../Model/Order"));
 const User = __importStar(require("../Model/User"));
 const Cook = __importStar(require("../Model/Cook"));
 const Waiter = __importStar(require("../Model/Waiter"));
@@ -60,7 +61,6 @@ function root(req, res) {
 exports.root = root;
 function login(req, res, next) {
     // If it's reached this point, req.user has been injected.
-    console.log(req.user);
     const authenticatedUser = new User.UserModel(req.user);
     const token = {
         username: authenticatedUser.username,
@@ -217,8 +217,6 @@ function createBartenderAndAddToARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const customRequest = req; // For error type at compile time
         const idOwner = customRequest.auth._id;
-        console.log(customRequest.auth._id);
-        console.log(customRequest.auth._id);
         const restaurantId = req.params.idr;
         const username = req.body.username;
         const email = req.body.email;
@@ -364,10 +362,8 @@ function createItemAndAddToARestaurant(req, res, next) {
         const preparationTime = req.body.preparationTime;
         switch (itemType) {
             case 'drink':
-                console.log("Il valore è 1");
                 break;
             case 'dish':
-                console.log("Il valore è 2");
                 break;
             default:
                 next({ statusCode: 404, error: true, errormessage: "Item type " + itemType + " is not correct, please select itemtype from [dish, drink] " });
@@ -439,3 +435,20 @@ function removeGroupFromTable(req, res, next) {
     });
 }
 exports.removeGroupFromTable = removeGroupFromTable;
+function createOrderAndAddToACustomerGroup(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idCustomerGroup = req.params.idc;
+        const idWaiterAuthenticated = req.auth._id;
+        const itemsList = req.body.items;
+        const customerGroup = yield Group.GroupModel.findById(idCustomerGroup);
+        const waiter = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
+        const newOrder = Order.createOrder(new mongoose_1.Types.ObjectId(idCustomerGroup), new mongoose_1.Types.ObjectId(idWaiterAuthenticated), itemsList);
+        Waiter.addOrderAwaited(newOrder, waiter);
+        Group.addOrder(newOrder, customerGroup);
+        waiter.save();
+        newOrder.save();
+        customerGroup.save();
+        return res.status(200).json({ error: false, errormessage: "", newOrder: newOrder });
+    });
+}
+exports.createOrderAndAddToACustomerGroup = createOrderAndAddToACustomerGroup;

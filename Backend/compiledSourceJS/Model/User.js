@@ -66,7 +66,10 @@ userSchema.methods.isPasswordCorrect = function (password) {
     return (this.digest === hmac.digest('hex'));
 };
 userSchema.methods.isOwner = function () {
-    return this.role === 'owner';
+    return this.role === RoleType.OWNER;
+};
+userSchema.methods.isWaiter = function () {
+    return this.role === RoleType.WAITER;
 };
 userSchema.methods.getId = function () {
     return this._id;

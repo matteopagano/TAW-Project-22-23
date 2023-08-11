@@ -7,6 +7,7 @@ import {RecipeModel} from '../Model/Recipe';
 import * as Restaurant from '../Model/Restaurant';
 import * as Table from '../Model/Table';
 import * as Item from '../Model/Item';
+import * as Order from '../Model/Order';
 
 import * as User from '../Model/User';
 import * as Cook from '../Model/Cook';
@@ -39,7 +40,6 @@ export function root(req : Request, res : Response) : void {
 export function login(req : Request, res : Response, next : NextFunction) {
     // If it's reached this point, req.user has been injected.
 
-    console.log(req.user)
 
     const authenticatedUser : User.User = new User.UserModel(req.user);
 
@@ -195,8 +195,6 @@ export async function createBartenderAndAddToARestaurant(req : Request, res : Re
     const customRequest = req as Request & { auth: any }; // For error type at compile time
     const idOwner = customRequest.auth._id
 
-    console.log(customRequest.auth._id)
-    console.log(customRequest.auth._id)
 
 
     const restaurantId : string = req.params.idr
@@ -342,10 +340,8 @@ export async function createItemAndAddToARestaurant(req : Request, res : Respons
 
     switch (itemType) {
         case 'drink':
-            console.log("Il valore è 1");
             break;
         case 'dish':
-            console.log("Il valore è 2");
             break;
         default:
             next({ statusCode : 404, error: true, errormessage: "Item type " + itemType + " is not correct, please select itemtype from [dish, drink] " })
@@ -390,7 +386,7 @@ export async function getCustomerGroupByRestaurantAndTable(req : Request, res : 
     if(table){
         return res.status(200).json({error: false, errormessage: "", tables : table.group})
     }else{
-        return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
+        return next({statusCode:404, error: true, errormessage: "not valid table"})
     }
 
 }
@@ -435,3 +431,23 @@ export async function removeGroupFromTable(req : Request, res : Response , next 
 
 }
 
+export async function createOrderAndAddToACustomerGroup(req, res, next : NextFunction){
+    const idCustomerGroup= req.params.idc
+    const idWaiterAuthenticated = req.auth._id
+    const itemsList = req.body.items
+
+    const customerGroup : Group.Group = await Group.GroupModel.findById(idCustomerGroup)
+    const waiter : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
+    const newOrder : Order.Order = Order.createOrder(new Types.ObjectId(idCustomerGroup), new Types.ObjectId(idWaiterAuthenticated), itemsList)
+
+    Waiter.addOrderAwaited(newOrder, waiter)
+    Group.addOrder(newOrder, customerGroup)
+
+    waiter.save()
+    newOrder.save()
+    customerGroup.save()
+    
+    
+    return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});
+
+}

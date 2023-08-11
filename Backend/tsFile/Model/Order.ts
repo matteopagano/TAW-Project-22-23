@@ -1,10 +1,12 @@
-import { Schema, model, Document} from 'mongoose';
+import { Schema, model, Document, Types} from 'mongoose';
+import { ItemModel } from './Item';
 
 interface itemElement {
-  dateFinish: Date,
+  timeFinished: Date,
   idItem: Schema.Types.ObjectId,
-  state: StateOrder
+  state: StateItem
   completedBy: Schema.Types.ObjectId
+  count : number
 }
 
 enum StateOrder {
@@ -25,7 +27,6 @@ export interface Order extends Document {
   idWaiter: Schema.Types.ObjectId;
   items: itemElement[];
   state: StateOrder;
-  idRestaurant : Schema.Types.ObjectId;
   timeCompleted: Date;
   timeStarted: Date;
 }
@@ -43,10 +44,11 @@ const orderSchema = new Schema({
     },
     items: {
         type : [{
-            dateFinish : {type: Schema.Types.Date,required: true},
+            timeFinished : {type: Schema.Types.Date,required: false},
             idItem : {type : Schema.Types.ObjectId, ref : 'Item', required: true},
             state : {type : Schema.Types.String, enum : StateItem, required : true}, // From the official documentation
-            completedBy : {type : Schema.Types.ObjectId, ref : 'User', required : true} // From the official documentation
+            completedBy : {type : Schema.Types.ObjectId, ref : 'User', required : false}, // From the official documentation
+            count : {type : Schema.Types.Number, required : true}
         }],
         required : true
     },
@@ -55,14 +57,9 @@ const orderSchema = new Schema({
       enum : StateOrder,
       required : true
     },
-    idRestaurant: {
-      type : Schema.Types.ObjectId,
-      ref : "Restaurant",
-      required: true
-    },
     timeCompleted: {
       type : Schema.Types.Date,
-      required : true
+      required : false
     },
     timeStarted: {
       type : Schema.Types.Date,
@@ -71,5 +68,43 @@ const orderSchema = new Schema({
     
     
   });
+
+  export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId, items ) : Order {
+
+    const itemsList: itemElement[] = [];
+
+    items.forEach(item => {
+      const itemId = item.itemId;
+      const count = item.count;
+      
+      const newItem: itemElement = {
+        timeFinished: null,
+        idItem: itemId,
+        state: StateItem.NOTCOMPLETED, // Supponiamo che StateOrder sia un tipo definito
+        completedBy: null,
+        count: count,
+        
+      };
+
+      // Fai qualcosa con itemId e count
+      itemsList.push(newItem);
+    });
+
+    console.log("printo nuova item list")
+    console.log(itemsList)
+  
+    const newOrder : Order =  new OrderModel({
+      idGroup: idGroup,
+      idWaiter: idWaiter,
+      items: itemsList,
+      state: StateOrder.NOTSTARTED,
+      timeCompleted: null,
+      timeStarted: new Date(),
+    });
+
+    console.log("Printo nuovo ordine")
+    console.log(newOrder)
+    return newOrder;
+}
   
   export const OrderModel = model<Order>('Order', orderSchema);

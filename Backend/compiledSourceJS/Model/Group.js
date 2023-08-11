@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GroupModel = exports.createGroup = void 0;
+exports.GroupModel = exports.addOrder = exports.createGroup = void 0;
 const mongoose_1 = require("mongoose");
 const groupSchema = new mongoose_1.Schema({
     numberOfPerson: {
@@ -46,7 +46,7 @@ function createGroup(numberOfPerson, idTable, idRestaurant) {
         numberOfPerson: numberOfPerson,
         dateStart: new Date(),
         dateFinish: null,
-        ordersList: null,
+        ordersList: [],
         idRestaurant: idRestaurant,
         idRecipe: null,
         idTable: idTable,
@@ -54,4 +54,8 @@ function createGroup(numberOfPerson, idTable, idRestaurant) {
     return newGroup;
 }
 exports.createGroup = createGroup;
+function addOrder(order, group) {
+    group.ordersList.push(order._id);
+}
+exports.addOrder = addOrder;
 exports.GroupModel = (0, mongoose_1.model)('Group', groupSchema);

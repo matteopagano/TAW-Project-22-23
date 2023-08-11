@@ -73,7 +73,11 @@ app.post('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRe
 app.delete('/restaurants/:idr/items/:idi', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemOfThatRestaurant, EP.deleteItemAndRemoveFromRestaurant);
 // CUSTOMERGROUP ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
-app.put('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createGroupAndAddToATable);
+app.post('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createGroupAndAddToATable);
+app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
+// CUSTOMERGROUP ENDPOINTS
+//app.get('/customerGroup/:idc/orders', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
+app.post('/customerGroup/:idc/orders', MW.verifyJWT, MW.isWaiter, MW.isCustomerRestaurantTheSameAsWaiter, EP.createOrderAndAddToACustomerGroup);
 app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));

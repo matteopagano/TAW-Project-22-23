@@ -59,8 +59,14 @@ app.delete('/restaurants/:idr/items/:idi', MW.verifyJWT, MW.isOwner, MW.isOwnerO
 
 // CUSTOMERGROUP ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
-app.put('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createGroupAndAddToATable);
+app.post('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createGroupAndAddToATable);
 app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
+
+
+// ORDERS ENDPOINTS
+//app.get('/customerGroup/:idc/orders', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
+app.post('/customerGroup/:idc/orders', MW.verifyJWT, MW.isWaiter, MW.isCustomerRestaurantTheSameAsWaiter, EP.createOrderAndAddToACustomerGroup);
+#app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
 
 app.use( function(err : any, req : Request, res : Response, next : NextFunction) {
 

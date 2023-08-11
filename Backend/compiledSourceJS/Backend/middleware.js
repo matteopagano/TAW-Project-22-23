@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.isTableOfThatRestaurant = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isOwnerOfThisRestaurant = exports.isOwner = exports.verifyJWT = void 0;
+exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.isTableOfThatRestaurant = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isCustomerRestaurantTheSameAsWaiter = exports.isOwnerOfThisRestaurant = exports.isWaiter = exports.isOwner = exports.verifyJWT = void 0;
 const passport = require("passport"); // authentication middleware for Express
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
@@ -40,16 +40,16 @@ const Owner = __importStar(require("../Model/Owner"));
 const Bartender_1 = require("../Model/Bartender");
 const Cashier_1 = require("../Model/Cashier");
 const Cook_1 = require("../Model/Cook");
-const Waiter_1 = require("../Model/Waiter");
+const Waiter = __importStar(require("../Model/Waiter"));
 const express_jwt_1 = require("express-jwt");
 const Restaurant = __importStar(require("../Model/Restaurant"));
+const Group = __importStar(require("../Model/Group"));
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
     return __awaiter(this, void 0, void 0, function* () {
         let user = yield User.UserModel.findOne({ email: username });
         if (!user) {
             return done(null, false, { statusCode: 500, error: true, errormessage: "Invalid user" });
         }
-        console.log(user);
         if (user.isPasswordCorrect(password)) {
             switch (user.role) {
                 case 'owner':
@@ -65,7 +65,7 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
                     user = new Cook_1.CookModel(user);
                     break;
                 case 'waiter':
-                    user = new Waiter_1.WaiterModel(user);
+                    user = new Waiter.WaiterModel(user);
                     break;
             }
             return done(null, user);
@@ -89,6 +89,16 @@ function isOwner(req, res, next) {
     }
 }
 exports.isOwner = isOwner;
+function isWaiter(req, res, next) {
+    const user = new User.UserModel(req.auth);
+    if (user.isWaiter()) {
+        return next();
+    }
+    else {
+        return next({ statusCode: 404, error: true, errormessage: "You are not Waiter" });
+    }
+}
+exports.isWaiter = isWaiter;
 function isOwnerOfThisRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idOwnerAuthenticated = req.auth._id;
@@ -113,6 +123,32 @@ function isOwnerOfThisRestaurant(req, res, next) {
     });
 }
 exports.isOwnerOfThisRestaurant = isOwnerOfThisRestaurant;
+function isCustomerRestaurantTheSameAsWaiter(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idWaiterAuthenticated = req.auth._id;
+        const idRistoranteParameter = req.params.idr;
+        const idCustomerGroup = req.params.idc;
+        const customerGroup = yield Group.GroupModel.findById(idCustomerGroup);
+        const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
+        if (waiterAuthenticated !== null) {
+            if (customerGroup !== null) {
+                if (waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "customerGroup not found not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "Waiter not found" });
+        }
+    });
+}
+exports.isCustomerRestaurantTheSameAsWaiter = isCustomerRestaurantTheSameAsWaiter;
 function hasNotAlreadyARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idOwner = req.auth._id;
@@ -133,7 +169,6 @@ function hasNotAlreadyARestaurant(req, res, next) {
 exports.hasNotAlreadyARestaurant = hasNotAlreadyARestaurant;
 function isCookMemberOfThatRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("debug 2");
         const cookIdToRemove = req.params.idu;
         const restaurantIdInWhichRemoveCook = req.params.idr;
         const restaurant = yield Restaurant.RestaurantModel.findById(restaurantIdInWhichRemoveCook);
