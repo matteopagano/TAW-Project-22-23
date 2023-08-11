@@ -1,0 +1,27 @@
+services:
+  mongodb:
+    image: mongo:latest
+    container_name: mongodb
+    networks:
+      - taw-subnet
+    volumes:
+      - MongoVolume:/data/db
+
+  backend:
+    build: ./Backend
+    container_name: backend
+    networks:
+      - taw-subnet
+    ports:
+      - "3000:3000"
+    depends_on:
+      - mongodb
+    volumes:
+      - ./Backend:/app/Backend
+
+networks:
+  taw-subnet:
+    driver: bridge
+
+volumes:
+  MongoVolume:

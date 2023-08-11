@@ -1,0 +1,33 @@
+POST 
+
+api/owner 
+
+/api/restaurants | Only Owner
+
+/api/tables | Only owner that own a restaurant
+/api/items | Only owner that own a restaurant
+
+/api/cooks | Only owner that own a restaurant
+/api/waiters | Only owner that own a restaurant
+/api/bartender | Only owner that own a restaurant
+/api/cashier | Only owner that own a restaurant
+/api/customers/:idc/orders | Only waitress
+
+PUT
+
+/api/customerGroup/:idc/receipt | Only chashier
+/api/table/:idt/customerGroup | Only waitress and if table is empty
+
+GET 
+
+/api/items
+/api/items/:idi                                     
+/api/tables                                         |Query ?empty=true,empty=false
+/api/tables/:idt                                    |Only waitress, cashier e owner
+/api/restaurants/:idr                               |Only owner
+/api/orders                                         |Query ?finished=true,finished=false    | Only waitress
+/api/orders/:ido | Only waitress
+/api/table/:idt/customers/:idc/orders               | ?finished=false |Only cooker and bartenders
+/api/table/:idt/customers/:idc/orders/:ido          |Only cooker and bartenders 
+
+
