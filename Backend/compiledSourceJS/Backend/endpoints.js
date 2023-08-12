@@ -32,8 +32,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createOrderAndAddToACustomerGroup = exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTablesAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
+exports.createRecipeForGroupAndAddToARestaurant = exports.createOrderAndAddToACustomerGroup = exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getRecipesByRestaurant = exports.getGroupsByRestaurant = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTableAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.login = exports.root = void 0;
 const mongoose_1 = require("mongoose");
+const Recipe = __importStar(require("../Model/Recipe"));
 const Restaurant = __importStar(require("../Model/Restaurant"));
 const Table = __importStar(require("../Model/Table"));
 const Item = __importStar(require("../Model/Item"));
@@ -62,6 +63,7 @@ exports.root = root;
 function login(req, res, next) {
     // If it's reached this point, req.user has been injected.
     const authenticatedUser = new User.UserModel(req.user);
+    console.log(authenticatedUser);
     const token = {
         username: authenticatedUser.username,
         role: authenticatedUser.role,
@@ -324,7 +326,7 @@ function createTableAndAddToARestaurant(req, res, next) {
     });
 }
 exports.createTableAndAddToARestaurant = createTableAndAddToARestaurant;
-function deleteTablesAndRemoveFromRestaurant(req, res, next) {
+function deleteTableAndRemoveFromRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
         const idTable = req.params.idt;
@@ -339,7 +341,7 @@ function deleteTablesAndRemoveFromRestaurant(req, res, next) {
         }
     });
 }
-exports.deleteTablesAndRemoveFromRestaurant = deleteTablesAndRemoveFromRestaurant;
+exports.deleteTableAndRemoveFromRestaurant = deleteTableAndRemoveFromRestaurant;
 function getItemsListByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
@@ -399,14 +401,40 @@ function getCustomerGroupByRestaurantAndTable(req, res, next) {
         const idtable = req.params.idt;
         const table = yield Table.TableModel.findById(idtable).populate("group");
         if (table) {
-            return res.status(200).json({ error: false, errormessage: "", tables: table.group });
+            return res.status(200).json({ error: false, errormessage: "", group: table.group });
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "not valid restaurant" });
+            return next({ statusCode: 404, error: true, errormessage: "not valid table" });
         }
     });
 }
 exports.getCustomerGroupByRestaurantAndTable = getCustomerGroupByRestaurantAndTable;
+function getGroupsByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant).populate("groups");
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", groups: restaurant.groups });
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "restaurant doesn't exist" });
+        }
+    });
+}
+exports.getGroupsByRestaurant = getGroupsByRestaurant;
+function getRecipesByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant).populate("recipes");
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", recipes: restaurant.recipes });
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "restaurant doesn't exist" });
+        }
+    });
+}
+exports.getRecipesByRestaurant = getRecipesByRestaurant;
 function createGroupAndAddToATable(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
@@ -429,7 +457,15 @@ function removeGroupFromTable(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idTable = req.params.idt;
         const table = yield Table.TableModel.findById(idTable);
+        const group = yield Group.GroupModel.findById(table.group);
         Table.removeGroupFromTable(table);
+        const date = new Date();
+        console.log(date);
+        group.dateFinish = date;
+        console.log("ciao 1");
+        group.idTable = null;
+        console.log("ciao 2");
+        yield group.save();
         yield table.save();
         return res.status(200).json({ error: false, errormessage: "", newGroup: table });
     });
@@ -452,3 +488,26 @@ function createOrderAndAddToACustomerGroup(req, res, next) {
     });
 }
 exports.createOrderAndAddToACustomerGroup = createOrderAndAddToACustomerGroup;
+function createRecipeForGroupAndAddToARestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idTable = req.params.idt;
+        const idRestaurant = req.params.idr;
+        const idCashierAuthenticated = req.auth._id;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        const cashier = yield Cashier.CashierModel.findById(idCashierAuthenticated);
+        const table = yield Table.TableModel.findById(idTable);
+        const orderList = yield (yield Group.GroupModel.findById(table.group).populate("ordersList")).ordersList;
+        console.log(orderList);
+        const group = yield Group.GroupModel.findById(table.group.toString());
+        const newRecipe = yield Recipe.createRecipe(new mongoose_1.Types.ObjectId(idCashierAuthenticated), new mongoose_1.Types.ObjectId(table.group.toString()), new mongoose_1.Types.ObjectId(idRestaurant), orderList);
+        Restaurant.addRecipeToRestaurant(newRecipe, restaurant);
+        Group.addRecipeToGroup(newRecipe, group);
+        Cashier.addRecipe(newRecipe, cashier);
+        newRecipe.save();
+        restaurant.save();
+        group.save();
+        cashier.save();
+        return res.status(200).json({ error: false, errormessage: "", newRecipe: newRecipe });
+    });
+}
+exports.createRecipeForGroupAndAddToARestaurant = createRecipeForGroupAndAddToARestaurant;

@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.RestaurantModel = exports.addGroupToARestaurant = exports.addItemToARestaurant = exports.addTableToARestaurant = exports.addBartenderToARestaurant = exports.addCashierToARestaurant = exports.addWaiterToARestaurant = exports.addCookToARestaurant = exports.newRestaurant = exports.checkNameCorrectness = void 0;
+exports.RestaurantModel = exports.addRecipeToRestaurant = exports.addGroupToARestaurant = exports.addItemToARestaurant = exports.addTableToARestaurant = exports.addBartenderToARestaurant = exports.addCashierToARestaurant = exports.addWaiterToARestaurant = exports.addCookToARestaurant = exports.newRestaurant = exports.checkNameCorrectness = void 0;
 const mongoose_1 = require("mongoose");
 const restaurantSchema = new mongoose_1.Schema({
     restaurantName: {
@@ -287,4 +287,8 @@ function addGroupToARestaurant(group, restaurant) {
     restaurant.groups.push(group._id);
 }
 exports.addGroupToARestaurant = addGroupToARestaurant;
+function addRecipeToRestaurant(recipe, restaurant) {
+    restaurant.recipes.push(recipe._id);
+}
+exports.addRecipeToRestaurant = addRecipeToRestaurant;
 exports.RestaurantModel = (0, mongoose_1.model)('Restaurant', restaurantSchema);

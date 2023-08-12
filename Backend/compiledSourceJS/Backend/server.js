@@ -64,21 +64,26 @@ app.delete('/restaurants/:idr/waiters/:idu', MW.verifyJWT, MW.isOwner, MW.isOwne
 app.delete('/restaurants/:idr/cashiers/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isCashierMemberOfThatRestaurant, EP.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isBartenderMemberOfThatRestaurant, EP.deleteBartenderAndRemoveFromRestaurant);
 // TABLES ENDPOINTS
-app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getTablesListByRestaurant);
-app.post('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createTableAndAddToARestaurant);
-app.delete('/restaurants/:idr/tables/:idt', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.deleteTablesAndRemoveFromRestaurant);
+app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isOwnerOfThisRestaurant, EP.getTablesListByRestaurant);
+app.post('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableAlreadyExist, EP.createTableAndAddToARestaurant);
+app.delete('/restaurants/:idr/tables/:idt', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.deleteTableAndRemoveFromRestaurant);
 // ITEMS ENDPOINTS
-app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getItemsListByRestaurant);
-app.post('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createItemAndAddToARestaurant);
+app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isOwnerOrWaiter, MW.isOwnerOfThisRestaurant, EP.getItemsListByRestaurant);
+app.post('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemAlreadyExist, EP.createItemAndAddToARestaurant);
 app.delete('/restaurants/:idr/items/:idi', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemOfThatRestaurant, EP.deleteItemAndRemoveFromRestaurant);
 // CUSTOMERGROUP ENDPOINTS
-app.get('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
-app.post('/restaurants/:idr/tables/:idt/customerGroup', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.createGroupAndAddToATable);
-app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
-// CUSTOMERGROUP ENDPOINTS
-//app.get('/customerGroup/:idc/orders', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
-app.post('/customerGroup/:idc/orders', MW.verifyJWT, MW.isWaiter, MW.isCustomerRestaurantTheSameAsWaiter, EP.createOrderAndAddToACustomerGroup);
-app.delete('/tables/:idt/customerGroup', MW.verifyJWT, EP.removeGroupFromTable);
+app.get('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
+app.post('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isWaiter, MW.isTableRestaurantTheSameAsWaiter, MW.isTableEmpty, EP.createGroupAndAddToATable);
+app.delete('/tables/:idt/group', MW.verifyJWT, MW.isCashier, MW.tableHasAGroup, EP.removeGroupFromTable);
+app.get('/restaurants/:idr/groups', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getGroupsByRestaurant);
+// ORDERS ENDPOINTS
+app.get('/group/:idc/orders', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
+app.post('/group/:idc/orders', MW.verifyJWT, MW.isWaiter, MW.isCustomerRestaurantTheSameAsWaiter, MW.groupHasATable, EP.createOrderAndAddToACustomerGroup);
+//app.delete('/tables/:idt/group', MW.verifyJWT, EP.removeGroupFromTable);
+// RECIPES ENDPOINTS
+app.get('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
+app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isTableRestaurantTheSameAsCashier, MW.tableHasAGroup, EP.createRecipeForGroupAndAddToARestaurant);
+app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
     res.status(err.statusCode || 500).json(err);

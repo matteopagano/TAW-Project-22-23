@@ -71,6 +71,9 @@ userSchema.methods.isOwner = function () {
 userSchema.methods.isWaiter = function () {
     return this.role === RoleType.WAITER;
 };
+userSchema.methods.isCashier = function () {
+    return this.role === RoleType.CASHIER;
+};
 userSchema.methods.getId = function () {
     return this._id;
 };

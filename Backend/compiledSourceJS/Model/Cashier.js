@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.CashierModel = exports.createCashier = void 0;
+exports.CashierModel = exports.addRecipe = exports.createCashier = void 0;
 const User_1 = require("./User");
 const mongoose_1 = require("mongoose");
 const cashierSchema = new mongoose_1.Schema({
@@ -18,4 +18,11 @@ function createCashier(username, email, password, idRestaurant) {
     return newCashier;
 }
 exports.createCashier = createCashier;
+function addRecipe(recipe, cashier) {
+    cashier.recipesPrinted.push(recipe._id);
+}
+exports.addRecipe = addRecipe;
+cashierSchema.methods.isCashierOf = function (restaurantId) {
+    return this.idRestaurant.toString() === restaurantId;
+};
 exports.CashierModel = User_1.UserModel.discriminator('Cashier', cashierSchema, User_1.RoleType.CASHIER);

@@ -7,8 +7,6 @@ const ownerSchema = new mongoose_1.Schema({
     restaurantOwn: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: false },
 }, User_1.options);
 ownerSchema.methods.isOwnerOf = function (restaurantId) {
-    console.log(this.restaurantOwn.toString());
-    console.log(restaurantId);
     return this.restaurantOwn.toString() === restaurantId;
 };
 ownerSchema.methods.hasAlreadyARestaurant = function () {

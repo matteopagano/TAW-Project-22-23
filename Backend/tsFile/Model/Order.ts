@@ -69,7 +69,7 @@ const orderSchema = new Schema({
     
   });
 
-  export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId, items ) : Order {
+export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId, items ) : Order {
 
     const itemsList: itemElement[] = [];
 
@@ -106,5 +106,15 @@ const orderSchema = new Schema({
     console.log(newOrder)
     return newOrder;
 }
+
+/*export function calculatePrice(order : Order.Order) : number{
+  order.items.forEach(item => {
+    const itemId = item.itemId;
+    const count = item.;
+    
+    
+  });
+}
+*/
   
-  export const OrderModel = model<Order>('Order', orderSchema);
+export const OrderModel = model<Order>('Order', orderSchema);

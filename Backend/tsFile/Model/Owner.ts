@@ -16,8 +16,6 @@ const ownerSchema = new Schema<Owner>({
 }, options)
 
 ownerSchema.methods.isOwnerOf = function(restaurantId): boolean {
-    console.log(this.restaurantOwn.toString())
-    console.log(restaurantId)
     return this.restaurantOwn.toString() === restaurantId;
 }
 

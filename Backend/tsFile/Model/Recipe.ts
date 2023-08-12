@@ -1,4 +1,7 @@
-import { Schema, model, Document} from 'mongoose';
+import { Schema, model, Document, Types} from 'mongoose';
+import * as Group from './Group';
+import * as Order from './Order';
+import * as Item from './Item';
 
 
 interface itemElement {
@@ -39,5 +42,53 @@ const recipeSchema = new Schema<Recipe>( {
     
 })
 
+export async function createRecipe(idCashier :  Types.ObjectId,idGroup : Types.ObjectId, idRestaurant : Types.ObjectId, orderList : any) : Promise<Recipe> {
+
+    
+    //const group : Group.Group = await Group.GroupModel.findById(recipeId.toString()).populate("ordersList")
+
+    
+
+    //console.log(group)
+
+    var sumTotal: number = 0;
+
+    async function calculateTotal() {
+        for (const order of orderList) {
+            const populatedOrder = await Order.OrderModel.findById(order._id).populate("items").lean();
+
+            var sumOrder: number = 0;
+
+            for (const item of populatedOrder.items) {
+                const priceItem: number = (await Item.ItemModel.findById(item.idItem.toString())).price;
+                sumOrder += priceItem * item.count;
+            }
+
+            sumTotal += sumOrder;
+        }
+
+        
+    }
+
+    await  calculateTotal().catch((error) => {
+        console.error(error);
+    });
+
+
+
+    const newRecipe : Recipe =  new RecipeModel({
+        costAmount : sumTotal,
+        dateOfPrinting : new Date(),
+        idGroup : idGroup,
+        idCashier : idCashier,
+        idRestaurant : idRestaurant,
+    });
+
+
+
+
+    return newRecipe
+    
+}
 
 export const RecipeModel = model('Recipe', recipeSchema)

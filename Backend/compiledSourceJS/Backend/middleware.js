@@ -32,18 +32,20 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.isTableOfThatRestaurant = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.isCustomerRestaurantTheSameAsWaiter = exports.isOwnerOfThisRestaurant = exports.isWaiter = exports.isOwner = exports.verifyJWT = void 0;
+exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.tableHasAGroup = exports.isTableEmpty = exports.isTableOfThatRestaurant = exports.isTableAlreadyExist = exports.isItemAlreadyExist = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.groupHasATable = exports.isTableRestaurantTheSameAsCashier = exports.isTableRestaurantTheSameAsWaiter = exports.isCustomerRestaurantTheSameAsWaiter = exports.isCashierOfThisRestaurant = exports.isOwnerOfThisRestaurant = exports.isCashier = exports.isWaiter = exports.isOwnerOrCashierOrWaiter = exports.isOwnerOrWaiter = exports.isOwner = exports.verifyJWT = void 0;
 const passport = require("passport"); // authentication middleware for Express
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
 const Owner = __importStar(require("../Model/Owner"));
-const Bartender_1 = require("../Model/Bartender");
-const Cashier_1 = require("../Model/Cashier");
-const Cook_1 = require("../Model/Cook");
+const Bartender = __importStar(require("../Model/Bartender"));
+const Cashier = __importStar(require("../Model/Cashier"));
+const Cooker = __importStar(require("../Model/Cook"));
 const Waiter = __importStar(require("../Model/Waiter"));
 const express_jwt_1 = require("express-jwt");
 const Restaurant = __importStar(require("../Model/Restaurant"));
 const Group = __importStar(require("../Model/Group"));
+const Table = __importStar(require("../Model/Table"));
+const Item = __importStar(require("../Model/Item"));
 passport.use(new passportHTTP.BasicStrategy(function (username, password, done) {
     return __awaiter(this, void 0, void 0, function* () {
         let user = yield User.UserModel.findOne({ email: username });
@@ -56,13 +58,13 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
                     user = new Owner.OwnerModel(user);
                     break;
                 case 'bartender':
-                    user = new Bartender_1.BartenderModel(user);
+                    user = new Bartender.BartenderModel(user);
                     break;
                 case 'cashier':
-                    user = new Cashier_1.CashierModel(user);
+                    user = new Cashier.CashierModel(user);
                     break;
                 case 'cook':
-                    user = new Cook_1.CookModel(user);
+                    user = new Cooker.CookModel(user);
                     break;
                 case 'waiter':
                     user = new Waiter.WaiterModel(user);
@@ -89,6 +91,26 @@ function isOwner(req, res, next) {
     }
 }
 exports.isOwner = isOwner;
+function isOwnerOrWaiter(req, res, next) {
+    const user = new User.UserModel(req.auth);
+    if (user.isOwner() || user.isWaiter) {
+        return next();
+    }
+    else {
+        return next({ statusCode: 404, error: true, errormessage: "You are not Owner or Waiter" });
+    }
+}
+exports.isOwnerOrWaiter = isOwnerOrWaiter;
+function isOwnerOrCashierOrWaiter(req, res, next) {
+    const user = new User.UserModel(req.auth);
+    if (user.isOwner() || user.isWaiter() || user.isCashier()) {
+        return next();
+    }
+    else {
+        return next({ statusCode: 404, error: true, errormessage: "You are not Owner or Waiter or Cashier" });
+    }
+}
+exports.isOwnerOrCashierOrWaiter = isOwnerOrCashierOrWaiter;
 function isWaiter(req, res, next) {
     const user = new User.UserModel(req.auth);
     if (user.isWaiter()) {
@@ -99,6 +121,16 @@ function isWaiter(req, res, next) {
     }
 }
 exports.isWaiter = isWaiter;
+function isCashier(req, res, next) {
+    const user = new User.UserModel(req.auth);
+    if (user.isCashier()) {
+        return next();
+    }
+    else {
+        return next({ statusCode: 404, error: true, errormessage: "You are not Cashier" });
+    }
+}
+exports.isCashier = isCashier;
 function isOwnerOfThisRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idOwnerAuthenticated = req.auth._id;
@@ -123,10 +155,103 @@ function isOwnerOfThisRestaurant(req, res, next) {
     });
 }
 exports.isOwnerOfThisRestaurant = isOwnerOfThisRestaurant;
+function isCashierOfThisRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idCashierAuthenticated = req.auth._id;
+        const idRistoranteParameter = req.params.idr;
+        const CashierAuthenticated = yield Owner.OwnerModel.findById(idCashierAuthenticated);
+        if (CashierAuthenticated !== null) {
+            if (CashierAuthenticated.isCashierOf(idRistoranteParameter)) {
+                return next();
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "You are not cashier of id: " + idRistoranteParameter + " restaurant." });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "User not found" });
+        }
+    });
+}
+exports.isCashierOfThisRestaurant = isCashierOfThisRestaurant;
 function isCustomerRestaurantTheSameAsWaiter(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idWaiterAuthenticated = req.auth._id;
-        const idRistoranteParameter = req.params.idr;
+        const idCustomerGroup = req.params.idc;
+        const customerGroup = yield Group.GroupModel.findById(idCustomerGroup);
+        const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
+        if (waiterAuthenticated !== null) {
+            if (customerGroup !== null) {
+                if (waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "customerGroup not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "Waiter not found" });
+        }
+    });
+}
+exports.isCustomerRestaurantTheSameAsWaiter = isCustomerRestaurantTheSameAsWaiter;
+function isTableRestaurantTheSameAsWaiter(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idWaiterAuthenticated = req.auth._id;
+        const idTable = req.params.idt;
+        const table = yield Table.TableModel.findById(idTable);
+        const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
+        if (waiterAuthenticated !== null) {
+            if (table !== null) {
+                if (waiterAuthenticated.idRestaurant.toString() === table.restaurantId.toString()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: table._id + " is not table of restaurant" + waiterAuthenticated.idRestaurant });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "table not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "Waiter not found" });
+        }
+    });
+}
+exports.isTableRestaurantTheSameAsWaiter = isTableRestaurantTheSameAsWaiter;
+function isTableRestaurantTheSameAsCashier(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idCahsier = req.auth._id;
+        const idTable = req.params.idt;
+        const table = yield Table.TableModel.findById(idTable);
+        const cashier = yield Cashier.CashierModel.findById(idCahsier);
+        if (cashier !== null) {
+            if (table !== null) {
+                if (cashier.idRestaurant.toString() === table.restaurantId.toString()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: table._id + " is not table of restaurant " + cashier.idRestaurant });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "table not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "Cashier not found" });
+        }
+    });
+}
+exports.isTableRestaurantTheSameAsCashier = isTableRestaurantTheSameAsCashier;
+function groupHasATable(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idWaiterAuthenticated = req.auth._id;
         const idCustomerGroup = req.params.idc;
         const customerGroup = yield Group.GroupModel.findById(idCustomerGroup);
         const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
@@ -148,7 +273,7 @@ function isCustomerRestaurantTheSameAsWaiter(req, res, next) {
         }
     });
 }
-exports.isCustomerRestaurantTheSameAsWaiter = isCustomerRestaurantTheSameAsWaiter;
+exports.groupHasATable = groupHasATable;
 function hasNotAlreadyARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idOwner = req.auth._id;
@@ -260,6 +385,34 @@ function isUserAlreadyExist(req, res, next) {
     });
 }
 exports.isUserAlreadyExist = isUserAlreadyExist;
+function isItemAlreadyExist(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const itemName = req.body.itemName;
+        console.log(itemName);
+        const itemFind = yield Item.ItemModel.findOne({ itemName: itemName });
+        console.log(itemFind);
+        if (!itemFind) {
+            next();
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Item : " + itemName + " already exist." });
+        }
+    });
+}
+exports.isItemAlreadyExist = isItemAlreadyExist;
+function isTableAlreadyExist(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableNumber = req.body.tableNumber;
+        const table = yield Table.TableModel.findOne({ tableNumber: tableNumber });
+        if (!table) {
+            next();
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "Table : " + tableNumber + " already exist." });
+        }
+    });
+}
+exports.isTableAlreadyExist = isTableAlreadyExist;
 function isTableOfThatRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableIdToRemove = req.params.idt;
@@ -274,6 +427,33 @@ function isTableOfThatRestaurant(req, res, next) {
     });
 }
 exports.isTableOfThatRestaurant = isTableOfThatRestaurant;
+function isTableEmpty(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const tableIdToAdd = req.params.idt;
+        const table = yield Table.TableModel.findById(tableIdToAdd);
+        if (table.isEmpty()) {
+            next();
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "table " + tableIdToAdd + " is not empty" });
+        }
+    });
+}
+exports.isTableEmpty = isTableEmpty;
+function tableHasAGroup(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idTable = req.params.idt;
+        const table = yield Table.TableModel.findById(idTable);
+        //If the table ha s group sitted
+        if (table.group) {
+            next();
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "table " + idTable + " doesn't have a group sitted" });
+        }
+    });
+}
+exports.tableHasAGroup = tableHasAGroup;
 function isItemOfThatRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const itemIdToRemove = req.params.idi;

@@ -10,6 +10,8 @@ export interface Table extends Document {
     group : Schema.Types.ObjectId,
     restaurantId : Schema.Types.ObjectId,
 
+    isEmpty : () => boolean,
+
 }
 
 const tableSchema = new Schema<Table>( {
@@ -36,13 +38,18 @@ const tableSchema = new Schema<Table>( {
 
 })
 
+tableSchema.methods.isEmpty = function(){
+    return this.group === null;
+}
+
 export function createTable(tableNumber : number, maxSeats : number, idRestaurant : Types.ObjectId) : Table {
     
     const newTable : Table =  new TableModel({
         tableNumber : tableNumber,
         isFree : true,
         maxSeats : maxSeats,
-        restaurantId : idRestaurant
+        restaurantId : idRestaurant,
+        group : null
     });
 
     return newTable;

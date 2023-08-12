@@ -2,14 +2,16 @@ import passport = require('passport');           // authentication middleware fo
 import passportHTTP = require('passport-http');
 import * as User from '../Model/User';
 import * as Owner from '../Model/Owner';
-import { BartenderModel } from '../Model/Bartender';
-import { CashierModel } from '../Model/Cashier';
-import { CookModel } from '../Model/Cook';
+import * as Bartender from '../Model/Bartender';
+import * as Cashier from '../Model/Cashier';
+import * as Cooker from '../Model/Cook';
 import * as Waiter from '../Model/Waiter';
 import { expressjwt as jwt } from 'express-jwt';  
 import { Schema, model, Document} from 'mongoose';
 import * as Restaurant from '../Model/Restaurant';
 import * as Group from '../Model/Group';
+import * as Table from '../Model/Table';
+import * as Item from '../Model/Item';
 
 passport.use( new passportHTTP.BasicStrategy(
     async function(username : string, password : string, done : Function) {
@@ -25,9 +27,9 @@ passport.use( new passportHTTP.BasicStrategy(
 
         switch (user.role){
           case 'owner' : user = new Owner.OwnerModel(user); break;
-          case 'bartender' : user = new BartenderModel(user); break;
-          case 'cashier' : user = new CashierModel(user); break;
-          case 'cook' : user = new CookModel(user); break;
+          case 'bartender' : user = new Bartender.BartenderModel(user); break;
+          case 'cashier' : user = new Cashier.CashierModel(user); break;
+          case 'cook' : user = new Cooker.CookModel(user); break;
           case 'waiter' : user = new Waiter.WaiterModel(user); break;
         }
         return done(null, user);
@@ -52,12 +54,39 @@ export function isOwner(req , res , next){
   }
 }
 
+export function isOwnerOrWaiter(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isOwner() || user.isWaiter){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Owner or Waiter" });
+  }
+}
+
+export function isOwnerOrCashierOrWaiter(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isOwner() || user.isWaiter() || user.isCashier()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Owner or Waiter or Cashier" });
+  }
+}
+
 export function isWaiter(req , res , next){
   const user : User.User = new User.UserModel(req.auth)
   if(user.isWaiter()){
     return next();
   }else{
     return next({ statusCode:404, error: true, errormessage: "You are not Waiter" });
+  }
+}
+
+export function isCashier(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isCashier()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Cashier" });
   }
 }
 
@@ -81,10 +110,103 @@ export async function isOwnerOfThisRestaurant(req , res , next){
   }
 }
 
+export async function isCashierOfThisRestaurant(req , res , next){
+  const idCashierAuthenticated = req.auth._id
+  const idRistoranteParameter = req.params.idr ;
+  const CashierAuthenticated : Cashier.Cashier = await Owner.OwnerModel.findById(idCashierAuthenticated)
+
+  if(CashierAuthenticated !== null){
+    if(CashierAuthenticated.isCashierOf(idRistoranteParameter)){
+      return next();
+    }else{
+      next({ statusCode:404, error: true, errormessage: "You are not cashier of id: " + idRistoranteParameter  + " restaurant."})
+    }
+  }else{
+    next({ statusCode:404, error: true, errormessage: "User not found" })
+  }
+}
+
 export async function isCustomerRestaurantTheSameAsWaiter(req , res , next){
 
   const idWaiterAuthenticated = req.auth._id
-  const idRistoranteParameter = req.params.idr ;
+  const idCustomerGroup = req.params.idc
+
+
+  const customerGroup : Group.Group = await Group.GroupModel.findById(idCustomerGroup)
+  const waiterAuthenticated : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
+
+
+  if(waiterAuthenticated !== null){
+    if(customerGroup !== null){
+      if(waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "customerGroup not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "Waiter not found" })
+  }
+}
+
+export async function isTableRestaurantTheSameAsWaiter(req , res , next){
+
+  const idWaiterAuthenticated = req.auth._id
+  const idTable = req.params.idt
+
+
+  const table : Table.Table = await Table.TableModel.findById(idTable)
+  const waiterAuthenticated : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
+
+
+  if(waiterAuthenticated !== null){
+    if(table !== null){
+      if(waiterAuthenticated.idRestaurant.toString() === table.restaurantId.toString()){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: table._id + " is not table of restaurant" + waiterAuthenticated.idRestaurant})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "table not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "Waiter not found" })
+  }
+}
+
+export async function isTableRestaurantTheSameAsCashier(req , res , next){
+
+  const idCahsier = req.auth._id
+  const idTable = req.params.idt
+
+
+  const table : Table.Table = await Table.TableModel.findById(idTable)
+  const cashier : Cashier.Cashier = await Cashier.CashierModel.findById(idCahsier)
+
+
+  if(cashier !== null){
+    if(table !== null){
+      if(cashier.idRestaurant.toString() === table.restaurantId.toString()){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: table._id + " is not table of restaurant " + cashier.idRestaurant})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "table not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "Cashier not found" })
+  }
+}
+
+export async function groupHasATable(req , res , next){
+
+  const idWaiterAuthenticated = req.auth._id
   const idCustomerGroup = req.params.idc
 
 
@@ -107,8 +229,6 @@ export async function isCustomerRestaurantTheSameAsWaiter(req , res , next){
     next({ statusCode:404, error: true, errormessage: "Waiter not found" })
   }
 }
-
-
 
 export async function hasNotAlreadyARestaurant(req , res , next){
   const idOwner = req.auth._id;
@@ -211,6 +331,30 @@ export async function isUserAlreadyExist(req , res , next){
   }
 }
 
+export async function isItemAlreadyExist(req , res , next){
+  const itemName = req.body.itemName
+  console.log(itemName)
+  const itemFind = await Item.ItemModel.findOne({itemName : itemName})
+  console.log(itemFind)
+
+  if(!itemFind){
+    next()
+  }else{
+    return next({statusCode:404, error: true, errormessage: "Item : " + itemName + " already exist."})
+  }
+}
+
+export async function isTableAlreadyExist(req , res , next){
+  const tableNumber = req.body.tableNumber
+  const table = await Table.TableModel.findOne({tableNumber : tableNumber})
+
+  if(!table){
+    next()
+  }else{
+    return next({statusCode:404, error: true, errormessage: "Table : " + tableNumber + " already exist."})
+  }
+}
+
 export async function isTableOfThatRestaurant(req , res , next){
 
   const tableIdToRemove = req.params.idt;
@@ -222,6 +366,32 @@ export async function isTableOfThatRestaurant(req , res , next){
   }else{
     next({ statusCode:404, error: true, errormessage: "table " + tableIdToRemove + " is not table of " + restaurantIdInWhichRemoveTable })
   }
+}
+
+export async function isTableEmpty(req , res , next){
+
+  const tableIdToAdd = req.params.idt;
+  const table : Table.Table = await Table.TableModel.findById(tableIdToAdd)
+
+  if(table.isEmpty()){
+    next();
+  }else{
+    next({ statusCode:404, error: true, errormessage: "table " + tableIdToAdd + " is not empty" })
+  }
+}
+
+export async function tableHasAGroup(req , res , next ){
+  const idTable = req.params.idt
+
+  const table : Table.Table = await Table.TableModel.findById(idTable)
+
+  //If the table ha s group sitted
+  if(table.group){
+    next();
+  }else{
+    next({ statusCode:404, error: true, errormessage: "table " + idTable + " doesn't have a group sitted"})
+  }
+
 }
 
 export async function isItemOfThatRestaurant(req , res , next){

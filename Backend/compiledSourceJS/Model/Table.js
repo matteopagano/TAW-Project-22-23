@@ -22,12 +22,16 @@ const tableSchema = new mongoose_1.Schema({
         ref: 'Restaurant'
     },
 });
+tableSchema.methods.isEmpty = function () {
+    return this.group === null;
+};
 function createTable(tableNumber, maxSeats, idRestaurant) {
     const newTable = new exports.TableModel({
         tableNumber: tableNumber,
         isFree: true,
         maxSeats: maxSeats,
-        restaurantId: idRestaurant
+        restaurantId: idRestaurant,
+        group: null
     });
     return newTable;
 }

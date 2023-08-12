@@ -3,7 +3,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
 import {OrderModel} from '../Model/Order';
-import {RecipeModel} from '../Model/Recipe';
+import * as Recipe from '../Model/Recipe';
 import * as Restaurant from '../Model/Restaurant';
 import * as Table from '../Model/Table';
 import * as Item from '../Model/Item';
@@ -43,6 +43,8 @@ export function login(req : Request, res : Response, next : NextFunction) {
 
     const authenticatedUser : User.User = new User.UserModel(req.user);
 
+    console.log(authenticatedUser)
+
     const token = {
         username: authenticatedUser.username,
         role: authenticatedUser.role,
@@ -59,7 +61,7 @@ export function login(req : Request, res : Response, next : NextFunction) {
     const options = {
         expiresIn: '5h'
     }
-    const tokenSigned = jsonwebtoken.sign(token, secret, options );
+    const tokenSigned = jsonwebtoken.sign(token, secret, options);
 
     return res.status(200).json( {error:false, errormessage:"", token: tokenSigned} );
 }
@@ -303,7 +305,7 @@ export async function createTableAndAddToARestaurant(req : Request, res : Respon
 
 
 
-export async function deleteTablesAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
+export async function deleteTableAndRemoveFromRestaurant(req : Request, res : Response , next : NextFunction) {
     const idRestaurant = req.params.idr;
     const idTable = req.params.idt;
 
@@ -352,6 +354,7 @@ export async function createItemAndAddToARestaurant(req : Request, res : Respons
     Restaurant.addItemToARestaurant(newItem, restaurant)
     
     
+    
 
     await newItem.save()
     await restaurant.save()
@@ -384,9 +387,33 @@ export async function getCustomerGroupByRestaurantAndTable(req : Request, res : 
     const table : Table.Table = await Table.TableModel.findById(idtable).populate("group")
     
     if(table){
-        return res.status(200).json({error: false, errormessage: "", tables : table.group})
+        return res.status(200).json({error: false, errormessage: "", group : table.group})
     }else{
         return next({statusCode:404, error: true, errormessage: "not valid table"})
+    }
+
+}
+
+export async function getGroupsByRestaurant(req : Request, res : Response , next : NextFunction){
+    const idRestaurant = req.params.idr
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant).populate("groups")
+    
+    if(restaurant){
+        return res.status(200).json({error: false, errormessage: "", groups : restaurant.groups})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "restaurant doesn't exist"})
+    }
+
+}
+
+export async function getRecipesByRestaurant(req : Request, res : Response , next : NextFunction){
+    const idRestaurant = req.params.idr
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant).populate("recipes")
+    
+    if(restaurant){
+        return res.status(200).json({error: false, errormessage: "", recipes : restaurant.recipes})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "restaurant doesn't exist"})
     }
 
 }
@@ -422,9 +449,18 @@ export async function removeGroupFromTable(req : Request, res : Response , next 
     const idTable = req.params.idt
 
     const table : Table.Table = await Table.TableModel.findById(idTable)
+    const group : Group.Group = await Group.GroupModel.findById(table.group)
 
     Table.removeGroupFromTable(table)
+    const date = new Date()
+    console.log(date)
+    group.dateFinish = date
+    console.log("ciao 1")
+    group.idTable = null
+    console.log("ciao 2")
 
+    
+    await group.save()
     await table.save()
     
     return res.status(200).json({error: false, errormessage: "", newGroup : table});
@@ -449,5 +485,37 @@ export async function createOrderAndAddToACustomerGroup(req, res, next : NextFun
     
     
     return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});
+
+}
+
+
+export async function createRecipeForGroupAndAddToARestaurant(req, res, next : NextFunction){
+    const idTable= req.params.idt
+    const idRestaurant = req.params.idr
+    const idCashierAuthenticated = req.auth._id
+
+    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant)
+    const cashier : Cashier.Cashier = await Cashier.CashierModel.findById(idCashierAuthenticated)
+    const table : Table.Table = await Table.TableModel.findById(idTable)
+    
+    const orderList = await (await Group.GroupModel.findById(table.group).populate("ordersList")).ordersList
+    console.log(orderList)
+
+
+    const group : Group.Group = await Group.GroupModel.findById(table.group.toString())
+
+    const newRecipe : Recipe.Recipe = await Recipe.createRecipe(new Types.ObjectId(idCashierAuthenticated), new Types.ObjectId(table.group.toString()), new Types.ObjectId(idRestaurant), orderList)
+
+    Restaurant.addRecipeToRestaurant(newRecipe, restaurant)
+    Group.addRecipeToGroup(newRecipe, group)
+    Cashier.addRecipe(newRecipe, cashier)
+
+    newRecipe.save()
+    restaurant.save()
+    group.save()
+    cashier.save()
+
+    
+    return res.status(200).json({error: false, errormessage: "", newRecipe : newRecipe});
 
 }

@@ -8,6 +8,7 @@ import * as Bartender from './Bartender';
 import * as Table from './Table';
 import * as Item from './Item';
 import * as Group from './Group';
+import * as Recipe from './Recipe';
 
 
 export interface Restaurant extends Document {
@@ -352,6 +353,10 @@ export function addItemToARestaurant(item : Item.Item, restaurant : Restaurant){
 
 export function addGroupToARestaurant(group : Group.Group, restaurant : Restaurant){
     restaurant.groups.push(group._id); 
+}
+
+export function addRecipeToRestaurant(recipe : Recipe.Recipe, restaurant : Restaurant){
+    restaurant.recipes.push(recipe._id); 
 }
 
 export const RestaurantModel = model<Restaurant>('Restaurant', restaurantSchema)

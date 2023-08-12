@@ -1,5 +1,6 @@
 import { Schema, model, Document, SchemaTypes, Types} from 'mongoose';
 import * as Order from './Order';
+import * as Recipe from './Recipe';
 
 export interface Group extends Document {
 
@@ -50,7 +51,7 @@ const groupSchema = new Schema<Group>( {
     },
     idTable: {
         type: Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref : 'Table'
     },
     
@@ -77,4 +78,9 @@ export function createGroup(numberOfPerson : string, idTable : Types.ObjectId, i
 export function addOrder(order : Order.Order, group : Group) {
     group.ordersList.push(order._id)
 }
+
+export function addRecipeToGroup(recipe : Recipe.Recipe, group : Group) {
+    group.idRecipe = recipe._id
+}
+
 export const GroupModel = model('Group', groupSchema)

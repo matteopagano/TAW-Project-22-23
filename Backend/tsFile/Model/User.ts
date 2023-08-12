@@ -25,6 +25,7 @@ export interface User extends Document {
     isPasswordCorrect: (password : string) => boolean;
     isOwner: () => boolean;
     isWaiter: () => boolean;
+    isCashier: () => boolean;
     getId: () => Schema.Types.ObjectId;
     getUsername : () => string
     getEmail : () => string
@@ -62,6 +63,10 @@ userSchema.methods.isOwner = function(): boolean {
 
 userSchema.methods.isWaiter = function(): boolean {
     return this.role === RoleType.WAITER;
+}
+
+userSchema.methods.isCashier = function(): boolean {
+    return this.role === RoleType.CASHIER;
 }
 
 userSchema.methods.getId = function(): Schema.Types.ObjectId {

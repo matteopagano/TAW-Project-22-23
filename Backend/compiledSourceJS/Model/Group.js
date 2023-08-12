@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.GroupModel = exports.addOrder = exports.createGroup = void 0;
+exports.GroupModel = exports.addRecipeToGroup = exports.addOrder = exports.createGroup = void 0;
 const mongoose_1 = require("mongoose");
 const groupSchema = new mongoose_1.Schema({
     numberOfPerson: {
@@ -37,7 +37,7 @@ const groupSchema = new mongoose_1.Schema({
     },
     idTable: {
         type: mongoose_1.Schema.Types.ObjectId,
-        required: true,
+        required: false,
         ref: 'Table'
     },
 });
@@ -58,4 +58,8 @@ function addOrder(order, group) {
     group.ordersList.push(order._id);
 }
 exports.addOrder = addOrder;
+function addRecipeToGroup(recipe, group) {
+    group.idRecipe = recipe._id;
+}
+exports.addRecipeToGroup = addRecipeToGroup;
 exports.GroupModel = (0, mongoose_1.model)('Group', groupSchema);

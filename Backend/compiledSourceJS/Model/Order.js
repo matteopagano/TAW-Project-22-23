@@ -79,4 +79,13 @@ function createOrder(idGroup, idWaiter, items) {
     return newOrder;
 }
 exports.createOrder = createOrder;
+/*export function calculatePrice(order : Order.Order) : number{
+  order.items.forEach(item => {
+    const itemId = item.itemId;
+    const count = item.;
+    
+    
+  });
+}
+*/
 exports.OrderModel = (0, mongoose_1.model)('Order', orderSchema);

@@ -1,10 +1,12 @@
 import {User, options, RoleType, UserModel} from './User'
 import { Schema, model, Document, Types} from 'mongoose';
+import * as Recipe from './Recipe'
 
 
 export interface Cashier extends User{
-    recipesPrinted : Schema.Types.ObjectId,
+    recipesPrinted : Schema.Types.ObjectId[],
     idRestaurant: Schema.Types.ObjectId
+    isCashierOf : (restaurantId : string) => boolean;
 }
 
 const cashierSchema = new Schema<Cashier>({
@@ -21,6 +23,14 @@ export function createCashier(username : string, email : string, password : stri
     });
     newCashier.setPassword(password);
     return newCashier;
+}
+
+export function addRecipe(recipe : Recipe.Recipe, cashier : Cashier) {
+    cashier.recipesPrinted.push(recipe._id)
+}
+
+cashierSchema.methods.isCashierOf = function(restaurantId): boolean {
+    return this.idRestaurant.toString() === restaurantId;
 }
 
 export const CashierModel = UserModel.discriminator<Cashier>('Cashier', cashierSchema,  RoleType.CASHIER);
