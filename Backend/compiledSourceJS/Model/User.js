@@ -86,6 +86,14 @@ userSchema.methods.getEmail = function () {
 userSchema.methods.getRole = function () {
     return this.role;
 };
+userSchema.methods.isUserOf = function (restaurantId) {
+    if (this.idRestaurant) {
+        return this.idRestaurant.toString() === restaurantId.toString();
+    }
+    else {
+        return this.restaurantOwn.toString() === restaurantId.toString();
+    }
+};
 function checkEmailCorrectness(email) {
     return emailValidator.validate(email);
 }

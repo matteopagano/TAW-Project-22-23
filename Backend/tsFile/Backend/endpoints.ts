@@ -294,12 +294,10 @@ export async function createTableAndAddToARestaurant(req : Request, res : Respon
     const newTable : Table.Table = Table.createTable(tableNumber, maxSeats, new Types.ObjectId(idRestaurant))
     Restaurant.addTableToARestaurant(newTable, restaurant)
     
-    
-
     await newTable.save()
     await restaurant.save()
     
-    return res.status(200).json({error: false, errormessage: "", tableNumber : newTable.tableNumber, maxSeats : newTable.maxSeats});
+    return res.status(200).json({error: false, errormessage: "", table : newTable});
 
 }
 
@@ -380,7 +378,6 @@ export async function deleteItemAndRemoveFromRestaurant(req : Request, res : Res
 }
 
 export async function getCustomerGroupByRestaurantAndTable(req : Request, res : Response , next : NextFunction){
-    const idRestaurant = req.params.idr
     const idtable = req.params.idt
     
 
@@ -388,6 +385,41 @@ export async function getCustomerGroupByRestaurantAndTable(req : Request, res : 
     
     if(table){
         return res.status(200).json({error: false, errormessage: "", group : table.group})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "not valid table"})
+    }
+
+}
+
+export async function getOrdersByRestaurantAndTable(req : Request, res : Response , next : NextFunction){
+    const idtable = req.params.idt
+    
+
+    const table : Table.Table = await Table.TableModel.findById(idtable)
+    const group : Group.Group = await Group.GroupModel.findById(table.group).populate("ordersList")
+
+    
+    if(group){
+        return res.status(200).json({error: false, errormessage: "", orders : group.ordersList})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "not valid group"})
+    }
+
+}
+
+export async function getRecipeByRestaurantAndTable(req : Request, res : Response , next : NextFunction){
+    const idtable = req.params.idt
+    
+
+    const table : Table.Table = await Table.TableModel.findById(idtable).populate("group")
+
+    const group : Group.Group = await Group.GroupModel.findById(table.group).populate("idRecipe")
+
+
+    
+    
+    if(table){
+        return res.status(200).json({error: false, errormessage: "", recipe : group.idRecipe})
     }else{
         return next({statusCode:404, error: true, errormessage: "not valid table"})
     }

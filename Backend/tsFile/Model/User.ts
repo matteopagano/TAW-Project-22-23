@@ -23,9 +23,12 @@ export interface User extends Document {
     idRestaurant : Schema.Types.ObjectId;
     setPassword: (password : string) => void;
     isPasswordCorrect: (password : string) => boolean;
+
     isOwner: () => boolean;
     isWaiter: () => boolean;
     isCashier: () => boolean;
+    
+    isUserOf: (restaurantId : string) => boolean;
     getId: () => Schema.Types.ObjectId;
     getUsername : () => string
     getEmail : () => string
@@ -83,6 +86,14 @@ userSchema.methods.getEmail = function(): Schema.Types.ObjectId {
 
 userSchema.methods.getRole = function(): Schema.Types.ObjectId {
     return this.role
+}
+
+userSchema.methods.isUserOf = function(restaurantId : string): boolean {
+    if(this.idRestaurant){
+        return this.idRestaurant.toString() === restaurantId.toString()
+    }else{
+        return this.restaurantOwn.toString() === restaurantId.toString()
+    }
 }
 
 export function checkEmailCorrectness(email : string){

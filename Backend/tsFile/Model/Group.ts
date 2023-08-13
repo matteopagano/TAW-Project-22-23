@@ -12,6 +12,8 @@ export interface Group extends Document {
     idRestaurant : Schema.Types.ObjectId,
     idRecipe : Schema.Types.ObjectId,
     idTable : Schema.Types.ObjectId,
+
+    hasRecipe : () => boolean,
     
 }
 
@@ -60,6 +62,10 @@ const groupSchema = new Schema<Group>( {
     
 
 })
+
+groupSchema.methods.hasRecipe = function(): boolean {
+    return (!(this.idRecipe === null))
+}
 
 export function createGroup(numberOfPerson : string, idTable : Types.ObjectId, idRestaurant : Types.ObjectId) : Group {
     const newGroup : Group =  new GroupModel({

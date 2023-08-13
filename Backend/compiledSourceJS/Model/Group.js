@@ -41,6 +41,9 @@ const groupSchema = new mongoose_1.Schema({
         ref: 'Table'
     },
 });
+groupSchema.methods.hasRecipe = function () {
+    return (!(this.idRecipe === null));
+};
 function createGroup(numberOfPerson, idTable, idRestaurant) {
     const newGroup = new exports.GroupModel({
         numberOfPerson: numberOfPerson,

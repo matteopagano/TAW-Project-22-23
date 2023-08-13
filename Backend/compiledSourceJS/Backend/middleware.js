@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.tableHasAGroup = exports.isTableEmpty = exports.isTableOfThatRestaurant = exports.isTableAlreadyExist = exports.isItemAlreadyExist = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.groupHasATable = exports.isTableRestaurantTheSameAsCashier = exports.isTableRestaurantTheSameAsWaiter = exports.isCustomerRestaurantTheSameAsWaiter = exports.isCashierOfThisRestaurant = exports.isOwnerOfThisRestaurant = exports.isCashier = exports.isWaiter = exports.isOwnerOrCashierOrWaiter = exports.isOwnerOrWaiter = exports.isOwner = exports.verifyJWT = void 0;
+exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.tableHasAGroup = exports.isTableEmpty = exports.isTableOfThatRestaurant = exports.isTableAlreadyExist = exports.isItemAlreadyExist = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.groupHasNotARecipeYet = exports.groupHasARecipe = exports.groupHasATable = exports.isTableRestaurantTheSameAsCashier = exports.isTableRestaurantTheSameAsWaiter = exports.isCustomerRestaurantTheSameAsWaiter = exports.isCashierOfThisRestaurant = exports.isWorkerOfThisRestaurant = exports.isOwnerOfThisRestaurant = exports.isCashier = exports.isWaiter = exports.isOwnerOrCashierOrWaiter = exports.isOwnerOrWaiter = exports.isOwner = exports.verifyJWT = void 0;
 const passport = require("passport"); // authentication middleware for Express
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
@@ -93,7 +93,7 @@ function isOwner(req, res, next) {
 exports.isOwner = isOwner;
 function isOwnerOrWaiter(req, res, next) {
     const user = new User.UserModel(req.auth);
-    if (user.isOwner() || user.isWaiter) {
+    if (user.isOwner() || user.isWaiter()) {
         return next();
     }
     else {
@@ -155,13 +155,33 @@ function isOwnerOfThisRestaurant(req, res, next) {
     });
 }
 exports.isOwnerOfThisRestaurant = isOwnerOfThisRestaurant;
+function isWorkerOfThisRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idUserAuthenticated = req.auth._id;
+        const idRistoranteParameter = req.params.idr;
+        const userAuthenticated = yield User.UserModel.findById(idUserAuthenticated);
+        if (userAuthenticated !== null) {
+            const bool = userAuthenticated.isUserOf(idRistoranteParameter);
+            if (bool) {
+                return next();
+            }
+            else {
+                return next({ statusCode: 404, error: true, errormessage: "You are not user of id: " + idRistoranteParameter + " restaurant." });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "User not found" });
+        }
+    });
+}
+exports.isWorkerOfThisRestaurant = isWorkerOfThisRestaurant;
 function isCashierOfThisRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idCashierAuthenticated = req.auth._id;
         const idRistoranteParameter = req.params.idr;
-        const CashierAuthenticated = yield Owner.OwnerModel.findById(idCashierAuthenticated);
-        if (CashierAuthenticated !== null) {
-            if (CashierAuthenticated.isCashierOf(idRistoranteParameter)) {
+        const cashierAuthenticated = yield Owner.OwnerModel.findById(idCashierAuthenticated);
+        if (cashierAuthenticated !== null) {
+            if (cashierAuthenticated.isCashierOf(idRistoranteParameter)) {
                 return next();
             }
             else {
@@ -274,6 +294,57 @@ function groupHasATable(req, res, next) {
     });
 }
 exports.groupHasATable = groupHasATable;
+function groupHasARecipe(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idWaiterAuthenticated = req.auth._id;
+        const idTable = req.params.idt;
+        const table = yield Table.TableModel.findById(idTable);
+        const group = yield Group.GroupModel.findById(table.group);
+        if (table !== null) {
+            if (group !== null) {
+                if (group.hasRecipe()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: group._id + " has not a recipe " });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "group not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "table not found" });
+        }
+    });
+}
+exports.groupHasARecipe = groupHasARecipe;
+function groupHasNotARecipeYet(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idWaiterAuthenticated = req.auth._id;
+        const idTable = req.params.idt;
+        const table = yield Table.TableModel.findById(idTable);
+        const group = yield Group.GroupModel.findById(table.group);
+        if (table !== null) {
+            if (group !== null) {
+                console.log(!group.hasRecipe());
+                if (!group.hasRecipe()) {
+                    return next();
+                }
+                else {
+                    return next({ statusCode: 404, error: true, errormessage: group._id + " has a recipe " });
+                }
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: "group not found" });
+            }
+        }
+        else {
+            next({ statusCode: 404, error: true, errormessage: "table not found" });
+        }
+    });
+}
+exports.groupHasNotARecipeYet = groupHasNotARecipeYet;
 function hasNotAlreadyARestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idOwner = req.auth._id;
