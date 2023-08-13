@@ -445,10 +445,16 @@ export async function isTableOfThatRestaurant(req , res , next){
 export async function isTableEmpty(req , res , next){
 
   const tableIdToAdd = req.params.idt;
+  const numberOfPerson = req.body.numberOfPerson
   const table : Table.Table = await Table.TableModel.findById(tableIdToAdd)
 
+  numberOfPerson <= table.maxSeats
   if(table.isEmpty()){
-    next();
+    if(numberOfPerson <= table.maxSeats){
+      next();
+    }else{
+      next({ statusCode:404, error: true, errormessage: numberOfPerson+ ">" + table.maxSeats + ", table capacity is not sufficient" })
+    }
   }else{
     next({ statusCode:404, error: true, errormessage: "table " + tableIdToAdd + " is not empty" })
   }

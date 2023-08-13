@@ -466,11 +466,11 @@ function createGroupAndAddToATable(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
         const idTable = req.params.idt;
-        const NumberOfPerson = req.body.numberOfPerson;
+        const numberOfPerson = req.body.numberOfPerson;
         const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
         const table = yield Table.TableModel.findById(idTable);
         //Restaurant.RestaurantModel.updateOne({ _id: documentoId }, { $set: { nome: nuovoValoreProprieta } })
-        const newGroup = Group.createGroup(NumberOfPerson, new mongoose_1.Types.ObjectId(idTable), new mongoose_1.Types.ObjectId(idRestaurant));
+        const newGroup = Group.createGroup(numberOfPerson, new mongoose_1.Types.ObjectId(idTable), new mongoose_1.Types.ObjectId(idRestaurant));
         Restaurant.addGroupToARestaurant(newGroup, restaurant);
         Table.addGroupToATable(newGroup, table);
         yield newGroup.save();
@@ -500,17 +500,18 @@ function removeGroupFromTable(req, res, next) {
 exports.removeGroupFromTable = removeGroupFromTable;
 function createOrderAndAddToACustomerGroup(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        const idCustomerGroup = req.params.idc;
+        const idTable = req.params.idt;
         const idWaiterAuthenticated = req.auth._id;
         const itemsList = req.body.items;
-        const customerGroup = yield Group.GroupModel.findById(idCustomerGroup);
+        const table = yield Table.TableModel.findById(idTable);
+        const group = yield Group.GroupModel.findById(table.group);
         const waiter = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
-        const newOrder = Order.createOrder(new mongoose_1.Types.ObjectId(idCustomerGroup), new mongoose_1.Types.ObjectId(idWaiterAuthenticated), itemsList);
+        const newOrder = Order.createOrder(new mongoose_1.Types.ObjectId(table.group.toString()), new mongoose_1.Types.ObjectId(idWaiterAuthenticated), itemsList);
         Waiter.addOrderAwaited(newOrder, waiter);
-        Group.addOrder(newOrder, customerGroup);
+        Group.addOrder(newOrder, group);
         waiter.save();
         newOrder.save();
-        customerGroup.save();
+        group.save();
         return res.status(200).json({ error: false, errormessage: "", newOrder: newOrder });
     });
 }

@@ -453,14 +453,14 @@ export async function getRecipesByRestaurant(req : Request, res : Response , nex
 export async function createGroupAndAddToATable(req : Request, res : Response , next : NextFunction){
     const idRestaurant = req.params.idr
     const idTable = req.params.idt
-    const NumberOfPerson = req.body.numberOfPerson
+    const numberOfPerson = req.body.numberOfPerson
 
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant)
     const table : Table.Table= await Table.TableModel.findById(idTable)
     
     //Restaurant.RestaurantModel.updateOne({ _id: documentoId }, { $set: { nome: nuovoValoreProprieta } })
 
-    const newGroup : Group.Group = Group.createGroup(NumberOfPerson,new Types.ObjectId(idTable), new Types.ObjectId(idRestaurant))
+    const newGroup : Group.Group = Group.createGroup(numberOfPerson,new Types.ObjectId(idTable), new Types.ObjectId(idRestaurant))
     
 
 
@@ -500,20 +500,22 @@ export async function removeGroupFromTable(req : Request, res : Response , next 
 }
 
 export async function createOrderAndAddToACustomerGroup(req, res, next : NextFunction){
-    const idCustomerGroup= req.params.idc
+    const idTable= req.params.idt
     const idWaiterAuthenticated = req.auth._id
     const itemsList = req.body.items
 
-    const customerGroup : Group.Group = await Group.GroupModel.findById(idCustomerGroup)
+    const table : Table.Table = await Table.TableModel.findById(idTable)
+    const group : Group.Group = await Group.GroupModel.findById(table.group)
+    
     const waiter : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
-    const newOrder : Order.Order = Order.createOrder(new Types.ObjectId(idCustomerGroup), new Types.ObjectId(idWaiterAuthenticated), itemsList)
+    const newOrder : Order.Order = Order.createOrder(new Types.ObjectId(table.group.toString()), new Types.ObjectId(idWaiterAuthenticated), itemsList)
 
     Waiter.addOrderAwaited(newOrder, waiter)
-    Group.addOrder(newOrder, customerGroup)
+    Group.addOrder(newOrder, group)
 
     waiter.save()
     newOrder.save()
-    customerGroup.save()
+    group.save()
     
     
     return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});

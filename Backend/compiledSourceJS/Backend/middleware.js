@@ -501,9 +501,16 @@ exports.isTableOfThatRestaurant = isTableOfThatRestaurant;
 function isTableEmpty(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const tableIdToAdd = req.params.idt;
+        const numberOfPerson = req.body.numberOfPerson;
         const table = yield Table.TableModel.findById(tableIdToAdd);
+        numberOfPerson <= table.maxSeats;
         if (table.isEmpty()) {
-            next();
+            if (numberOfPerson <= table.maxSeats) {
+                next();
+            }
+            else {
+                next({ statusCode: 404, error: true, errormessage: numberOfPerson + ">" + table.maxSeats + ", table capacity is not sufficient" });
+            }
         }
         else {
             next({ statusCode: 404, error: true, errormessage: "table " + tableIdToAdd + " is not empty" });
