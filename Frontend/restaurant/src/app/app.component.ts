@@ -23,4 +23,8 @@ export class AppComponent {
   logout(){
     return this.us.logout()
   }
+
+  getRestaurant(){
+    return this.us.get_restaurant()
+  }
 }

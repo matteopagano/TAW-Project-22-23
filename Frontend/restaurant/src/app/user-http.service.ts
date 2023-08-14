@@ -10,7 +10,7 @@ interface TokenData {
   role: string,
   email: string,
   _id: string,
-  restaurantID : Schema.Types.ObjectId;
+  restaurantId : Schema.Types.ObjectId;
 }
 
 interface ReceivedToken {
@@ -35,7 +35,6 @@ export class UserHttpService {
 
   constructor( private http: HttpClient ) {
     console.log('User service instantiated');
-
 
   }
 
@@ -76,7 +75,8 @@ export class UserHttpService {
   }
 
   get_restaurant(){
-    return (jwt_decode(this.token) as TokenData).restaurantID
+    console.log(jwt_decode(this.token) as TokenData)
+    return (jwt_decode(this.token) as TokenData).restaurantId
   }
 
 

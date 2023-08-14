@@ -43,6 +43,37 @@ interface WaitersResponse {
   waiters: Waiter[];
 }
 
+interface Cooker {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  idRestaurant: string;
+  // Altre proprietà specifiche dei cuochi
+}
+
+interface Bartender {
+  _id: string;
+  username: string;
+  email: string;
+  role: string;
+  idRestaurant: string;
+  // Altre proprietà specifiche dei barman
+}
+
+
+interface CookersResponse {
+  error: boolean;
+  errormessage: string;
+  cooks: Cooker[];
+}
+
+interface BartendersResponse {
+  error: boolean;
+  errormessage: string;
+  bartenders: Bartender[];
+}
+
 export interface User {
   _id: string;
   username: string;
@@ -110,17 +141,67 @@ export class RestaurantHttpService {
     return this.http.delete<any>(this.us.url + '/restaurants/' + this.us.get_restaurant() +'/waiters/' + waiterId, this.create_options());
   }
 
+  get_cooks(): Observable<CookersResponse> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/cooks`;
+    const options = this.create_options();
+    return this.http.get<CookersResponse>(url, options);
+  }
+
+  get_bartenders(): Observable<BartendersResponse> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/bartenders`;
+    const options = this.create_options();
+    return this.http.get<BartendersResponse>(url, options);
+  }
+
+  delete_cook(cookerId: string): Observable<any> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/cooks/${cookerId}`;
+    const options = this.create_options();
+    return this.http.delete(url, options);
+  }
+
+  delete_bartender(bartenderId: string): Observable<any> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/bartenders/${bartenderId}`;
+    const options = this.create_options();
+    return this.http.delete(url, options);
+  }
+
   create_user(user: User): Observable<any> {
     let endpoint: string;
 
     if (user.role === 'cashier') {
       endpoint = `${this.url}/restaurants/${this.us.get_restaurant()}/cashiers`;
-    } else {
+    } else if (user.role === 'waiter') {
       endpoint = `${this.url}/restaurants/${this.us.get_restaurant()}/waiters`;
+    } else if (user.role === 'cooker') {
+      endpoint = `${this.url}/restaurants/${this.us.get_restaurant()}/cooks`;
+    } else {
+      endpoint = `${this.url}/restaurants/${this.us.get_restaurant()}/bartenders`;
     }
+
 
     const options = this.create_options();
 
     return this.http.post<any>(endpoint, user, options);
   }
+
+  addNewItem(newItem: any): Observable<any> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/items`;
+    const options = this.create_options(newItem);
+    return this.http.post<any>(url, newItem, options);
+  }
+
+  getAllItems(): Observable<any> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/items`;
+    const options = this.create_options();
+    return this.http.get<any>(url, options);
+  }
+
+  deleteItem(itemId: string): Observable<any> {
+    const url = `${this.url}/restaurants/${this.us.get_restaurant()}/items/${itemId}`;
+    const options = this.create_options();
+
+    return this.http.delete<any>(url, options);
+  }
+
+
 }

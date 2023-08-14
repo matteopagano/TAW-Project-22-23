@@ -32,7 +32,43 @@
         </div>
       </div>
     </div>
+
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-danger text-white">Visualizzazione Cuochi</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let cook of cooks">
+              ID: {{ cook._id }}<br>
+              Username: {{ cook.username }}<br>
+              Email: {{ cook.email }}<br>
+              Ruolo: {{ cook.role }}<br>
+              <button class="btn btn-danger" (click)="deleteCook(cook._id)">Elimina Cuoco</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-warning text-white">Visualizzazione Bartender</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let bartender of bartenders">
+              ID: {{ bartender._id }}<br>
+              Username: {{ bartender.username }}<br>
+              Email: {{ bartender.email }}<br>
+              Ruolo: {{ bartender.role }}<br>
+              <button class="btn btn-danger" (click)="deleteBartender(bartender._id)">Elimina Bartender</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
+
   <div class="row mt-5">
     <div class="col-md-12">
       <div class="card">
@@ -49,6 +85,8 @@
             <select [(ngModel)]="newUser.role" name="role" class="form-control" required>
               <option value="cashier">Cassiere</option>
               <option value="waiter">Cameriere</option>
+              <option value="cooker">Cuoco</option>
+              <option value="bartender">Bartender</option>
             </select>
             <br>
             <button type="submit" class="btn btn-primary">Crea Utente</button>
@@ -57,4 +95,66 @@
       </div>
     </div>
   </div>
+<div *ngIf="newUserData" class="mt-4">
+  <div class="card">
+    <div class="card-header bg-success text-white">Credenziali di accesso</div>
+    <div class="card-body">
+      <p>Password: {{ newUserData.passwordToChange }}</p>
+    </div>
+  </div>
 </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">Aggiungi Nuovo Item</div>
+        <div class="card-body">
+          <form (submit)="addNewItem()" #itemForm="ngForm">
+            <label>Nome del piatto:</label>
+            <input type="text" [(ngModel)]="newItem.itemName" name="itemName" class="form-control" required>
+            <br>
+            <label>Tipo:</label>
+            <select [(ngModel)]="newItem.itemType" name="itemType" class="form-control" required>
+              <option value="dish">Piatto</option>
+              <option value="beverage">Bevanda</option>
+            </select>
+            <br>
+            <label>Prezzo:</label>
+            <input type="number" [(ngModel)]="newItem.price" name="price" class="form-control" required>
+            <br>
+            <label>Tempo di preparazione (minuti):</label>
+            <input type="number" [(ngModel)]="newItem.preparationTime" name="preparationTime" class="form-control" required>
+            <br>
+            <button type="submit" class="btn btn-primary">Aggiungi Item</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row mt-5">
+
+  <div class="col-md-12">
+    <div class="card">
+      <div class="card-header bg-success text-white">Visualizzazione Items</div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let item of items">
+            ID: {{ item._id }}<br>
+            Nome: {{ item.itemName }}<br>
+            Tipo: {{ item.itemType }}<br>
+            Prezzo: {{ item.price }}<br>
+            Tempo di preparazione: {{ item.preparationTime }}<br>
+            <button class="btn btn-danger" (click)="deleteItem(item._id)">Elimina Piatto</button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
