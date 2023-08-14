@@ -1,27 +1,22 @@
-import { Component } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { UserHttpService } from '../user-http.service';
 import { Router } from '@angular/router';
 
-
 @Component({
-  selector: 'app-user-login',
-  templateUrl: './user-login.component.html',
-  styleUrls: ['./user-login.component.css']
+  selector: 'app-login-user',
+  templateUrl: './login-user.component.html',
+  styleUrls: ['./login-user.component.css']
 })
-export class UserLoginComponent {
+export class LoginUserComponent{
   public errmessage = undefined;
-  constructor( private us: UserHttpService, private router: Router  ) { }
-
-  ngOnInit() {
-  }
+  constructor( private us: UserHttpService, private router : Router) { }
 
   login(mail: string, password: string, remember: boolean) {
     this.us.login(mail, password, remember).subscribe({
       next: (d) => {
         console.log('Login granted: ' + JSON.stringify(d));
-        console.log('User service token: ' + this.us.get_token());
+        this.router.navigate(['mainpage']);
         this.errmessage = undefined;
-        this.router.navigate(['/messages']);
       },
       error: (err) => {
         console.log('Login error: ' + JSON.stringify(err));
@@ -29,6 +24,6 @@ export class UserLoginComponent {
 
       }
     });
-
   }
 }
+

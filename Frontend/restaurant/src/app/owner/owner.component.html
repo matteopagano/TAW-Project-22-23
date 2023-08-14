@@ -1,0 +1,60 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">Visualizzazione Cassieri</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let cashier of cashiers">
+              ID: {{ cashier._id }}<br>
+              Username: {{ cashier.username }}<br>
+              Email: {{ cashier.email }}<br>
+              Ruolo: {{ cashier.role }}<br>
+              <button class="btn btn-danger" (click)="deleteCashier(cashier._id)">Elimina Cassiere</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">Visualizzazione Camerieri</div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let waiter of waiters">
+              ID: {{ waiter._id }}<br>
+              Username: {{ waiter.username }}<br>
+              Email: {{ waiter.email }}<br>
+              Ruolo: {{ waiter.role }}<br>
+              <button class="btn btn-danger" (click)="deleteWaiter(waiter._id)">Elimina Cameriere</button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">Creazione Nuovo Utente</div>
+        <div class="card-body">
+          <form (submit)="createUser()" #userForm="ngForm">
+            <label>Username:</label>
+            <input type="text" [(ngModel)]="newUser.username" name="username" class="form-control" required>
+            <br>
+            <label>Email:</label>
+            <input type="email" [(ngModel)]="newUser.email" name="email" class="form-control" required>
+            <br>
+            <label>Ruolo:</label>
+            <select [(ngModel)]="newUser.role" name="role" class="form-control" required>
+              <option value="cashier">Cassiere</option>
+              <option value="waiter">Cameriere</option>
+            </select>
+            <br>
+            <button type="submit" class="btn btn-primary">Crea Utente</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

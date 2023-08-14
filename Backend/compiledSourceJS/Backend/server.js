@@ -39,6 +39,7 @@ const mongoose_1 = __importDefault(require("mongoose"));
 const EP = __importStar(require("./endpoints"));
 const MW = __importStar(require("./middleware"));
 const Owner = __importStar(require("../Model/Owner"));
+const cors = require('cors');
 const express = require("express");
 let app = express();
 const http = require("http");
@@ -46,6 +47,7 @@ const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors()); // Questo abiliterà le richieste da qualsiasi origine
 app.get('/', EP.root);
 app.get('/login', MW.basicAuthentication, EP.login);
 // USERS ENDPOINTS

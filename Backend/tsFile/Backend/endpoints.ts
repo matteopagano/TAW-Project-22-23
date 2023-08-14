@@ -40,17 +40,33 @@ export function root(req : Request, res : Response) : void {
 export function login(req : Request, res : Response, next : NextFunction) {
     // If it's reached this point, req.user has been injected.
 
+    console.log(req.user)
 
-    const authenticatedUser : User.User = new User.UserModel(req.user);
+    const authenticatedUser : any = new User.UserModel(req.user);
 
     console.log(authenticatedUser)
 
-    const token = {
-        username: authenticatedUser.username,
-        role: authenticatedUser.role,
-        email: authenticatedUser.email,
-        _id: authenticatedUser._id
+    var token
+
+    if(authenticatedUser.role === 'owner'){
+        token = {
+            restaurantId : authenticatedUser.restaurantOwn,
+            username: authenticatedUser.username,
+            role: authenticatedUser.role,
+            email: authenticatedUser.email,
+            _id: authenticatedUser._id
+        }
+    }else{
+        token = {
+            restaurantID : authenticatedUser.idRestaurant,
+            username: authenticatedUser.username,
+            role: authenticatedUser.role,
+            email: authenticatedUser.email,
+            _id: authenticatedUser._id
+        }
     }
+
+    
 
     const secret = process.env.JWT_SECRET;
 
@@ -143,7 +159,7 @@ export async function createCookAndAddToARestaurant(req : Request, res : Respons
     const email = req.body.email;
 
     if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
-        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+        return next({statusCode:404, error: true, errormessage: "Email or Name input not valid"})
     }
 
     const newPassword = Utilities.generateRandomString(8)
@@ -162,7 +178,7 @@ export async function createWaiterAndAddToARestaurant(req : Request, res : Respo
     const username = req.body.username;
     const email = req.body.email;
     if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
-        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+        return next({statusCode:404, error: true, errormessage: "Email or Name input not valid"})
     }
     const newPassword = Utilities.generateRandomString(8)
     const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
@@ -180,7 +196,7 @@ export async function createCashierAndAddToARestaurant(req : Request, res : Resp
     const username = req.body.username;
     const email = req.body.email;
     if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
-        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+        return next({statusCode:404, error: true, errormessage: "Email or Name input not valid"})
     }
     const newPassword = Utilities.generateRandomString(8)
     const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
@@ -203,7 +219,7 @@ export async function createBartenderAndAddToARestaurant(req : Request, res : Re
     const username = req.body.username;
     const email = req.body.email;
     if(!await User.checkNameCorrectness(username) || !User.checkEmailCorrectness(email)){
-        return next({statusCode:404, error: true, errormessage: "Email or password input not valid"})
+        return next({statusCode:404, error: true, errormessage: "Email or Name input not valid"})
     }
     const newPassword = Utilities.generateRandomString(8)
     const restaurant = await Restaurant.RestaurantModel.findById(restaurantId)
@@ -516,7 +532,6 @@ export async function createOrderAndAddToACustomerGroup(req, res, next : NextFun
     waiter.save()
     newOrder.save()
     group.save()
-    
     
     return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});
 

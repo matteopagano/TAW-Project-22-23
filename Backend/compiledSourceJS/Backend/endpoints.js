@@ -62,14 +62,28 @@ function root(req, res) {
 exports.root = root;
 function login(req, res, next) {
     // If it's reached this point, req.user has been injected.
+    console.log(req.user);
     const authenticatedUser = new User.UserModel(req.user);
     console.log(authenticatedUser);
-    const token = {
-        username: authenticatedUser.username,
-        role: authenticatedUser.role,
-        email: authenticatedUser.email,
-        _id: authenticatedUser._id
-    };
+    var token;
+    if (authenticatedUser.role === 'owner') {
+        token = {
+            restaurantId: authenticatedUser.restaurantOwn,
+            username: authenticatedUser.username,
+            role: authenticatedUser.role,
+            email: authenticatedUser.email,
+            _id: authenticatedUser._id
+        };
+    }
+    else {
+        token = {
+            restaurantID: authenticatedUser.idRestaurant,
+            username: authenticatedUser.username,
+            role: authenticatedUser.role,
+            email: authenticatedUser.email,
+            _id: authenticatedUser._id
+        };
+    }
     const secret = process.env.JWT_SECRET;
     if (!secret) {
         throw new Error('JWT secret is not defined');
@@ -167,7 +181,7 @@ function createCookAndAddToARestaurant(req, res, next) {
         const username = req.body.username;
         const email = req.body.email;
         if (!(yield User.checkNameCorrectness(username)) || !User.checkEmailCorrectness(email)) {
-            return next({ statusCode: 404, error: true, errormessage: "Email or password input not valid" });
+            return next({ statusCode: 404, error: true, errormessage: "Email or Name input not valid" });
         }
         const newPassword = Utilities.generateRandomString(8);
         const restaurant = yield Restaurant.RestaurantModel.findById(restaurantId);
@@ -185,7 +199,7 @@ function createWaiterAndAddToARestaurant(req, res, next) {
         const username = req.body.username;
         const email = req.body.email;
         if (!(yield User.checkNameCorrectness(username)) || !User.checkEmailCorrectness(email)) {
-            return next({ statusCode: 404, error: true, errormessage: "Email or password input not valid" });
+            return next({ statusCode: 404, error: true, errormessage: "Email or Name input not valid" });
         }
         const newPassword = Utilities.generateRandomString(8);
         const restaurant = yield Restaurant.RestaurantModel.findById(restaurantId);
@@ -203,7 +217,7 @@ function createCashierAndAddToARestaurant(req, res, next) {
         const username = req.body.username;
         const email = req.body.email;
         if (!(yield User.checkNameCorrectness(username)) || !User.checkEmailCorrectness(email)) {
-            return next({ statusCode: 404, error: true, errormessage: "Email or password input not valid" });
+            return next({ statusCode: 404, error: true, errormessage: "Email or Name input not valid" });
         }
         const newPassword = Utilities.generateRandomString(8);
         const restaurant = yield Restaurant.RestaurantModel.findById(restaurantId);
@@ -223,7 +237,7 @@ function createBartenderAndAddToARestaurant(req, res, next) {
         const username = req.body.username;
         const email = req.body.email;
         if (!(yield User.checkNameCorrectness(username)) || !User.checkEmailCorrectness(email)) {
-            return next({ statusCode: 404, error: true, errormessage: "Email or password input not valid" });
+            return next({ statusCode: 404, error: true, errormessage: "Email or Name input not valid" });
         }
         const newPassword = Utilities.generateRandomString(8);
         const restaurant = yield Restaurant.RestaurantModel.findById(restaurantId);

@@ -3,12 +3,14 @@ import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular
 import { tap, catchError } from 'rxjs/operators';
 import { Observable, throwError } from 'rxjs';
 import jwt_decode from "jwt-decode";
+import { Schema } from 'mongoose';
 
 interface TokenData {
-  username:string,
-  mail:string,
-  roles:string[],
-  id:string
+  username: string,
+  role: string,
+  email: string,
+  _id: string,
+  restaurantID : Schema.Types.ObjectId;
 }
 
 interface ReceivedToken {
@@ -34,14 +36,7 @@ export class UserHttpService {
   constructor( private http: HttpClient ) {
     console.log('User service instantiated');
 
-    const loadedtoken = localStorage.getItem('postmessages_token');
-    if ( !loadedtoken || loadedtoken.length < 1 ) {
-      console.log("No token found in local storage");
-      this.token = ""
-    } else {
-      this.token = loadedtoken as string;
-      console.log("JWT loaded from local storage.")
-    }
+
   }
 
   login( mail: string, password: string, remember: boolean ): Observable<any> {
@@ -55,71 +50,35 @@ export class UserHttpService {
       })
     };
 
-    return this.http.get( this.url + '/login',  options, ).pipe(
+    return this.http.get( this.url + '/login',  options).pipe(
       tap( (data) => {
         console.log(JSON.stringify(data));
         this.token = (data as ReceivedToken).token;
         if ( remember ) {
-          localStorage.setItem('postmessages_token', this.token as string);
+          localStorage.setItem('token_auth', this.token as string);
         }
+
       }));
   }
-
   logout() {
     console.log('Logging out');
     this.token = '';
-    localStorage.setItem('postmessages_token', this.token);
+    localStorage.removeItem('token_auth');
   }
-
-  register( user:User ): Observable<any> {
-    const options = {
-      headers: new HttpHeaders({
-        'cache-control': 'no-cache',
-        'Content-Type':  'application/json',
-      })
-    };
-
-    return this.http.post( this.url + '/users', user, options ).pipe(
-      tap( (data) => {
-        console.log(JSON.stringify(data) );
-      })
-    );
-
-  }
-
   get_token() {
     return this.token;
   }
-
-  get_username() {
-    return (jwt_decode(this.token) as TokenData).username;
+  is_logged(){
+    return this.token !== '';
+  }
+  get_rule(){
+    return (jwt_decode(this.token) as TokenData).role
   }
 
-  get_mail() {
-    return (jwt_decode(this.token) as TokenData).mail;
+  get_restaurant(){
+    return (jwt_decode(this.token) as TokenData).restaurantID
   }
 
-  get_id() {
-    return (jwt_decode(this.token) as TokenData).id;
-  }
 
-  is_admin(): boolean {
-    const roles = (jwt_decode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'ADMIN' ) {
-        return true;
-      }
-    }
-    return false;
-  }
 
-  is_moderator(): boolean {
-    const roles = (jwt_decode(this.token) as TokenData).roles;
-    for ( let idx = 0; idx < roles.length; ++idx ) {
-      if ( roles[idx] === 'MODERATOR' ) {
-        return true;
-      }
-    }
-    return false;
-  }
 }

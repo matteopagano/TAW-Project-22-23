@@ -5,6 +5,7 @@ import * as EP from './endpoints'
 import * as MW from './middleware'
 import * as Owner from '../Model/Owner';
 import { Response, Request, NextFunction } from 'express';
+const cors = require('cors');
 
 
 import express = require('express');
@@ -15,6 +16,7 @@ const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use(cors()); // Questo abiliterà le richieste da qualsiasi origine
 
 app.get('/', EP.root)
 app.get('/login', MW.basicAuthentication, EP.login)

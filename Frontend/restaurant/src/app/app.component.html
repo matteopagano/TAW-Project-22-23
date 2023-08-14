@@ -1,3 +1,23 @@
-<div class="container" >
-  <router-outlet></router-outlet>
+<div class="container mt-5" *ngIf="isLoggedIn(); else notLoggedIn">
+  <div class="alert alert-success">
+    Benvenuto! Hai effettuato l'accesso.
+    <button class="btn btn-danger" (click)="logout()">Logout</button>
+  </div>
+
+  <div [ngSwitch]="getRule()">
+    <ng-container *ngSwitchCase="'owner'">
+      <app-owner></app-owner>
+    </ng-container>
+    <ng-container *ngSwitchCase="'cashier'">
+      <app-cashier></app-cashier>
+    </ng-container>
+  </div>
 </div>
+
+<ng-template #notLoggedIn>
+  <div class="container mt-5">
+    <app-login-user></app-login-user>
+  </div>
+</ng-template>
+
+
