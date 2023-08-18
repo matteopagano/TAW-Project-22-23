@@ -31,7 +31,7 @@ export interface User {
 export class UserHttpService {
 
   private token: string = '';
-  public url = 'http://localhost:3000';
+  public url = 'http://backend:3000';
 
   constructor( private http: HttpClient ) {
     console.log('User service instantiated');

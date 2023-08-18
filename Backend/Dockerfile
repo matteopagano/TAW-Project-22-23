@@ -18,6 +18,6 @@ COPY . /app/Backend/
 # Espone la porta su cui l'applicazione Express ascolterà le richieste
 EXPOSE 3000
 
-ENTRYPOINT ["tail", "-f", "/dev/null"]
+#ENTRYPOINT ["tail", "-f", "/dev/null"]
 # Comando da eseguire quando il container viene avviato
-#CMD ["npm", "run", "test"]
+CMD ["npm", "run", "test"]

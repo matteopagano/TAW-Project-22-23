@@ -88,7 +88,7 @@ export interface User {
 export class RestaurantHttpService {
 
   private token: string = '';
-  public url = 'http://localhost:3000';
+  public url = 'http://backend:3000';
 
   constructor( private http: HttpClient, private us: UserHttpService) {
   }
