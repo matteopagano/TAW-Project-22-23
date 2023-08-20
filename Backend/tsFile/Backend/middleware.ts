@@ -289,7 +289,6 @@ export async function groupHasNotARecipeYet(req , res , next){
 
   if(table !== null){
     if(group !== null){
-      console.log(!group.hasRecipe())
       if(!group.hasRecipe()){
         return next();
       }else{
@@ -407,9 +406,7 @@ export async function isUserAlreadyExist(req , res , next){
 
 export async function isItemAlreadyExist(req , res , next){
   const itemName = req.body.itemName
-  console.log(itemName)
   const itemFind = await Item.ItemModel.findOne({itemName : itemName})
-  console.log(itemFind)
 
   if(!itemFind){
     next()

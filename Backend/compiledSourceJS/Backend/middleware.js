@@ -327,7 +327,6 @@ function groupHasNotARecipeYet(req, res, next) {
         const group = yield Group.GroupModel.findById(table.group);
         if (table !== null) {
             if (group !== null) {
-                console.log(!group.hasRecipe());
                 if (!group.hasRecipe()) {
                     return next();
                 }
@@ -459,9 +458,7 @@ exports.isUserAlreadyExist = isUserAlreadyExist;
 function isItemAlreadyExist(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const itemName = req.body.itemName;
-        console.log(itemName);
         const itemFind = yield Item.ItemModel.findOne({ itemName: itemName });
-        console.log(itemFind);
         if (!itemFind) {
             next();
         }

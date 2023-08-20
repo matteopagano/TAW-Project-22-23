@@ -62,9 +62,7 @@ function root(req, res) {
 exports.root = root;
 function login(req, res, next) {
     // If it's reached this point, req.user has been injected.
-    console.log(req.user);
     const authenticatedUser = new User.UserModel(req.user);
-    console.log(authenticatedUser);
     var token;
     if (authenticatedUser.role === 'owner') {
         token = {
@@ -77,7 +75,7 @@ function login(req, res, next) {
     }
     else {
         token = {
-            restaurantID: authenticatedUser.idRestaurant,
+            restaurantId: authenticatedUser.idRestaurant,
             username: authenticatedUser.username,
             role: authenticatedUser.role,
             email: authenticatedUser.email,
@@ -501,11 +499,8 @@ function removeGroupFromTable(req, res, next) {
         const group = yield Group.GroupModel.findById(table.group);
         Table.removeGroupFromTable(table);
         const date = new Date();
-        console.log(date);
         group.dateFinish = date;
-        console.log("ciao 1");
         group.idTable = null;
-        console.log("ciao 2");
         yield group.save();
         yield table.save();
         return res.status(200).json({ error: false, errormessage: "", newGroup: table });
@@ -523,9 +518,9 @@ function createOrderAndAddToACustomerGroup(req, res, next) {
         const newOrder = Order.createOrder(new mongoose_1.Types.ObjectId(table.group.toString()), new mongoose_1.Types.ObjectId(idWaiterAuthenticated), itemsList);
         Waiter.addOrderAwaited(newOrder, waiter);
         Group.addOrder(newOrder, group);
-        waiter.save();
-        newOrder.save();
-        group.save();
+        yield waiter.save();
+        yield newOrder.save();
+        yield group.save();
         return res.status(200).json({ error: false, errormessage: "", newOrder: newOrder });
     });
 }
@@ -539,16 +534,15 @@ function createRecipeForGroupAndAddToARestaurant(req, res, next) {
         const cashier = yield Cashier.CashierModel.findById(idCashierAuthenticated);
         const table = yield Table.TableModel.findById(idTable);
         const orderList = yield (yield Group.GroupModel.findById(table.group).populate("ordersList")).ordersList;
-        console.log(orderList);
         const group = yield Group.GroupModel.findById(table.group.toString());
         const newRecipe = yield Recipe.createRecipe(new mongoose_1.Types.ObjectId(idCashierAuthenticated), new mongoose_1.Types.ObjectId(table.group.toString()), new mongoose_1.Types.ObjectId(idRestaurant), orderList);
         Restaurant.addRecipeToRestaurant(newRecipe, restaurant);
         Group.addRecipeToGroup(newRecipe, group);
         Cashier.addRecipe(newRecipe, cashier);
-        newRecipe.save();
-        restaurant.save();
-        group.save();
-        cashier.save();
+        yield newRecipe.save();
+        yield restaurant.save();
+        yield group.save();
+        yield cashier.save();
         return res.status(200).json({ error: false, errormessage: "", newRecipe: newRecipe });
     });
 }

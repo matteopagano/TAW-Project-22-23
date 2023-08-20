@@ -3,6 +3,7 @@ import { UserHttpService } from '../user-http.service';
 import { RestaurantHttpService } from '../restaurant-http.service';
 
 import { FormsModule } from '@angular/forms'; // Assicurati di aver importato FormsModule
+import { SocketService } from '../socket.service';
 
 
 interface Cashier {
@@ -73,6 +74,42 @@ interface BartendersResponse {
   bartenders: Bartender[];
 }
 
+interface Table {
+  _id: string;
+  tableNumber: string;
+  maxSeats: number;
+  group: string;
+  restaurantId: string;
+  __v: number;
+}
+
+interface TablesResponse {
+  error: boolean;
+  errormessage: string;
+  tables: Table[];
+}
+
+export interface Group {
+  _id: string;
+  numberOfPerson: number;
+  dateStart: string;
+  dateFinish: string | null;
+  ordersList: string[];
+  idRestaurant: string;
+  idRecipe: string | null;
+  idTable: string | null;
+  __v: number;
+}
+
+export interface Recipe {
+  _id: string;
+  costAmount: number;
+  dateOfPrinting: Date;
+  idGroup: string;
+  idCashier: string;
+  __v: number;
+}
+
 @Component({
   selector: 'app-owner',
   templateUrl: './owner.component.html',
@@ -87,7 +124,11 @@ export class OwnerComponent {
   cooks: Cooker[] = [];
   bartenders: Bartender[] = [];
   items: any[] = [];
+  tables: Table[] = [];
 
+  public groups: Group[] = []; // Assicurati che il tipo sia corretto in base alla struttura dei tuoi dati
+
+  recipes: Recipe[] = [];
 
   newUser: any = {
     username: '',
@@ -102,14 +143,57 @@ export class OwnerComponent {
     preparationTime: 0
   };
 
+  newTable: {
+    tableNumber: string,
+    maxSeats: number } =
+    {
+      tableNumber: '',
+      maxSeats: 0
+    }; // Inizializza i dati del nuovo tavolo
 
 
-  constructor(private us: UserHttpService, private rs: RestaurantHttpService){
+
+  constructor(private rs: RestaurantHttpService, private socketService: SocketService){
     this.get_cashiers();
     this.get_waiters()
     this.get_bartenders()
     this.get_cooks()
     this.fetchItems()
+    this.getTables()
+    this.getGroups();
+    this.getRecipes()
+
+
+    this.socketService.joinRestaurantRoom(rs.getRestaurantId());
+    const socket = socketService.getSocket()
+    socket.fromEvent("fetchTableNeeded").subscribe((data) => {
+      console.log("fetchTableNeeded")
+      // Questa funzione verrà chiamata quando arriva un evento con il nome specificato
+      this.getTables()
+      // Puoi aggiungere qui la logica per gestire i dati ricevuti
+    });
+
+    socket.fromEvent("fetchItemsNeeded").subscribe((data) => {
+      console.log("fetchItemsNeeded")
+      // Questa funzione verrà chiamata quando arriva un evento con il nome specificato
+      this.fetchItems()
+      // Puoi aggiungere qui la logica per gestire i dati ricevuti
+    });
+
+    socket.fromEvent("fetchGroupsNeeded").subscribe((data) => {
+      console.log("fetchGroupsNeeded")
+      // Questa funzione verrà chiamata quando arriva un evento con il nome specificato
+      this.getGroups()
+      // Puoi aggiungere qui la logica per gestire i dati ricevuti
+    });
+
+    socket.fromEvent("fetchRecipesNeeded").subscribe((data) => {
+      console.log("fetchRecipesNeeded")
+      // Questa funzione verrà chiamata quando arriva un evento con il nome specificato
+      this.getRecipes()
+      // Puoi aggiungere qui la logica per gestire i dati ricevuti
+    });
+
 
   }
 
@@ -188,6 +272,7 @@ export class OwnerComponent {
     this.rs.addNewItem(this.newItem).subscribe(
       response => {
         console.log('Item aggiunto con successo:', response);
+        this.socketService.emitFetchItems(this.rs.getRestaurantId())
         this.fetchItems()
         this.newItem = {};
       },
@@ -212,12 +297,64 @@ export class OwnerComponent {
     this.rs.deleteItem(itemId).subscribe(
       () => {
         console.log('Item deleted successfully.');
+        this.socketService.emitFetchItems(this.rs.getRestaurantId())
         this.fetchItems();
       },
       (error) => {
         console.error('Error deleting item:', error);
       }
     );
+  }
+
+  addNewTable() {
+    this.rs.addTable(this.newTable).subscribe(
+      response => {
+        console.log('Tavolo aggiunto con successo:', response);
+        // Esegui qualsiasi azione aggiuntiva necessaria dopo l'aggiunta del tavolo
+        this.newTable = { tableNumber: '', maxSeats: 0 }; // Resetta i dati del nuovo tavolo
+        this.socketService.emitFetchTable(this.rs.getRestaurantId())
+        this.getTables()
+      },
+      error => {
+        console.error('Errore durante l\'aggiunta del tavolo:', error);
+      }
+    );
+  }
+
+  getTables() {
+    this.rs.getTables().subscribe((data: TablesResponse) => {
+      this.tables = data.tables;
+    });
+  }
+
+  deleteTable(tableId: string) {
+    this.rs.deleteTable(tableId).subscribe(() => {
+      this.socketService.emitFetchTable(this.rs.getRestaurantId())
+      // Dopo aver eliminato il tavolo, aggiorniamo la lista dei tavoli
+      this.getTables();
+    });
+  }
+
+
+
+  getGroups() {
+    this.rs.getGroups().subscribe((data) => {
+      this.groups = data.groups; // Assegna i dati ricevuti dal servizio alla variabile groups
+    }, (error) => {
+      console.error('Errore nel recupero dei gruppi:', error);
+    });
+  }
+
+  getRecipes() {
+    this.rs.getRecipes().subscribe((data) => {
+      this.recipes = data.recipes; // Assegna i dati ricevuti dal servizio alla variabile groups
+    }, (error) => {
+      console.error('Errore nel recupero delle ricette:', error);
+    });
+  }
+
+  getRecipeById(recipeId: string): Recipe | undefined {
+    return this.recipes.find((recipe) => recipe._id === recipeId);
   }
 
 }

@@ -30,7 +30,17 @@
     <ng-container *ngSwitchCase="'cashier'">
       <app-cashier></app-cashier>
     </ng-container>
+    <ng-container *ngSwitchCase="'waiter'">
+      <app-waiter></app-waiter>
+    </ng-container>
+    <ng-container *ngSwitchCase="'bartender'">
+      <app-bartender></app-bartender>
+    </ng-container>
+    <ng-container *ngSwitchCase="'cook'">
+      <app-cook></app-cook>
+    </ng-container>
   </div>
+
 </div>
 
 <ng-template #notLoggedIn>

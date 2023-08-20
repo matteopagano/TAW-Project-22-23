@@ -31,12 +31,16 @@ export interface User {
 export class UserHttpService {
 
   private token: string = '';
-  public url = 'http://backend:3000';
+  public url = 'http://localhost:3000';
+  restaurantId : string = ''
 
   constructor( private http: HttpClient ) {
     console.log('User service instantiated');
 
+
   }
+
+
 
   login( mail: string, password: string, remember: boolean ): Observable<any> {
 
@@ -45,7 +49,7 @@ export class UserHttpService {
       headers: new HttpHeaders({
         authorization: 'Basic ' + btoa( mail + ':' + password),
         'cache-control': 'no-cache',
-        'Content-Type':  'application/x-www-form-urlencoded',
+        'Content-Type':  'application/x-www-form-urlencoded'
       })
     };
 
@@ -76,7 +80,7 @@ export class UserHttpService {
 
   get_restaurant(){
     console.log(jwt_decode(this.token) as TokenData)
-    return (jwt_decode(this.token) as TokenData).restaurantId
+    return this.restaurantId = (jwt_decode(this.token) as TokenData).restaurantId.toString()
   }
 
 

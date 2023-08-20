@@ -1,43 +1,28 @@
+version: '3.8'
 services:
   mongodb:
     image: mongo:latest
     container_name: mongodb
-    networks:
-      taw-subnet:
     volumes:
       - MongoVolume:/data/db
+    networks:
+      - taw-subnet 
 
   backend:
     build: ./Backend
     container_name: backend
-    networks:
-      taw-subnet:
     ports:
       - "3000:3000"
     depends_on:
       - mongodb
     volumes:
       - ./Backend:/app/Backend
-    environment:
-      - ALLOWED_ORIGIN=http://angular  
-
-
-  angular:
-    build: ./Frontend/restaurant
-    container_name: angular
     networks:
-      taw-subnet:
-    ports:
-      - "80:80"
-    depends_on:
-      - backend
+      - taw-subnet  
 
 networks:
   taw-subnet:
-    driver: bridge
-    ipam:
-      config:
-        - subnet: 172.21.0.0/16
+    external: true
 
 volumes:
   MongoVolume:

@@ -9,7 +9,9 @@ import { Router } from '@angular/router';
 })
 export class LoginUserComponent{
   public errmessage = undefined;
-  constructor( private us: UserHttpService, private router : Router) { }
+  constructor( private us: UserHttpService, private router : Router) {
+
+  }
 
   login(mail: string, password: string, remember: boolean) {
     this.us.login(mail, password, remember).subscribe({
@@ -25,5 +27,7 @@ export class LoginUserComponent{
       }
     });
   }
+
+
 }
 

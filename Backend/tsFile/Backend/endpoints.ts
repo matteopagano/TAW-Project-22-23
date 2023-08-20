@@ -21,6 +21,7 @@ import jsonwebtoken = require('jsonwebtoken'); //For sign the jwt data
 import * as Owner from '../Model/Owner';
 import * as Utilities from './utilities';
 
+
 const result = require('dotenv').config({ path: './compiledSourceJS/Backend/.env' })
 
 if (result.error) {
@@ -40,11 +41,9 @@ export function root(req : Request, res : Response) : void {
 export function login(req : Request, res : Response, next : NextFunction) {
     // If it's reached this point, req.user has been injected.
 
-    console.log(req.user)
 
     const authenticatedUser : any = new User.UserModel(req.user);
 
-    console.log(authenticatedUser)
 
     var token
 
@@ -58,7 +57,7 @@ export function login(req : Request, res : Response, next : NextFunction) {
         }
     }else{
         token = {
-            restaurantID : authenticatedUser.idRestaurant,
+            restaurantId : authenticatedUser.idRestaurant,
             username: authenticatedUser.username,
             role: authenticatedUser.role,
             email: authenticatedUser.email,
@@ -501,11 +500,8 @@ export async function removeGroupFromTable(req : Request, res : Response , next 
 
     Table.removeGroupFromTable(table)
     const date = new Date()
-    console.log(date)
     group.dateFinish = date
-    console.log("ciao 1")
     group.idTable = null
-    console.log("ciao 2")
 
     
     await group.save()
@@ -529,9 +525,9 @@ export async function createOrderAndAddToACustomerGroup(req, res, next : NextFun
     Waiter.addOrderAwaited(newOrder, waiter)
     Group.addOrder(newOrder, group)
 
-    waiter.save()
-    newOrder.save()
-    group.save()
+    await waiter.save()
+    await newOrder.save()
+    await group.save()
     
     return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});
 
@@ -548,7 +544,6 @@ export async function createRecipeForGroupAndAddToARestaurant(req, res, next : N
     const table : Table.Table = await Table.TableModel.findById(idTable)
     
     const orderList = await (await Group.GroupModel.findById(table.group).populate("ordersList")).ordersList
-    console.log(orderList)
 
 
     const group : Group.Group = await Group.GroupModel.findById(table.group.toString())
@@ -559,10 +554,10 @@ export async function createRecipeForGroupAndAddToARestaurant(req, res, next : N
     Group.addRecipeToGroup(newRecipe, group)
     Cashier.addRecipe(newRecipe, cashier)
 
-    newRecipe.save()
-    restaurant.save()
-    group.save()
-    cashier.save()
+    await newRecipe.save()
+    await restaurant.save()
+    await group.save()
+    await cashier.save()
 
     
     return res.status(200).json({error: false, errormessage: "", newRecipe : newRecipe});

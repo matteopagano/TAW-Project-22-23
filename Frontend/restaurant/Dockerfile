@@ -14,13 +14,6 @@ RUN npm install
 COPY . .
 
 # Build dell'app Angular
-RUN npm run build --prod
+CMD ["ng", "serve"]
 
-# Usa un'immagine leggera di Nginx per servire l'app Angular
-FROM nginx:latest
-
-# Copia l'output del build dell'app Angular nella directory di default di Nginx
-COPY --from=build /app/dist/restaurant /usr/share/nginx/html
-
-# Espone la porta 80 su cui l'app sarà in ascolto
-EXPOSE 80
+#prova

@@ -1,0 +1,28 @@
+<p>cook works!</p>
+
+<h2>Tavoli</h2>
+<div class="row">
+  <div class="col-md-4" *ngFor="let table of tables">
+    <div class="card mb-4">
+      <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
+        <h5 class="card-title">{{ table.tableNumber }}</h5>
+        <p class="card-text">Posti Massimi: {{ table.maxSeats }}</p>
+
+
+          <!-- Mostra l'accordion solo se il tavolo è selezionato -->
+
+
+
+
+
+                  <!-- Aggiungi questo blocco di codice all'interno del tuo HTML -->
+
+
+
+
+
+
+      </div>
+    </div>
+  </div>
+</div>

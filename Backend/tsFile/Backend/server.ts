@@ -9,17 +9,22 @@ const cors = require('cors');
 
 
 import express = require('express');
+const socketIo = require('socket.io');
 let app = express();
-import http = require('http');
+app.use(cors());
+
+
+
+export const http = require('http');
+
+
+
 const bodyParser = require('body-parser');
 
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
-app.use(cors({
-  origin: process.env.ALLOWED_ORIGIN,
-  optionsSuccessStatus: 200
-}));
+
 
 app.get('/', EP.root)
 app.get('/login', MW.basicAuthentication, EP.login)
@@ -50,7 +55,7 @@ app.post('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisR
 app.delete('/restaurants/:idr/tables/:idt', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.deleteTableAndRemoveFromRestaurant);
 
 // ITEMS ENDPOINTS
-app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isOwnerOrWaiter, MW.isOwnerOfThisRestaurant, EP.getItemsListByRestaurant);
+app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isWorkerOfThisRestaurant, EP.getItemsListByRestaurant);
 app.post('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemAlreadyExist, EP.createItemAndAddToARestaurant);
 app.delete('/restaurants/:idr/items/:idi', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemOfThatRestaurant, EP.deleteItemAndRemoveFromRestaurant);
 
@@ -85,6 +90,55 @@ app.use( (req,res,next) => {
 
 function InitExpressServer(): void {
   let server = http.createServer(app);
+  const io = socketIo(server, {
+    cors: {
+      origin: "*",
+      methods: ["GET", "POST"]
+    }
+  });
+  io.on('connection', (socket) => {
+    console.log('Nuova connessione socket:', socket.id);
+  
+    // Gestisci l'evento di join stanza
+    socket.on('join-room', (room) => {
+      socket.join(room); // Il socket entra nella stanza con l'ID del ristorante
+      console.log(`Socket ${socket.id} si è unito alla stanza ${room}`);
+    });
+
+    socket.on('fetchTable', (room) => {
+      console.log("iviato")
+      
+      io.to(room).emit('fetchTableNeeded');
+    });
+
+    socket.on('fetchItems', (room) => {
+      console.log("iviato")
+      
+      io.to(room).emit('fetchItemsNeeded');
+    });
+
+    socket.on('fetchGroups', (room) => {
+      console.log("iviato")
+      
+      io.to(room).emit('fetchGroupsNeeded');
+    });
+
+    socket.on('fetchRecipes', (room) => {
+      console.log("iviato")
+      
+      io.to(room).emit('fetchRecipesNeeded');
+    });
+  
+    // Altri gestori di eventi possono essere aggiunti qui
+  
+    // Esempio di come inviare un messaggio a una stanza specifica
+    // socket.to(room).emit('nome-evento', dati);
+  
+    // Disconnessione
+    socket.on('disconnect', () => {
+      console.log(`Socket ${socket.id} si è disconnesso`);
+    });
+  });
   server.listen(3000, () => console.log("HTTP Server started on port 3000"));
 }
 
@@ -116,6 +170,9 @@ mongoose.connection.once('open', async() => {
     
 
     InitExpressServer();
+
+
+    
 })
 
 
