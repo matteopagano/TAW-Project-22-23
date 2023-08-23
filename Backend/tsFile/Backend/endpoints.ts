@@ -2,7 +2,6 @@
 
 import { Request, Response, NextFunction } from 'express';
 import { Types } from 'mongoose';
-import {OrderModel} from '../Model/Order';
 import * as Recipe from '../Model/Recipe';
 import * as Restaurant from '../Model/Restaurant';
 import * as Table from '../Model/Table';
@@ -81,6 +80,38 @@ export function login(req : Request, res : Response, next : NextFunction) {
     return res.status(200).json( {error:false, errormessage:"", token: tokenSigned} );
 }
 
+export async function signup(req : Request, res : Response, next : NextFunction) {
+    const username = req.body.username ;
+    const email = req.body.email ;
+    const password = req.body.password ;
+    const restaurantNameBody = req.body.restaurantName
+
+
+    const newUser : Owner.Owner = await Owner.OwnerModel.findOne({email:email})
+    
+    if(!newUser){
+      
+      //If i reached this point all the middleware have done correctly all the input checks and are correct
+
+      const newAdmin : Owner.Owner = new Owner.OwnerModel({
+        username : username,
+        email : email,
+        restaurantOwn : null,
+      })
+        const newRestaurant = Restaurant.newRestaurant(restaurantNameBody, newAdmin)
+        newAdmin.setRestaurantOwn(newRestaurant.getId())
+        newAdmin.setPassword(password);
+        await newAdmin.save()
+        await newRestaurant.save() 
+
+        return res.status(200).json({error: false, errormessage: "", newUser : {newRestaurantId : newRestaurant.getId(), newUser : newAdmin}})
+    }else{
+        return next({statusCode:404, error: true, errormessage: "User " + email + "already exists"})
+    }
+
+
+}
+
 export async function getRestaurantById(req : Request, res : Response , next : NextFunction ){
     const idRestorantParameter = req.params.idr ;
     const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestorantParameter)
@@ -139,16 +170,7 @@ export async function getBartenderByRestaurant(req : Request, res : Response , n
 
 export async function createRestaurant(req : Request, res : Response, next : NextFunction) {
 
-    //If i reached this point all the middleware have done correctly all the input checks and are correct
-    const customRequest = req as Request & { auth: any }; // For error type at compile time
-    const idOwner = customRequest.auth._id
-    const restaurantNameBody = req.body.restaurantName
-    const owner : Owner.Owner = await Owner.OwnerModel.findById(idOwner)
-    const newRestaurant = Restaurant.newRestaurant(restaurantNameBody, owner)
-    owner.setRestaurantOwn(newRestaurant.getId())
-    await owner.save()
-    await newRestaurant.save()
-    return res.status(200).json({error: false, errormessage: "", newRestaurantId : newRestaurant.getId()})    
+    
 }
 
 
@@ -288,15 +310,34 @@ export async function deleteBartenderAndRemoveFromRestaurant(req : Request, res 
 
 export async function getTablesListByRestaurant(req : Request, res : Response , next : NextFunction){
     const idRestaurant = req.params.idr
+
+    const isFull = req.query.isFull === 'True';
+
+    if(isFull){
+        const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant).populate("tables")
+        const tables = await Table.TableModel.find({
+            _id: { $in: restaurant.tables },
+            group: { $ne: null },
+        });
+        
+    
+        if(restaurant){
+            return res.status(200).json({error: false, errormessage: "", tables : tables})
+        }else{
+            return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
+        }
+    }else{
+        const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant).populate("tables")
+    
+        if(restaurant){
+            return res.status(200).json({error: false, errormessage: "", tables : restaurant.tables})
+        }else{
+            return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
+        }
+    }
     
 
-    const restaurant : Restaurant.Restaurant = await Restaurant.RestaurantModel.findById(idRestaurant).populate("tables")
     
-    if(restaurant){
-        return res.status(200).json({error: false, errormessage: "", tables : restaurant.tables})
-    }else{
-        return next({statusCode:404, error: true, errormessage: "not valid restaurant"})
-    }
 
 }
 
@@ -406,20 +447,40 @@ export async function getCustomerGroupByRestaurantAndTable(req : Request, res : 
 
 }
 
-export async function getOrdersByRestaurantAndTable(req : Request, res : Response , next : NextFunction){
-    const idtable = req.params.idt
-    
+export async function getOrdersByRestaurantAndTable(req: Request, res: Response, next: NextFunction) {
+    const idtable = req.params.idt;
+    const type = req.query.type;
+    const notStarted = req.query.notStarted;
 
-    const table : Table.Table = await Table.TableModel.findById(idtable)
-    const group : Group.Group = await Group.GroupModel.findById(table.group).populate("ordersList")
+    const table: Table.Table = await Table.TableModel.findById(idtable);
 
-    
-    if(group){
-        return res.status(200).json({error: false, errormessage: "", orders : group.ordersList})
-    }else{
-        return next({statusCode:404, error: true, errormessage: "not valid group"})
+    if (!table) {
+        return next({ statusCode: 404, error: true, errormessage: "not valid table" });
     }
 
+    const group: Group.Group = await Group.GroupModel.findById(table.group).populate("ordersList");
+
+    if (!group) {
+        return next({ statusCode: 404, error: true, errormessage: "not valid group" });
+    }
+
+    const queryConditions: any = {
+        _id: { $in: group.ordersList }
+    };
+
+    if (type) {
+        queryConditions.type = type;
+    }
+
+    if (notStarted) {
+        queryConditions.state = "notStarted";
+    }
+
+    console.log(queryConditions)
+    const orders = await Order.OrderModel.find(queryConditions);
+    console.log(orders)
+
+    return res.status(200).json({ error: false, errormessage: "", orders: orders });
 }
 
 export async function getRecipeByRestaurantAndTable(req : Request, res : Response , next : NextFunction){
@@ -510,29 +571,172 @@ export async function removeGroupFromTable(req : Request, res : Response , next 
     return res.status(200).json({error: false, errormessage: "", newGroup : table});
 
 }
+export interface ItemRequest {
+    items: ItemData[];
+  }
+
+export interface ItemData {
+    itemId: string;
+    itemName: string; // Aggiungi la proprietà itemName
+    count: string;
+}
 
 export async function createOrderAndAddToACustomerGroup(req, res, next : NextFunction){
     const idTable= req.params.idt
     const idWaiterAuthenticated = req.auth._id
-    const itemsList = req.body.items
+    const itemsList: ItemRequest = req.body;
+    const items: ItemData[] = itemsList.items;
 
     const table : Table.Table = await Table.TableModel.findById(idTable)
     const group : Group.Group = await Group.GroupModel.findById(table.group)
     
     const waiter : Waiter.Waiter = await Waiter.WaiterModel.findById(idWaiterAuthenticated)
-    const newOrder : Order.Order = Order.createOrder(new Types.ObjectId(table.group.toString()), new Types.ObjectId(idWaiterAuthenticated), itemsList)
 
-    Waiter.addOrderAwaited(newOrder, waiter)
-    Group.addOrder(newOrder, group)
-
-    await waiter.save()
-    await newOrder.save()
-    await group.save()
+    const drinkItems: ItemData[] = [];
+    const dishItems: ItemData[] = [];
     
-    return res.status(200).json({error: false, errormessage: "", newOrder : newOrder});
+    console.log(items)
+    for (const itemData of itemsList.items) {
+        const itemId = itemData.itemId;
+        const item : Item.Item = await Item.ItemModel.findById(itemId)
+
+        if(!item){
+            next({ statusCode:404, error: true, errormessage: "item " + item + " non trovato" })
+        }
+        
+        
+      
+        if (item.itemType === "drink") {
+            // Se l'item è un drink, aggiungilo alla lista dei drink
+            drinkItems.push(itemData);
+        } else if (item.itemType === "dish") {
+            // Se l'item è un dish, aggiungilo alla lista dei dish
+            dishItems.push(itemData);
+        } else {
+            console.log(`Tipo sconosciuto per l'item con ID ${itemId}`);
+            next({ statusCode:404, error: true, errormessage: "item " + item.itemType + " non riconosciuto" })
+        }
+    }
+
+    let newOrderDrink: Order.Order;
+    let newOrderDish: Order.Order;
+
+
+
+    if (drinkItems.length > 0) {
+    // Se drinkItems ha almeno un elemento, crea un ordine basato su drinkItems
+        newOrderDrink = Order.createOrder(new Types.ObjectId(table.group.toString()), new Types.ObjectId(idWaiterAuthenticated), drinkItems, Item.ItemType.DRINK);
+        Waiter.addOrderAwaited(newOrderDrink, waiter)
+        Group.addOrder(newOrderDrink, group)
+
+        console.log(newOrderDrink)
+
+        await waiter.save()
+        await newOrderDrink.save()
+        await group.save()
+    }
+
+    if (dishItems.length > 0) {
+    // Se dishItems ha almeno un elemento e newOrder non è già stato creato, crea un ordine basato su dishItems
+        newOrderDish = Order.createOrder(new Types.ObjectId(table.group.toString()), new Types.ObjectId(idWaiterAuthenticated), dishItems, Item.ItemType.DISH);
+        Waiter.addOrderAwaited(newOrderDish, waiter)
+        Group.addOrder(newOrderDish, group)
+
+        await waiter.save()
+        await newOrderDish.save()
+        await group.save()
+    }
+
+
+    //const newOrder : Order.Order = Order.createOrder(new Types.ObjectId(table.group.toString()), new Types.ObjectId(idWaiterAuthenticated), itemsList)
+
+    
+    return res.status(200).json({error: false, errormessage: "", newOrder : {newOrderDrink:newOrderDrink, newOrderDish:newOrderDish}});
 
 }
 
+export async function modifyItemOrder(req, res, next : NextFunction){
+
+    const status  = req.body.status;
+    const idCook  = req.body.completedBy;
+    const idItemToModify = req.params.idi
+
+    const tableId = req.params.idt;
+    const orderId = req.params.ido
+    const order : Order.Order = await Order.OrderModel.findById(orderId)
+
+    let itemToModify = order.items.find((item) => item.idItem.toString() === idItemToModify);
+
+
+    if(status === Order.StateItem.COMPLETED){
+
+        itemToModify.state = status; 
+        itemToModify.completedBy = idCook
+        itemToModify.timeFinished = new Date()
+        order.save()
+    
+        return res.status(200).json({error: false, errormessage: "", orderModifyied : order});
+    }else{
+        next({ statusCode:404, error: true, errormessage: "status  " + status + " non riconosciuto" })
+    }
+}
+
+export async function modifyOrder(req, res, next : NextFunction){
+
+    console.log("ordine di modifica")
+    const status  = req.body.status;
+    const orderId = req.params.ido
+    const order : Order.Order = await Order.OrderModel.findById(orderId)
+    const waiter : Waiter.Waiter = await Waiter.WaiterModel.findById(order.idWaiter)
+
+    if(status === Order.StateOrder.READY){
+        order.state = Order.StateOrder.READY
+        order.save()
+        return res.status(200).json({error: false, errormessage: "", orderModifyied : order});
+    }else if(status === Order.StateOrder.SERVED){
+        if(order.state === Order.StateOrder.READY){
+            Waiter.addOrderServed(order, waiter)
+            Waiter.removeOrderAwaited(order, waiter)
+            waiter.save()
+            order.state = Order.StateOrder.SERVED
+            order.timeCompleted = new Date()
+            order.save()
+            return res.status(200).json({error: false, errormessage: "", orderModifyied : order});
+        }else{
+            next({ statusCode:404, error: true, errormessage: "l'ordine non è ready " + order._id})
+        }
+        
+    }else{
+        next({ statusCode:404, error: true, errormessage: "status  " + status + " non riconosciuto" })
+    }
+}
+
+export async function getUser(req, res, next : NextFunction){
+    const idUser = req.params.idu
+    let user: User.User = (await User.UserModel.findById(idUser))
+
+    switch (user.getRole()) {
+        case "owner":
+            const owner: Owner.Owner = (await Owner.OwnerModel.findById(idUser))
+            return res.status(200).json({error: false, errormessage: "", userDetails : owner});
+        case "bartender":
+            const bartender: Bartender.Bartender = (await Bartender.BartenderModel.findById(idUser))
+            return res.status(200).json({error: false, errormessage: "", userDetails : bartender});
+        case "cashier":
+            const cashier: Cashier.Cashier = (await Cashier.CashierModel.findById(idUser))
+            return res.status(200).json({error: false, errormessage: "", userDetails : cashier});
+        case "cook":
+            const cook: Cook.Cook = (await Cook.CookModel.findById(idUser))
+            return res.status(200).json({error: false, errormessage: "", userDetails : cook});
+        case "waiter":
+            const waiter: Waiter.Waiter = (await Waiter.WaiterModel.findById(idUser))
+            return res.status(200).json({error: false, errormessage: "", userDetails : waiter});
+        default:
+            next({ statusCode:404, error: true, errormessage: "Role  " + user.getRole() + " not known" })
+          break;
+      }
+    
+}
 
 export async function createRecipeForGroupAndAddToARestaurant(req, res, next : NextFunction){
     const idTable= req.params.idt

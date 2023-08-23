@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { UserHttpService } from './user-http.service';
+import { UserPropertyService } from './common/api/user-property/user-property.service';
 
 @Component({
   selector: 'app-root',
@@ -10,21 +10,24 @@ export class AppComponent {
   title = 'restaurant';
 
 
-  constructor(private us: UserHttpService){
+  constructor(
+    private ups : UserPropertyService
+  ){
   }
 
-  isLoggedIn(){
-    return this.us.is_logged()
+  isLogged(){
+    return this.ups.isLogged()
   }
+
   getRule(){
-    return this.us.get_rule()
+    return this.ups.getRule()
   }
 
   logout(){
-    return this.us.logout()
+    return this.ups.logout()
   }
 
   getRestaurant(){
-    return this.us.get_restaurant()
+    return this.ups.getRestaurant()
   }
 }

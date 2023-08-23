@@ -1,6 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.WaiterModel = exports.createWaiter = exports.addOrderAwaited = void 0;
+exports.WaiterModel = exports.createWaiter = exports.removeOrderAwaited = exports.addOrderServed = exports.addOrderAwaited = void 0;
 const User_1 = require("./User");
 const mongoose_1 = require("mongoose");
 const waiterSchema = new mongoose_1.Schema({
@@ -11,6 +11,17 @@ function addOrderAwaited(order, waiter) {
     waiter.ordersAwaiting.push(order._id);
 }
 exports.addOrderAwaited = addOrderAwaited;
+function addOrderServed(order, waiter) {
+    waiter.ordersServed.push(order._id);
+}
+exports.addOrderServed = addOrderServed;
+function removeOrderAwaited(order, waiter) {
+    const index = waiter.ordersAwaiting.indexOf(order._id);
+    if (index !== -1) {
+        waiter.ordersAwaiting.splice(index, 1);
+    }
+}
+exports.removeOrderAwaited = removeOrderAwaited;
 function createWaiter(username, email, password, idRestaurant) {
     const newWaiter = new exports.WaiterModel({
         username: username,

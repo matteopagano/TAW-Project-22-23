@@ -1,0 +1,361 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Visualizzazione Cassieri
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let cashier of cashiers">
+              ID: {{ cashier._id }}<br />
+              Username: {{ cashier.username }}<br />
+              Email: {{ cashier.email }}<br />
+              Ruolo: {{ cashier.role }}<br />
+              <button
+                class="btn btn-danger"
+                (click)="deleteCashier(cashier._id)"
+              >
+                Elimina Cassiere
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          Visualizzazione Camerieri
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let waiter of waiters">
+              ID: {{ waiter._id }}<br />
+              Username: {{ waiter.username }}<br />
+              Email: {{ waiter.email }}<br />
+              Ruolo: {{ waiter.role }}<br />
+              <button class="btn btn-danger" (click)="deleteWaiter(waiter._id)">
+                Elimina Cameriere
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-danger text-white">
+          Visualizzazione Cuochi
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let cook of cooks">
+              ID: {{ cook._id }}<br />
+              Username: {{ cook.username }}<br />
+              Email: {{ cook.email }}<br />
+              Ruolo: {{ cook.role }}<br />
+              <button class="btn btn-danger" (click)="deleteCook(cook._id)">
+                Elimina Cuoco
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-warning text-white">
+          Visualizzazione Bartender
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let bartender of bartenders">
+              ID: {{ bartender._id }}<br />
+              Username: {{ bartender.username }}<br />
+              Email: {{ bartender.email }}<br />
+              Ruolo: {{ bartender.role }}<br />
+              <button
+                class="btn btn-danger"
+                (click)="deleteBartender(bartender._id)"
+              >
+                Elimina Bartender
+              </button>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row mt-5">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">Creazione Nuovo Utente</div>
+        <div class="card-body">
+          <form (submit)="createUser()" #userForm="ngForm">
+            <label>Username:</label>
+            <input
+              type="text"
+              [(ngModel)]="newUser.username"
+              name="username"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Email:</label>
+            <input
+              type="email"
+              [(ngModel)]="newUser.email"
+              name="email"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Ruolo:</label>
+            <select
+              [(ngModel)]="newUser.role"
+              name="role"
+              class="form-control"
+              required
+            >
+              <option value="cashier">Cassiere</option>
+              <option value="waiter">Cameriere</option>
+              <option value="cooker">Cuoco</option>
+              <option value="bartender">Bartender</option>
+            </select>
+            <br />
+            <button type="submit" class="btn btn-primary">Crea Utente</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="newUserData" class="mt-4">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        Credenziali di accesso
+      </div>
+      <div class="card-body">
+        <p>Password: {{ newUserData.passwordToChange }}</p>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">Aggiungi Nuovo Item</div>
+        <div class="card-body">
+          <form (submit)="addNewItem()" #itemForm="ngForm">
+            <label>Nome del piatto:</label>
+            <input
+              type="text"
+              [(ngModel)]="newItem.itemName"
+              name="itemName"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Tipo:</label>
+            <select
+              [(ngModel)]="newItem.itemType"
+              name="itemType"
+              class="form-control"
+              required
+            >
+              <option value="dish">Piatto</option>
+              <option value="drink">Bevanda</option>
+            </select>
+            <br />
+            <label>Prezzo:</label>
+            <input
+              type="number"
+              [(ngModel)]="newItem.price"
+              name="price"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Tempo di preparazione (minuti):</label>
+            <input
+              type="number"
+              [(ngModel)]="newItem.preparationTime"
+              name="preparationTime"
+              class="form-control"
+              required
+            />
+            <br />
+            <button type="submit" class="btn btn-primary">Aggiungi Item</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-success text-white">
+          Visualizzazione Items
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4" *ngFor="let item of items">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <strong>ID:</strong> {{ item._id }}<br />
+                  <strong>Nome:</strong> {{ item.itemName }}<br />
+                  <strong>Tipo:</strong> {{ item.itemType }}<br />
+                  <strong>Prezzo:</strong> {{ item.price }}<br />
+                  <strong>Tempo di preparazione:</strong>
+                  {{ item.preparationTime }}<br />
+                  <button class="btn btn-danger" (click)="deleteItem(item._id)">
+                    Elimina Piatto
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-6">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Aggiungi Nuovo Tavolo
+        </div>
+        <div class="card-body">
+          <form (submit)="addNewTable()" #tableForm="ngForm">
+            <div class="form-group">
+              <label for="tableNumber">Numero Tavolo:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="tableNumber"
+                name="tableNumber"
+                [(ngModel)]="newTable.tableNumber"
+                required
+              />
+            </div>
+            <div class="form-group">
+              <label for="maxSeats">Posti Massimi:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="maxSeats"
+                name="maxSeats"
+                [(ngModel)]="newTable.maxSeats"
+                required
+              />
+            </div>
+            <button type="submit" class="btn btn-primary">
+              Aggiungi Tavolo
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">Visualizzazione Tavoli</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4" *ngFor="let table of tables">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <strong>ID:</strong> {{ table._id }}<br />
+                  <strong>Numero Tavolo:</strong> {{ table.tableNumber }}<br />
+                  <strong>Posti Massimi:</strong> {{ table.maxSeats }}<br />
+                  <button
+                    class="btn btn-danger"
+                    (click)="deleteTable(table._id)"
+                  >
+                    Elimina Tavolo
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">Visualizzazione Gruppi</div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4" *ngFor="let group of groups">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <strong>Numero di Persone:</strong>
+                  {{ group.numberOfPerson }}<br />
+                  <strong>Data Inizio:</strong>
+                  {{ group.dateStart | date : "dd/MM/yyyy HH:mm:ss" }}<br />
+                  <strong>Data Fine:</strong>
+                  {{ (group.dateFinish | date : "dd/MM/yyyy HH:mm:ss") || "NA"
+                  }}<br />
+                  <strong>Ordini:</strong> {{ group.ordersList.length }}<br />
+                  <div *ngIf="group.idRecipe">
+                    <ng-container *ngIf="getRecipeById(group.idRecipe)">
+                      <strong>Costo Amount:</strong>
+                      {{ getRecipeById(group.idRecipe)?.costAmount }}<br />
+                      <strong>Data di Stampa:</strong>
+                      {{
+                        getRecipeById(group.idRecipe)?.dateOfPrinting
+                          | date : "dd/MM/yyyy HH:mm:ss"
+                      }}<br />
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          Visualizzazione Recipes
+        </div>
+        <div class="card-body">
+          <ul class="list-group">
+            <li class="list-group-item" *ngFor="let recipe of recipes">
+              <strong>Costo:</strong> {{ recipe.costAmount }}<br />
+              <strong>Data di Stampa:</strong>
+              {{ recipe.dateOfPrinting | date : "dd/MM/yyyy HH:mm:ss" }}<br />
+              <!-- Altri campi della recipe -->
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

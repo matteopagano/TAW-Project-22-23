@@ -20,6 +20,18 @@ export function addOrderAwaited(order : Order.Order, waiter : Waiter){
     waiter.ordersAwaiting.push(order._id); 
 }
 
+export function addOrderServed(order : Order.Order, waiter : Waiter){
+    waiter.ordersServed.push(order._id); 
+}
+
+export function removeOrderAwaited(order : Order.Order, waiter : Waiter){
+    const index = waiter.ordersAwaiting.indexOf(order._id);
+
+  if (index !== -1) {
+    waiter.ordersAwaiting.splice(index, 1);
+  }
+}
+
 export function createWaiter(username : string, email : string, password : string, idRestaurant : Types.ObjectId) : Waiter {
     const newWaiter : Waiter =  new WaiterModel({
         username : username,

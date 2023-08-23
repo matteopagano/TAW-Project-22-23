@@ -1,6 +1,5 @@
 import { Injectable } from '@angular/core';
 import { Socket } from 'ngx-socket-io';
-import { RestaurantHttpService } from './restaurant-http.service';
 
 type MyFunctionType = () => void;
 
@@ -9,14 +8,13 @@ type MyFunctionType = () => void;
 })
 export class SocketService {
 
-  constructor(private socket: Socket, private rs: RestaurantHttpService,) {}
+  constructor(private socket: Socket) {}
 
-  // Metodo per connettersi a una stanza specifica (il nome del ristorante è l'ID della stanza)
   joinRestaurantRoom(restaurantId: string) {
     console.log("mi inserisco nella stanza ")
     console.log(restaurantId)
 
-    this.socket.emit('join-room', restaurantId); // Sostituisci con il nome del tuo evento personalizzato
+    this.socket.emit('join-room', restaurantId);
   }
 
 
@@ -32,6 +30,10 @@ export class SocketService {
     this.socket.emit('fetchGroups', restaurantId);
   }
 
+  emitFetchOrders(restaurantId : string) {
+    this.socket.emit('fetchOrders', restaurantId);
+  }
+
   emitFetchRecipes(restaurantId : string) {
     this.socket.emit('fetchRecipes', restaurantId);
   }
@@ -39,8 +41,4 @@ export class SocketService {
   getSocket (){
     return this.socket;
   }
-
-
-  // Altri metodi per gestire la comunicazione con la stanza, ad esempio per inviare messaggi
-  // o ricevere aggiornamenti dalla stanza.
 }

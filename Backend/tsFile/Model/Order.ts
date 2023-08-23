@@ -1,5 +1,5 @@
 import { Schema, model, Document, Types} from 'mongoose';
-import { ItemModel } from './Item';
+import { ItemModel, ItemType} from './Item';
 
 interface itemElement {
   timeFinished: Date,
@@ -9,14 +9,14 @@ interface itemElement {
   count : number
 }
 
-enum StateOrder {
+export enum StateOrder {
     READY = 'ready',
     SERVED = 'served',
     INPROGRESS = 'inProgress',
     NOTSTARTED = 'notStarted'
 }
 
-enum StateItem {
+export enum StateItem {
     COMPLETED = 'completed',
     NOTCOMPLETED = 'notcompleted'
 }
@@ -29,6 +29,7 @@ export interface Order extends Document {
   state: StateOrder;
   timeCompleted: Date;
   timeStarted: Date;
+  type: StateItem
 }
 
 const orderSchema = new Schema({
@@ -65,11 +66,14 @@ const orderSchema = new Schema({
       type : Schema.Types.Date,
       required : true
     },
+    type: {
+      type : Schema.Types.String, enum : ItemType, required : true
+    },
     
     
   });
 
-export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId, items ) : Order {
+export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId, items ,type : ItemType) : Order {
 
     const itemsList: itemElement[] = [];
 
@@ -80,18 +84,15 @@ export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId
       const newItem: itemElement = {
         timeFinished: null,
         idItem: itemId,
-        state: StateItem.NOTCOMPLETED, // Supponiamo che StateOrder sia un tipo definito
+        state: StateItem.NOTCOMPLETED,
         completedBy: null,
         count: count,
         
       };
 
-      // Fai qualcosa con itemId e count
       itemsList.push(newItem);
     });
 
-    console.log("printo nuova item list")
-    console.log(itemsList)
   
     const newOrder : Order =  new OrderModel({
       idGroup: idGroup,
@@ -100,21 +101,11 @@ export function createOrder(idGroup :  Types.ObjectId, idWaiter : Types.ObjectId
       state: StateOrder.NOTSTARTED,
       timeCompleted: null,
       timeStarted: new Date(),
+      type : type
     });
 
-    console.log("Printo nuovo ordine")
-    console.log(newOrder)
     return newOrder;
 }
 
-/*export function calculatePrice(order : Order.Order) : number{
-  order.items.forEach(item => {
-    const itemId = item.itemId;
-    const count = item.;
-    
-    
-  });
-}
-*/
   
 export const OrderModel = model<Order>('Order', orderSchema);

@@ -12,6 +12,7 @@ import * as Restaurant from '../Model/Restaurant';
 import * as Group from '../Model/Group';
 import * as Table from '../Model/Table';
 import * as Item from '../Model/Item';
+import * as Order from '../Model/Order';
 
 passport.use( new passportHTTP.BasicStrategy(
     async function(username : string, password : string, done : Function) {
@@ -20,7 +21,7 @@ passport.use( new passportHTTP.BasicStrategy(
       
         
       if( !user ) {
-        return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid user"});
+        return done({ statusCode: 401, message: "Invalid credentials" }, false);
       }
   
       if(user.isPasswordCorrect(password)){
@@ -35,7 +36,7 @@ passport.use( new passportHTTP.BasicStrategy(
         return done(null, user);
       }else{
   
-        return done(null,false,{statusCode: 500, error: true, errormessage:"Invalid password"});
+        return done({ statusCode: 401, message: "Invalid credentials" }, false);
       }
     }
 ));
@@ -54,6 +55,15 @@ export function isOwner(req , res , next){
   }
 }
 
+export function isThatUser(req , res , next){
+  const idUser = req.params.idu
+  if(req.auth === idUser){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not this user " +  idUser});
+  }
+}
+
 export function isOwnerOrWaiter(req , res , next){
   const user : User.User = new User.UserModel(req.auth)
   if(user.isOwner() || user.isWaiter()){
@@ -69,6 +79,33 @@ export function isOwnerOrCashierOrWaiter(req , res , next){
     return next();
   }else{
     return next({ statusCode:404, error: true, errormessage: "You are not Owner or Waiter or Cashier" });
+  }
+}
+
+export function isCookOrBartender(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isCook() || user.isBartender()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Cook or Bartender" });
+  }
+}
+
+export function isCookOrWaiterOrBartender(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isCook() || user.isBartender() || user.isWaiter()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Cook or Bartender" });
+  }
+}
+
+export function isCookOrWaiter(req , res , next){
+  const user : User.User = new User.UserModel(req.auth)
+  if(user.isCook() || user.isWaiter()){
+    return next();
+  }else{
+    return next({ statusCode:404, error: true, errormessage: "You are not Cook or Waiter" });
   }
 }
 
@@ -303,6 +340,68 @@ export async function groupHasNotARecipeYet(req , res , next){
   }
 }
 
+export async function groupHasARecipeYet(req , res , next){
+
+  const idWaiterAuthenticated = req.auth._id
+  const idTable = req.params.idt
+
+  const table : Table.Table = await Table.TableModel.findById(idTable)
+
+  const group : Group.Group = await Group.GroupModel.findById(table.group)
+  
+
+
+  if(table !== null){
+    if(group !== null){
+      if(group.hasRecipe()){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: group._id + " doesn't have a recipe "})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "group not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "table not found" })
+  }
+}
+
+export async function areOrdersFinished(req , res , next){
+
+  const idWaiterAuthenticated = req.auth._id
+  const idTable = req.params.idt
+
+  const table : Table.Table = await Table.TableModel.findById(idTable)
+
+  const group : Group.Group = await Group.GroupModel.findById(table.group).populate("ordersList")
+
+  const orders: Order.Order[] = (group.ordersList as unknown) as Order.Order[];
+
+
+
+
+  if(table !== null){
+    if(group !== null){
+      const orders: Order.Order[] = (group.ordersList as unknown) as Order.Order[];
+
+      console.log(orders)
+
+      const allServed = orders.every((orderItem) => orderItem.state === 'served');
+      if(allServed){
+        return next();
+      }else{
+        return next({ statusCode:404, error: true, errormessage: group._id + " has orders not servered "})
+      }
+    }else{
+      next({ statusCode:404, error: true, errormessage: "group not found" })
+    }
+    
+  }else{
+    next({ statusCode:404, error: true, errormessage: "table not found" })
+  }
+}
+
 export async function hasNotAlreadyARestaurant(req , res , next){
   const idOwner = req.auth._id;
   const owner : Owner.Owner = await Owner.OwnerModel.findById(idOwner)
@@ -436,6 +535,23 @@ export async function isTableOfThatRestaurant(req , res , next){
     next();
   }else{
     next({ statusCode:404, error: true, errormessage: "table " + tableIdToRemove + " is not table of " + restaurantIdInWhichRemoveTable })
+  }
+}
+
+
+export async function isOrderOfThatGroup(req , res , next){
+
+  const tableId = req.params.idt;
+  const orderId = req.params.ido
+  const table : Table.Table = await Table.TableModel.findById(tableId)
+
+  const group : Group.Group = await Group.GroupModel.findById(table.group)
+
+
+  if(group.isOrderPresent(orderId)){
+    next();
+  }else{
+    next({ statusCode:404, error: true, errormessage: "order " + orderId + " is not order of group" + group._id })
   }
 }
 

@@ -74,6 +74,12 @@ userSchema.methods.isWaiter = function () {
 userSchema.methods.isCashier = function () {
     return this.role === RoleType.CASHIER;
 };
+userSchema.methods.isCook = function () {
+    return this.role === RoleType.COOK;
+};
+userSchema.methods.isBartender = function () {
+    return this.role === RoleType.BARTENDER;
+};
 userSchema.methods.getId = function () {
     return this._id;
 };

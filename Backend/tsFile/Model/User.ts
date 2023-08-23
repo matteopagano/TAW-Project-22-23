@@ -27,6 +27,8 @@ export interface User extends Document {
     isOwner: () => boolean;
     isWaiter: () => boolean;
     isCashier: () => boolean;
+    isCook: () => boolean;
+    isBartender: () => boolean;
     
     isUserOf: (restaurantId : string) => boolean;
     getId: () => Schema.Types.ObjectId;
@@ -70,6 +72,14 @@ userSchema.methods.isWaiter = function(): boolean {
 
 userSchema.methods.isCashier = function(): boolean {
     return this.role === RoleType.CASHIER;
+}
+
+userSchema.methods.isCook = function(): boolean {
+    return this.role === RoleType.COOK;
+}
+
+userSchema.methods.isBartender = function(): boolean {
+    return this.role === RoleType.BARTENDER;
 }
 
 userSchema.methods.getId = function(): Schema.Types.ObjectId {

@@ -44,6 +44,14 @@ const groupSchema = new mongoose_1.Schema({
 groupSchema.methods.hasRecipe = function () {
     return (!(this.idRecipe === null));
 };
+groupSchema.methods.isOrderPresent = function (order) {
+    try {
+        return this.ordersList.includes(new mongoose_1.Types.ObjectId(order));
+    }
+    catch (_a) {
+        return false;
+    }
+};
 function createGroup(numberOfPerson, idTable, idRestaurant) {
     const newGroup = new exports.GroupModel({
         numberOfPerson: numberOfPerson,

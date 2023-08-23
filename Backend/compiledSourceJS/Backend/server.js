@@ -50,8 +50,14 @@ const bodyParser = require('body-parser');
 app.use(express.json());
 app.use(bodyParser.urlencoded({ extended: false }));
 app.use(bodyParser.json());
+app.use((req, res, next) => {
+    console.log(`Nuova richiesta in entrata: ${req.method} ${req.url}`);
+    next();
+});
+// AUTH ENDPOINTS
 app.get('/', EP.root);
 app.get('/login', MW.basicAuthentication, EP.login);
+app.post('/signup', EP.signup);
 // USERS ENDPOINTS
 app.get('/restaurants/:idr', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRestaurantById);
 app.get('/restaurants/:idr/cooks', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getCooksByRestaurant);
@@ -67,25 +73,28 @@ app.delete('/restaurants/:idr/cooks/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerO
 app.delete('/restaurants/:idr/waiters/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isWaiterMemberOfThatRestaurant, EP.deleteWaiterAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/cashiers/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isCashierMemberOfThatRestaurant, EP.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isBartenderMemberOfThatRestaurant, EP.deleteBartenderAndRemoveFromRestaurant);
+app.get('/user/:idu', MW.verifyJWT, MW.isThatUser, EP.getUser);
 // TABLES ENDPOINTS
-app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isWorkerOfThisRestaurant, EP.getTablesListByRestaurant);
+app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isWorkerOfThisRestaurant, EP.getTablesListByRestaurant);
 app.post('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableAlreadyExist, EP.createTableAndAddToARestaurant);
 app.delete('/restaurants/:idr/tables/:idt', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.deleteTableAndRemoveFromRestaurant);
 // ITEMS ENDPOINTS
-app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isWorkerOfThisRestaurant, EP.getItemsListByRestaurant);
+app.get('/restaurants/:idr/items', MW.verifyJWT, MW.isWorkerOfThisRestaurant, EP.getItemsListByRestaurant);
 app.post('/restaurants/:idr/items', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemAlreadyExist, EP.createItemAndAddToARestaurant);
 app.delete('/restaurants/:idr/items/:idi', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isItemOfThatRestaurant, EP.deleteItemAndRemoveFromRestaurant);
 // CUSTOMERGROUP ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isOwnerOrCashierOrWaiter, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, EP.getCustomerGroupByRestaurantAndTable);
 app.post('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isWaiter, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.isTableEmpty, EP.createGroupAndAddToATable);
-app.delete('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, EP.removeGroupFromTable);
-app.get('/restaurants/:idr/groups', MW.verifyJWT, EP.getGroupsByRestaurant);
+app.delete('/restaurants/:idr/tables/:idt/group', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasARecipeYet, EP.removeGroupFromTable);
+app.get('/restaurants/:idr/groups', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getGroupsByRestaurant);
 // ORDERS ENDPOINTS
-app.get('/restaurants/:idr/tables/:idt/group/orders', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, EP.getOrdersByRestaurantAndTable);
+app.get('/restaurants/:idr/tables/:idt/group/orders', MW.verifyJWT, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, EP.getOrdersByRestaurantAndTable);
 app.post('/restaurants/:idr/tables/:idt/group/orders', MW.verifyJWT, MW.isWaiter, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, EP.createOrderAndAddToACustomerGroup);
+app.put('/restaurants/:idr/tables/:idt/group/orders/:ido', MW.verifyJWT, MW.isCookOrWaiterOrBartender, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.isOrderOfThatGroup, EP.modifyOrder);
+app.put('/restaurants/:idr/tables/:idt/group/orders/:ido/items/:idi', MW.verifyJWT, MW.isCookOrBartender, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.isOrderOfThatGroup, EP.modifyItemOrder);
 // RECIPES ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasARecipe, EP.getRecipeByRestaurantAndTable);
-app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasNotARecipeYet, EP.createRecipeForGroupAndAddToARestaurant);
+app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasNotARecipeYet, MW.areOrdersFinished, EP.createRecipeForGroupAndAddToARestaurant);
 app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant); // For visualizing all the recipes
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
@@ -104,9 +113,8 @@ function InitExpressServer() {
     });
     io.on('connection', (socket) => {
         console.log('Nuova connessione socket:', socket.id);
-        // Gestisci l'evento di join stanza
         socket.on('join-room', (room) => {
-            socket.join(room); // Il socket entra nella stanza con l'ID del ristorante
+            socket.join(room);
             console.log(`Socket ${socket.id} si è unito alla stanza ${room}`);
         });
         socket.on('fetchTable', (room) => {
@@ -125,10 +133,10 @@ function InitExpressServer() {
             console.log("iviato");
             io.to(room).emit('fetchRecipesNeeded');
         });
-        // Altri gestori di eventi possono essere aggiunti qui
-        // Esempio di come inviare un messaggio a una stanza specifica
-        // socket.to(room).emit('nome-evento', dati);
-        // Disconnessione
+        socket.on('fetchOrders', (room) => {
+            console.log("iviato");
+            io.to(room).emit('fetchOrdersNeeded');
+        });
         socket.on('disconnect', () => {
             console.log(`Socket ${socket.id} si è disconnesso`);
         });

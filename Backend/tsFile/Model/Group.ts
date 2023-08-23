@@ -13,6 +13,8 @@ export interface Group extends Document {
     idRecipe : Schema.Types.ObjectId,
     idTable : Schema.Types.ObjectId,
 
+
+    isOrderPresent : (table : string) => boolean;
     hasRecipe : () => boolean,
     
 }
@@ -65,6 +67,14 @@ const groupSchema = new Schema<Group>( {
 
 groupSchema.methods.hasRecipe = function(): boolean {
     return (!(this.idRecipe === null))
+}
+
+groupSchema.methods.isOrderPresent = function( order : string ) : boolean {
+    try{
+        return this.ordersList.includes(new Types.ObjectId(order));
+    }catch{
+        return false;
+    }
 }
 
 export function createGroup(numberOfPerson : string, idTable : Types.ObjectId, idRestaurant : Types.ObjectId) : Group {

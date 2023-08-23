@@ -1,23 +1,28 @@
-<div class="container mt-5" *ngIf="isLoggedIn(); else notLoggedIn">
+
+<div *ngIf="isLogged(); else notLoggedIn">
   <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
 
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarNav" aria-controls="navbarNav" aria-expanded="false" aria-label="Toggle navigation">
       <span class="navbar-toggler-icon"></span>
     </button>
+
+    <div class="navbar-brand-container d-flex justify-content-center align-items-center">
+      <a class="navbar-brand"> Il Tuo Ristorante</a>
+    </div>
+
     <div class="collapse navbar-collapse" id="navbarNav">
       <ul class="navbar-nav mr-auto">
-        <!-- Altri link della navbar -->
       </ul>
       <ul class="navbar-nav">
-        <li class="nav-item" *ngIf="isLoggedIn()">
-          <a class="nav-link" href="#" (click)="logout()">Logout</a>
+        <li class="nav-item" *ngIf="isLogged()">
+          <button class="btn btn-danger" (click)="logout()">Logout</button>
         </li>
       </ul>
     </div>
   </nav>
   <div class="alert alert-success">
     Benvenuto! Hai effettuato l'accesso.
-    <button class="btn btn-danger" (click)="logout()">Logout</button>
+
   </div>
   <div class="alert alert-info mt-3">
     ID del ristorante: {{ getRestaurant() }}
@@ -45,8 +50,10 @@
 
 <ng-template #notLoggedIn>
   <div class="container mt-5">
-    <app-login-user></app-login-user>
+    <app-authentication></app-authentication>
   </div>
 </ng-template>
+
+
 
 

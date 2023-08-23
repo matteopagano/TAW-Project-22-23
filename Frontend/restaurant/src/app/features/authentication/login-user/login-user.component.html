@@ -1,0 +1,28 @@
+<div class="container" style="max-width: 400px; margin-top: 20px;">
+  <div class="card">
+    <div class="card-body text-center loginform">
+      <i class="fas fa-envelope loginlogo"></i>
+      <h1 class="h3 mb-3 font-weight-normal">Please sign in</h1>
+
+      <div>
+        <label for="inputEmail" class="sr-only">Email address</label>
+        <input type="email" [(ngModel)]="email" id="inputEmail" class="form-control mb-2" placeholder="Email address" required autofocus>
+      </div>
+      <div>
+        <label for="inputPassword" class="sr-only">Password</label>
+        <input type="password" [(ngModel)]="password" id="inputPassword" class="form-control mb-3" placeholder="Password" required>
+      </div>
+
+      <div *ngIf="errmessage" class="alert alert-danger" role="alert">
+        Login error: {{ errmessage }}
+      </div>
+
+      <button class="btn btn-lg btn-primary btn-block" (click)="login()">Sign in</button>
+
+      <p class="mt-5 mb-3 text-muted">&copy; 2017-2023</p>
+    </div>
+  </div>
+</div>
+
+
+
