@@ -1,23 +1,19 @@
 <div class="container mt-5">
   <div class="text-center">
-    <h2>Welcome to Restaurant Manager</h2>
+    <h1 class="display-4">Welcome to Restaurant Manager</h1>
     <p class="lead">Please log in or sign up to continue.</p>
   </div>
 
-  <div class="d-flex justify-content-center mt-4">
-    <button class="btn btn-primary btn-lg mr-3" (click)="showLogin = true">Login</button>
-    <button class="btn btn-secondary btn-lg" (click)="showLogin = false">Signup</button>
+  <div class="text-center mt-4">
+    <button class="btn btn-primary btn-lg mr-3" (click)="navigateToLogin()">Login</button>
+    <button class="btn btn-secondary btn-lg" (click)="navigateToSignup()">Signup</button>
   </div>
 
   <div class="mt-4">
-    <div *ngIf="showLogin">
-      <app-login-user></app-login-user>
-    </div>
-    <div *ngIf="!showLogin">
-      <app-signup-user></app-signup-user>
-    </div>
+    <router-outlet></router-outlet>
   </div>
 </div>
+
 
 
 

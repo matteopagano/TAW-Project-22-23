@@ -1,40 +1,56 @@
-<div class="container mt-4">
-  <h2>Tavoli</h2>
-  <div class="row">
-    <div class="col-md-4" *ngFor="let table of tables">
-      <div class="card mb-4">
-        <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
-          <h5 class="card-title">{{ table.tableNumber }}</h5>
-          <p class="card-text">Posti Massimi: {{ table.maxSeats }}</p>
-          <ng-container *ngIf="table.group !== null">
-            <button class="btn btn-danger" (click)="removeCustomer(table._id)">Remove Customer</button>
-            <hr>
-            <button class="btn btn-primary" (click)="calculateRecipe(table._id)" >Calculate Recipe</button>
-            <hr>
-            <button class="btn btn-primary" (click)="toggleTableDetails(table._id)">Visualize Orders</button>
-            <hr>
-            <ng-container *ngIf="selectedTable === table._id">
-                    <div *ngIf="ordersForTable.length > 0">
-                      <h5>Ordini per il tavolo</h5>
-                      <ul>
-                        <li *ngFor="let order of ordersForTable">
-                          <p>Stato dell'ordine: {{ order.state }}</p>
-                          <p>Data di inizio: {{ order.timeStarted | date:'dd/MM/yyyy HH:mm:ss' }}</p>
-                          <ul>
-                            <li *ngFor="let item of order.items">
-                              <p>Nome : {{ findItemName(item.idItem) }}, Quantità: {{ item.count }}</p>
-                            </li>
-                          </ul>
-                        </li>
-                      </ul>
-                    </div>
+<div class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand">Restaurant Manager</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto"></ul>
 
-
-
-            </ng-container>
-          </ng-container>
-        </div>
-      </div>
+      <ul class="navbar-nav" style="margin-left: auto">
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()">Logout</a>
+        </li>
+      </ul>
     </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav
+      id="sidebar"
+      class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
+    >
+      <div class="position-sticky">
+        <h4 class="text-dark mt-4 ml-2">Tables</h4>
+
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              class="nav-link text-dark active"
+              [routerLink]="['/cashier-dashboard/tables']"
+              routerLinkActive="active"
+            >
+              Visualize Tables
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <hr class="text-dark" />
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>

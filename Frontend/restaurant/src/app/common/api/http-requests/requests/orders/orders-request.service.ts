@@ -28,18 +28,18 @@ export class OrdersRequestService extends AuthenticatedRequest{
   }
 
   createGroupOrder(tableId: string, order : any): Observable<any> {
-    return this.httpClient.post<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders', this.create_options())
+    return this.httpClient.post<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders', order, this.create_options())
   }
 
   modifyItemOfOrderCompleted(tableId: string, orderId: string, itemId: string): Observable<any> {
-    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders' + orderId + '/items/' + itemId, {status : "completed", completedBy : this.ups.getId()},this.create_options())
+    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders/' + orderId + '/items/' + itemId, {status : "completed", completedBy : this.ups.getId()},this.create_options())
   }
 
   modifyOrderReady(tableId: string, orderId: string): Observable<any> {
-    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders' + orderId, {status : "ready"},this.create_options())
+    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders/' + orderId, {status : "ready"},this.create_options())
   }
 
   modifyOrderServed(tableId: string, orderId: string): Observable<any> {
-    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders' + orderId, {status : "served"},this.create_options())
+    return this.httpClient.put<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables/' + tableId + '/group/orders/' + orderId, {status : "served"},this.create_options())
   }
 }

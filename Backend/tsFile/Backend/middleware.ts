@@ -57,7 +57,7 @@ export function isOwner(req , res , next){
 
 export function isThatUser(req , res , next){
   const idUser = req.params.idu
-  if(req.auth === idUser){
+  if(req.auth._id === idUser){
     return next();
   }else{
     return next({ statusCode:404, error: true, errormessage: "You are not this user " +  idUser});

@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import { Router } from '@angular/router';
 
 @Component({
   selector: 'app-authentication',
@@ -6,8 +7,17 @@ import { Component } from '@angular/core';
   styleUrls: ['./authentication.component.css']
 })
 export class AuthenticationComponent {
-  showLogin = true;
-  constructor() {
+  constructor(private router: Router) {
 
   }
+
+  navigateToLogin() {
+    this.router.navigate(['/authentication/login']);
+  }
+
+  navigateToSignup() {
+    this.router.navigate(['/authentication/signup']);
+  }
+
+
 }

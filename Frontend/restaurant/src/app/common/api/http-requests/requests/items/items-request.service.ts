@@ -16,7 +16,7 @@ export class ItemsRequestService extends AuthenticatedRequest{
   }
 
 
-  addItem(newItem: any): Observable<void> {
+  addItem(newItem: any): Observable<any> {
     return this.httpClient.post<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/items', newItem, this.create_options())
   }
 
@@ -24,7 +24,7 @@ export class ItemsRequestService extends AuthenticatedRequest{
     return this.httpClient.get<MenuItemsResponse>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/items', this.create_options())
   }
 
-  deleteItem(itemId: string): Observable<void> {
+  deleteItem(itemId: string): Observable<any> {
     return this.httpClient.delete<void>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/items/' + itemId, this.create_options())
   }
 }

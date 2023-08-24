@@ -1,0 +1,48 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          Customers Group
+        </div>
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md-4" *ngFor="let group of groups">
+              <div class="card mb-3">
+                <div class="card-body">
+                  <strong>Number of People:</strong>
+                  {{ group.numberOfPerson }}<br />
+                  <strong>Start consuming:</strong>
+                  {{ group.dateStart | date : "dd/MM HH:mm"
+                  }}<br />
+                  <strong>End consuming:</strong>
+                  {{
+                    (group.dateFinish | date : "dd/MM HH:mm") ||
+                      "NA"
+                  }}<br />
+                  <strong>Orders:</strong> {{ group.ordersList.length
+                  }}<br />
+
+                  <div *ngIf="group.idRecipe">
+                    <hr>
+                    <ng-container *ngIf="getRecipeById(group.idRecipe)">
+
+                      <strong>Cost Amount:</strong>
+                      {{ getRecipeById(group.idRecipe)?.costAmount
+                      }} $ <br />
+                      <strong>Data of Print:</strong>
+                      {{
+                        getRecipeById(group.idRecipe)?.dateOfPrinting
+                          | date : "dd/MM HH:mm"
+                      }}<br />
+                    </ng-container>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

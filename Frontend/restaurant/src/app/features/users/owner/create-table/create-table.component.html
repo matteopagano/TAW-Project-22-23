@@ -1,0 +1,55 @@
+
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Table form creation
+        </div>
+        <div class="card-body">
+
+          <form (submit)="addNewTable()" #tableForm="ngForm">
+            <div class="form-group">
+              <label for="tableNumber">Table Name:</label>
+              <input
+                type="text"
+                class="form-control"
+                id="tableNumber"
+                name="tableNumber"
+                [(ngModel)]="newTable.tableNumber"
+                required
+              />
+            </div>
+            <br />
+            <div class="form-group">
+              <label for="maxSeats">Table Capacity:</label>
+              <input
+                type="number"
+                class="form-control"
+                id="maxSeats"
+                name="maxSeats"
+                [(ngModel)]="newTable.maxSeats"
+                required
+              />
+            </div>
+            <br />
+            <button type="submit" class="btn btn-primary">
+              Add table
+            </button>
+          </form>
+
+          <hr *ngIf="responseMessage">
+          <div class="alert alert-success" role="alert" *ngIf="responseMessage">
+            {{responseMessage}}
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+</div>
+
+
+

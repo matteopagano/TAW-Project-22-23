@@ -24,7 +24,7 @@ export class TablesRequestService extends AuthenticatedRequest{
   }
 
   addTable(tableData: { tableNumber: string; maxSeats: number }): Observable<any> {
-    return this.httpClient.post<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/items', tableData, this.create_options())
+    return this.httpClient.post<any>( this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/tables', tableData, this.create_options())
   }
 
   getTablesNotEmpty(): Observable<any> {

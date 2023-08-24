@@ -684,7 +684,7 @@ function getUser(req, res, next) {
                 const cook = (yield Cook.CookModel.findById(idUser));
                 return res.status(200).json({ error: false, errormessage: "", userDetails: cook });
             case "waiter":
-                const waiter = (yield Waiter.WaiterModel.findById(idUser));
+                const waiter = yield Waiter.WaiterModel.findById(idUser).populate("ordersAwaiting ordersServed");
                 return res.status(200).json({ error: false, errormessage: "", userDetails: waiter });
             default:
                 next({ statusCode: 404, error: true, errormessage: "Role  " + user.getRole() + " not known" });

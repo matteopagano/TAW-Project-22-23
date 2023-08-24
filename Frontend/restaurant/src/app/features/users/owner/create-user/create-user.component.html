@@ -1,0 +1,61 @@
+<div class="container mt-5">
+
+
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-info text-white">
+          User form creation
+        </div>
+        <div class="card-body">
+          <form (submit)="createUser()" #userForm="ngForm">
+            <label>Username:</label>
+            <input
+              type="text"
+              [(ngModel)]="newUser.username"
+              name="username"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Email:</label>
+            <input
+              type="email"
+              [(ngModel)]="newUser.email"
+              name="email"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Ruolo:</label>
+            <select
+              [(ngModel)]="newUser.role"
+              name="role"
+              class="form-control"
+              required
+            >
+              <option value="cashier">Cashier</option>
+              <option value="waiter">Waiter</option>
+              <option value="cooker">Cooker</option>
+              <option value="bartender">Bartender</option>
+            </select>
+            <br />
+            <button type="submit" class="btn btn-primary">
+              Create user
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div *ngIf="newUserData" class="mt-4">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        User credential for the login
+      </div>
+      <div class="card-body">
+        <p>Password: {{ newUserData.passwordToChange }}</p>
+      </div>
+    </div>
+  </div>
+</div>

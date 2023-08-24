@@ -1,0 +1,74 @@
+
+<div class="container mt-4">
+  <h2>Tavoli</h2>
+  <div class="row">
+    <div class="col-md-4" *ngFor="let table of tables">
+      <div class="card mb-4">
+        <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
+          <h5 class="card-title">{{ table.tableNumber }}</h5>
+          <p class="card-text">Table Capacity: {{ table.maxSeats }}</p>
+          <ng-container *ngIf="table.group !== null; else addCustomerGroupButton">
+            <p class="card-text">Il tavolo ha un gruppo associato</p>
+
+            <button (click)="toggleTableDetails(table)" class="btn btn-warning text-white">Visualizza dettagli gruppo</button>
+            <hr>
+            <div *ngIf="table === selectedTable">
+              <div *ngIf="tableDetails">
+                <p>Numero di Persone: {{ tableDetails.numberOfPerson }}</p>
+                <p>Data Inizio: {{ tableDetails.dateStart | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+                <p>Data Fine: {{ tableDetails.dateFinish | date:'dd/MM/yyyy HH:mm:ss' }}</p>
+
+                <form (submit)="createOrder()">
+
+
+                  <div class="form-group">
+                    <label for="orderItem">Seleziona un elemento:</label>
+                    <select id="orderItem" name="orderItem" class="form-control" [(ngModel)]="selectedItem" required>
+                      <option *ngFor="let item of menuItems" [value]="item._id">{{ item.itemName }}</option>
+                    </select>
+                  </div>
+
+                  <div class="form-group">
+                    <label for="itemQuantity">Quantità:</label>
+                    <input type="number" id="itemQuantity" name="itemQuantity" class="form-control" [(ngModel)]="selectedItemQuantity" required>
+                  </div>
+
+                <div>
+                  <button type="button" class="btn btn-success" (click)="addItemToOrder()">Aggiungi Elemento</button>
+                  <hr>
+                  <p><button type="submit" class="btn btn-primary">Invia Ordine</button></p>
+                </div>
+                </form>
+
+                <div *ngIf="currentOrder.length > 0">
+                  <h5>Ordine Corrente</h5>
+                  <ul>
+                    <li *ngFor="let item of currentOrder">{{ item.itemName }} (Quantità: {{ item.count }})</li>
+                  </ul>
+
+                </div>
+
+              </div>
+            </div>
+
+
+          </ng-container>
+          <ng-template #addCustomerGroupButton>
+            <div class="card">
+
+              <div class="card-body">
+                <form (submit)="addCustomerGroup(table._id)" #customerGroupForm="ngForm">
+                  <div class="form-group">
+                    <label for="numberOfPerson">Number of person:</label>
+                    <input type="number" class="form-control" id="numberOfPerson" name="numberOfPerson" [(ngModel)]="customerGroup.numberOfPerson" required>
+                  </div>
+                  <button type="submit" class="btn btn-success">Add Group</button>
+                </form>
+              </div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

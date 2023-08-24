@@ -56,7 +56,7 @@ app.delete('/restaurants/:idr/waiters/:idu', MW.verifyJWT, MW.isOwner, MW.isOwne
 app.delete('/restaurants/:idr/cashiers/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isCashierMemberOfThatRestaurant, EP.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isBartenderMemberOfThatRestaurant, EP.deleteBartenderAndRemoveFromRestaurant);
 
-app.get('/user/:idu', MW.verifyJWT, MW.isThatUser, EP.getUser)
+app.get('/users/:idu', MW.verifyJWT, MW.isThatUser, EP.getUser)
 
 // TABLES ENDPOINTS
 app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isWorkerOfThisRestaurant, EP.getTablesListByRestaurant);

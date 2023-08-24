@@ -1,44 +1,54 @@
-<div class="container">
-  <h3>Orders Queue</h3>
-  <div class="row">
-    <ng-container *ngIf="orders.length > 0; else emptyQueue">
-      <div class="col-md-6" *ngFor="let order of orders">
-        <div [ngClass]="{'bg-success': isOrderCompleted(order), 'bg-danger': !isOrderCompleted(order)}" class="card mb-4">
-          <div class="card-body">
-            <p class="card-text">
-              <strong>Start Date:</strong> {{ order.timeStarted | date:'dd/MM HH:mm'}}
-            </p>
-            <hr>
+<div class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand">Restaurant Manager</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto"></ul>
 
-            <h4>Order Items</h4>
-            <ul class="list-group">
-              <li class="list-group-item" *ngFor="let item of order.items" [ngClass]="{'bg-success': item.state === 'completed', 'bg-danger': item.state === 'notcompleted'}">
-                <p>
-                  <strong>Product:</strong> {{ findItemName(item.idItem) }}
-                </p>
-                <p>
-                  <strong>Quantity:</strong> {{ item.count }}
-                </p>
-                <p>
-                  <strong>Status:</strong> {{ item.state === 'completed' ? 'Completed' : 'Not Completed' }}
-                </p>
-                <button class="btn btn-primary" (click)="itemCompleted(order.tableId, order._id, item.idItem)" *ngIf="item.state === 'notcompleted'">
-                  Item Finished
-                </button>
-              </li>
-            </ul>
-
-            <button class="btn btn-primary" (click)="orderCompleted(order.tableId, order._id)" *ngIf="isOrderCompleted(order)">
-              Order Finished
-            </button>
-          </div>
-        </div>
-      </div>
-    </ng-container>
-    <ng-template #emptyQueue>
-      <p>Any order at the moment.</p>
-    </ng-template>
+      <ul class="navbar-nav" style="margin-left: auto">
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()">Logout</a>
+        </li>
+      </ul>
+    </div>
   </div>
 </div>
 
+<div class="container-fluid">
+  <div class="row">
+    <nav
+      id="sidebar"
+      class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
+    >
+      <div class="position-sticky">
+        <h4 class="text-dark mt-4 ml-2">Queue</h4>
 
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              class="nav-link text-dark active"
+              [routerLink]="['/cooker-dashboard/queue']"
+              routerLinkActive="active"
+            >
+              Visualize Queue
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+      <router-outlet></router-outlet>
+    </main>
+  </div>
+</div>

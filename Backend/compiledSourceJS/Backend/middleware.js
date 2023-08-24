@@ -93,7 +93,7 @@ function isOwner(req, res, next) {
 exports.isOwner = isOwner;
 function isThatUser(req, res, next) {
     const idUser = req.params.idu;
-    if (req.auth === idUser) {
+    if (req.auth._id === idUser) {
         return next();
     }
     else {

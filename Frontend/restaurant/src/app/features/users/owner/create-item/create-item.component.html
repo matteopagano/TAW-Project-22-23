@@ -1,0 +1,62 @@
+
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Item form creation
+        </div>
+        <div class="card-body">
+          <form (submit)="addNewItem()" #itemForm="ngForm">
+            <label>Item Name:</label>
+            <input
+              type="text"
+              [(ngModel)]="newItem.itemName"
+              name="itemName"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Type:</label>
+            <select
+              [(ngModel)]="newItem.itemType"
+              name="itemType"
+              class="form-control"
+              required
+            >
+              <option value="dish">Dish</option>
+              <option value="drink">Drink</option>
+            </select>
+            <br />
+            <label>Price:</label>
+            <input
+              type="number"
+              [(ngModel)]="newItem.price"
+              name="price"
+              class="form-control"
+              required
+            />
+            <br />
+            <label>Preparation Time :</label>
+            <input
+              type="number"
+              [(ngModel)]="newItem.preparationTime"
+              name="preparationTime"
+              class="form-control"
+              required
+            />
+            <br />
+            <button type="submit" class="btn btn-primary">
+              Add Item
+            </button>
+          </form>
+
+          <hr *ngIf="responseMessage">
+          <div class="alert alert-success" role="alert" *ngIf="responseMessage">
+            {{responseMessage}}
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

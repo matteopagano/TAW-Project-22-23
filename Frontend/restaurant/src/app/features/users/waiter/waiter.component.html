@@ -1,118 +1,90 @@
-<div class="container mt-4">
-  <h2>Tavoli</h2>
-  <div class="row">
-    <div class="col-md-4" *ngFor="let table of tables">
-      <div class="card mb-4">
-        <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
-          <h5 class="card-title">{{ table.tableNumber }}</h5>
-          <p class="card-text">Numero posti totale: {{ table.maxSeats }}</p>
-          <p class="card-text">Numero tavolo: {{ table.tableNumber }}</p>
-          <ng-container *ngIf="table.group !== null; else addCustomerGroupButton">
-            <p class="card-text">Il tavolo ha un gruppo associato</p>
+<div class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+  <div class="container">
+    <a class="navbar-brand">Restaurant Manager</a>
+    <button
+      class="navbar-toggler"
+      type="button"
+      data-bs-toggle="collapse"
+      data-bs-target="#navbarNav"
+      aria-controls="navbarNav"
+      aria-expanded="false"
+      aria-label="Toggle navigation"
+    >
+      <span class="navbar-toggler-icon"></span>
+    </button>
+    <div class="collapse navbar-collapse" id="navbarNav">
+      <ul class="navbar-nav ml-auto"></ul>
 
-            <button (click)="toggleTableDetails(table)" class="btn btn-warning text-white">Visualizza dettagli gruppo</button>
-            <hr>
-            <div *ngIf="table === selectedTable">
-              <div *ngIf="tableDetails">
-                <p>Numero di Persone: {{ tableDetails.numberOfPerson }}</p>
-                <p>Data Inizio: {{ tableDetails.dateStart | date:'dd/MM/yyyy HH:mm:ss' }}</p>
-                <p>Data Fine: {{ tableDetails.dateFinish | date:'dd/MM/yyyy HH:mm:ss' }}</p>
-
-                <form (submit)="createOrder()">
-
-
-                  <div class="form-group">
-                    <label for="orderItem">Seleziona un elemento:</label>
-                    <select id="orderItem" name="orderItem" class="form-control" [(ngModel)]="selectedItem" required>
-                      <option *ngFor="let item of menuItems" [value]="item._id">{{ item.itemName }}</option>
-                    </select>
-                  </div>
-
-                  <div class="form-group">
-                    <label for="itemQuantity">Quantità:</label>
-                    <input type="number" id="itemQuantity" name="itemQuantity" class="form-control" [(ngModel)]="selectedItemQuantity" required>
-                  </div>
-
-                <div>
-                  <button type="button" class="btn btn-success" (click)="addItemToOrder()">Aggiungi Elemento</button>
-                  <hr>
-                  <p><button type="submit" class="btn btn-primary">Invia Ordine</button></p>
-                </div>
-                </form>
-
-                <div *ngIf="currentOrder.length > 0">
-                  <h5>Ordine Corrente</h5>
-                  <ul>
-                    <li *ngFor="let item of currentOrder">{{ item.itemName }} (Quantità: {{ item.count }})</li>
-                  </ul>
-
-                </div>
-
-              </div>
-            </div>
-
-
-          </ng-container>
-          <ng-template #addCustomerGroupButton>
-            <div class="card">
-              <div class="card-header bg-success text-white">Aggiungi Customer Group</div>
-              <div class="card-body">
-                <form (submit)="addCustomerGroup(table._id)" #customerGroupForm="ngForm">
-                  <div class="form-group">
-                    <label for="numberOfPerson">Numero di Persone:</label>
-                    <input type="number" class="form-control" id="numberOfPerson" name="numberOfPerson" [(ngModel)]="customerGroup.numberOfPerson" required>
-                  </div>
-                  <button type="submit" class="btn btn-success">Aggiungi Customer Group</button>
-                </form>
-              </div>
-            </div>
-          </ng-template>
-        </div>
-      </div>
+      <ul class="navbar-nav" style="margin-left: auto">
+        <li class="nav-item">
+          <a class="nav-link" (click)="logout()">Logout</a>
+        </li>
+      </ul>
     </div>
   </div>
 </div>
 
-<div class="container">
-  <h3>Legenda</h3>
-  <ul class="list-unstyled">
-    <li><span class="badge badge-success">Ready</span></li>
-    <li><span class="badge badge-warning">Not started</span></li>
-    <li><span class="badge badge-light text-dark">served</span></li>
-  </ul>
-</div>
-
-
-<div class="container">
-  <h1>List orders awaited</h1>
+<div class="container-fluid">
   <div class="row">
-    <div class="col-md-4" *ngFor="let order of ordersAwaiting">
-      <div class="card mb-4" [ngClass]="{'bg-success': order.state === 'ready', 'bg-warning': order.state === 'notStarted'}">
-        <div class="card-body">
-          <p class="card-text">Started Time: {{ order.timeStarted | date:'dd/MM HH:mm' }}</p>
-          <p class="card-text">Table: {{ getTableNameByGroup(order.idGroup) }}</p>
-          <button class="btn btn-primary" (click)="serveOrder(order)" *ngIf="order.state === 'ready'">Serve Order</button>
-        </div>
+    <nav
+      id="sidebar"
+      class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
+    >
+      <div class="position-sticky">
+        <h4 class="text-dark mt-4 ml-2">Tables</h4>
+
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              class="nav-link text-dark active"
+              [routerLink]="['/waiter-dashboard/tables']"
+              routerLinkActive="active"
+            >
+              Visualize Tables
+            </a>
+          </li>
+        </ul>
       </div>
-    </div>
+
+      <hr class="text-dark" />
+
+      <div class="position-sticky">
+        <h4 class="text-dark mt-4 ml-2">Orders Awaiting</h4>
+
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              class="nav-link text-dark active"
+              [routerLink]="['/waiter-dashboard/orders-awaiting']"
+              routerLinkActive="active"
+            >
+              Visualize orders
+            </a>
+          </li>
+        </ul>
+      </div>
+
+      <hr class="text-dark" />
+
+      <div class="position-sticky">
+        <h4 class="text-dark mt-4 ml-2">Orders Served</h4>
+
+        <ul class="nav flex-column">
+          <li class="nav-item">
+            <a
+              class="nav-link text-dark active"
+              [routerLink]="['/waiter-dashboard/orders-served']"
+              routerLinkActive="active"
+            >
+              Visualize Orders
+            </a>
+          </li>
+        </ul>
+      </div>
+    </nav>
+
+    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+      <router-outlet></router-outlet>
+    </main>
   </div>
 </div>
-
-
-
-<div class="container">
-  <h1>List orders served</h1>
-  <div class="row">
-    <div class="col-md-4" *ngFor="let order of ordersServed">
-      <div class="card mb-4" [ngClass]="{'bg-light': order.state === 'served'}">
-        <div class="card-body">
-          <p class="card-text">Started Time: {{ order.timeStarted | date:'dd/MM HH:mm' }}</p>
-          <p class="card-text">Data Fine: {{ order.timeCompleted| date:'dd/MM HH:mm' }}</p>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
-
-

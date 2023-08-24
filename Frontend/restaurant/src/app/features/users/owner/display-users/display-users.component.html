@@ -1,0 +1,100 @@
+
+<div class="row mt-5">
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-primary text-white">
+        Cashiers
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let cashier of cashiers">
+            Username: {{ cashier.username }}<br />
+            <hr>
+            Email: {{ cashier.email }}<br />
+            <hr>
+            <button
+              class="btn btn-danger"
+              (click)="deleteCashier(cashier._id)"
+            >
+              Delete Cashier
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-success text-white">
+        Waiters
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let waiter of waiters">
+            Username: {{ waiter.username }}<br />
+            <hr>
+            Email: {{ waiter.email }}<br />
+            <hr>
+            <button
+              class="btn btn-danger"
+              (click)="deleteWaiter(waiter._id)"
+            >
+              Delete Waiter
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-danger text-white">
+        Cooks
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li class="list-group-item" *ngFor="let cook of cooks">
+            Username: {{ cook.username }}<br />
+            <hr>
+            Email: {{ cook.email }}<br />
+            <hr>
+            <button
+              class="btn btn-danger"
+              (click)="deleteCook(cook._id)"
+            >
+              Delete Cook
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-6">
+    <div class="card">
+      <div class="card-header bg-warning text-white">
+        Bartenders
+      </div>
+      <div class="card-body">
+        <ul class="list-group">
+          <li
+            class="list-group-item"
+            *ngFor="let bartender of bartenders"
+          >
+            Username: {{ bartender.username }}<br />
+            <hr>
+            Email: {{ bartender.email }}<br />
+            <hr>
+            <button
+              class="btn btn-danger"
+              (click)="deleteBartender(bartender._id)"
+            >
+              Delete Bartender
+            </button>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</div>

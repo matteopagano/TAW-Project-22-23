@@ -16,6 +16,14 @@ import { CookComponent } from './features/users/cook/cook.component';
 import { SignupUserComponent } from './features/authentication/signup-user/signup-user.component';
 import { LoginUserComponent } from './features/authentication/login-user/login-user.component';
 import { AuthenticationComponent } from './features/authentication/auth-screen/authentication.component';
+import { OwnerModule } from './features/users/owner/owner.module';
+import { AuthenticationModule } from './features/authentication/authentication.module';
+import { NavbarComponent } from './features/navbar/navbar.component';
+import { CashierModule } from './features/users/cashier/cashier.module';
+import { CookModule } from './features/users/cook/cook.module';
+import { BartenderModule } from './features/users/bartender/bartender.module';
+import { WaiterModule } from './features/users/waiter/waiter.module';
+import { PermissionDeniedComponent } from './features/permission-denied/permission-denied.component';
 
 
 
@@ -31,14 +39,22 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     BartenderComponent,
     CookComponent,
     LoginUserComponent,
-    AuthenticationComponent
+    AuthenticationComponent,
+    NavbarComponent,
+    PermissionDeniedComponent
   ],
   imports: [
     BrowserModule,
     AppRoutingModule,
     HttpClientModule,
     FormsModule,
-    SocketIoModule.forRoot(config)
+    SocketIoModule.forRoot(config),
+    OwnerModule,
+    AuthenticationModule,
+    CashierModule,
+    CookModule,
+    BartenderModule,
+    WaiterModule
 
   ],
   providers: [SocketService],

@@ -729,7 +729,7 @@ export async function getUser(req, res, next : NextFunction){
             const cook: Cook.Cook = (await Cook.CookModel.findById(idUser))
             return res.status(200).json({error: false, errormessage: "", userDetails : cook});
         case "waiter":
-            const waiter: Waiter.Waiter = (await Waiter.WaiterModel.findById(idUser))
+            const waiter: Waiter.Waiter = await Waiter.WaiterModel.findById(idUser).populate("ordersAwaiting ordersServed")
             return res.status(200).json({error: false, errormessage: "", userDetails : waiter});
         default:
             next({ statusCode:404, error: true, errormessage: "Role  " + user.getRole() + " not known" })

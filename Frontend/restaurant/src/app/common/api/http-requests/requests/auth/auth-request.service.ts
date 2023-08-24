@@ -34,7 +34,6 @@ export class AuthRequestService extends AuthRequest{
     return this.httpClient.get( this.baseUrl + '/login',  {headers : reqOptions.headers}).pipe(
       tap( (data) => {
         this.jwtService.storeToken((data as ReceivedToken).token)
-        this.ups.storeAllProperty(this.jwtService.getToken())
       }))
       .pipe(
         tap((data) => {
