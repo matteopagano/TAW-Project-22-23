@@ -1,32 +1,29 @@
 <div class="container mt-5">
   <div class="row">
     <div class="col-md-12">
-      <div class="card">
-        <div class="card-header bg-success text-white">
-          Items
-        </div>
-        <div class="card-body">
-          <div class="row">
-            <div class="col-md-4" *ngFor="let item of items">
-              <div class="card mb-3">
-                <div class="card-body">
-                  <strong>Name: </strong> {{ item.itemName }}<br />
-                  <strong>Type: </strong> {{ item.itemType }}<br />
-                  <strong>Price: </strong> {{ item.price }}<br />
-                  <strong>Preparation Time: </strong>
-                  {{ item.preparationTime }}<br />
-                  <button
-                    class="btn btn-danger"
-                    (click)="deleteItem(item._id)"
-                  >
-                    Delete Dish
-                  </button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
+      <h3 class="bg-success text-white p-2">Items</h3>
+      <table class="table table-bordered">
+        <thead>
+          <tr>
+            <th>Name</th>
+            <th>Type</th>
+            <th>Price</th>
+            <th>Preparation Time</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let item of items">
+            <td>{{ item.itemName }}</td>
+            <td>{{ item.itemType }}</td>
+            <td>{{ item.price }}</td>
+            <td>{{ item.preparationTime }}</td>
+            <td>
+              <button class="btn btn-danger" (click)="deleteItem(item._id)">Delete Dish</button>
+            </td>
+          </tr>
+        </tbody>
+      </table>
     </div>
   </div>
 </div>

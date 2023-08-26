@@ -52,6 +52,7 @@ export class DisplayCustomersComponent {
     socket.fromEvent("fetchGroupsNeeded").subscribe((data) => {
       console.log("fetchGroupsNeeded")
       this.getGroups()
+      this.getRecipes()
     });
 
   }
@@ -64,7 +65,9 @@ export class DisplayCustomersComponent {
   }
 
   getRecipeById(recipeId: string): Recipe | undefined {
-    return this.recipes.find((recipe) => recipe._id === recipeId);
+    const recipe = this.recipes.find((recipe) => recipe._id === recipeId);
+    console.log(recipe)
+    return recipe;
   }
 
   getRecipes() {

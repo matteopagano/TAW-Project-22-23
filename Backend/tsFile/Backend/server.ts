@@ -84,8 +84,9 @@ app.put('/restaurants/:idr/tables/:idt/group/orders/:ido/items/:idi', MW.verifyJ
 
 // RECIPES ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier,  MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasARecipe, EP.getRecipeByRestaurantAndTable);
-app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasNotARecipeYet, MW.areOrdersFinished, EP.createRecipeForGroupAndAddToARestaurant);
-app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant) // For visualizing all the recipes
+app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.areOrdersFinished, MW.groupHasNotARecipeYet, EP.createRecipeForGroupAndAddToARestaurant);
+app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant) 
+app.get('/restaurants/:idr/recipes/:idre', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipeByRestaurant) 
 
 
 
@@ -117,31 +118,31 @@ function InitExpressServer(): void {
     });
 
     socket.on('fetchTable', (room) => {
-      console.log("iviato")
+      console.log("Inviato fetchTableNeeded")
       
       io.to(room).emit('fetchTableNeeded');
     });
 
     socket.on('fetchItems', (room) => {
-      console.log("iviato")
+      console.log("Inviato fetchItemsNeeded")
       
       io.to(room).emit('fetchItemsNeeded');
     });
 
     socket.on('fetchGroups', (room) => {
-      console.log("iviato")
+      console.log("Inviato fetchGroupsNeeded")
       
       io.to(room).emit('fetchGroupsNeeded');
     });
 
     socket.on('fetchRecipes', (room) => {
-      console.log("iviato")
+      console.log("Inviato fetchRecipesNeeded")
       
       io.to(room).emit('fetchRecipesNeeded');
     });
 
     socket.on('fetchOrders', (room) => {
-      console.log("iviato")
+      console.log("Inviato fetchOrdersNeeded")
       
       io.to(room).emit('fetchOrdersNeeded');
     });

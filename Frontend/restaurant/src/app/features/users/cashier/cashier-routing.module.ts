@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { CashierComponent } from './cashier.component';
 import { DisplayTablesComponent } from './display-tables/display-tables.component';
+import { VisualizeTableDetailsComponent } from './visualize-table-details/visualize-table-details.component';
 
 const routes: Routes = [{
   path : '',
@@ -9,6 +10,9 @@ const routes: Routes = [{
   children: [
     {
       path: 'tables' , component: DisplayTablesComponent
+    },
+    {
+      path: 'tables/:id' , component: VisualizeTableDetailsComponent
     },
 
   ]

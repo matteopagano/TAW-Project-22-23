@@ -31,6 +31,10 @@ const itemSchema = new mongoose_1.Schema({
         required: true,
         ref: 'Restaurant'
     },
+    countServered: {
+        type: mongoose_1.Schema.Types.Number,
+        required: true,
+    },
 });
 // Il required presente dentro type nello snippet di codice indica che ogni elemento dell'array "ordersList" è obbligatorio e non può essere vuoto.
 // In particolare, la riga required: true indica che il campo "ordersList" è obbligatorio e non può essere lasciato vuoto quando si crea o si aggiorna un documento utilizzando questo schema.
@@ -40,7 +44,8 @@ function createItem(itemName, itemType, price, preparationTime, idRestaurant) {
         itemType: itemType,
         price: price,
         preparationTime: preparationTime,
-        idRestaurant: idRestaurant
+        idRestaurant: idRestaurant,
+        countServered: 0
     });
     return newTable;
 }

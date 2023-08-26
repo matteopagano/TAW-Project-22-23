@@ -1,0 +1,36 @@
+<div class="container">
+  <h2 class="my-4">Dettagli del tavolo</h2>
+
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th>Item Description</th>
+        <th>Item Type</th>
+        <th>Price Single</th>
+        <th>Qty.</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let item of recipe?.itemsBought">
+
+          <tr>
+            <td>{{ item._id.itemName }}</td>
+            <td>{{ item._id.itemType }}</td>
+            <td>{{ item._id.price.toFixed(2) }}</td>
+            <td>{{ item.quantity }}</td>
+            <td>{{ (item._id.price * item.quantity).toFixed(2) }} €</td>
+          </tr>
+      </ng-container>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><strong>Total:</strong></td>
+        <td><strong>{{ recipe.costAmount.toFixed(2) }} €</strong></td>
+      </tr>
+    </tbody>
+  </table>
+  <button class="btn btn-primary" (click)="printReceipt()">Print Receipt</button>
+</div>
+

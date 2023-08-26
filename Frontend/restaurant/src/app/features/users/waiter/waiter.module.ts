@@ -6,13 +6,15 @@ import { DisplayTablesComponent } from './display-tables/display-tables.componen
 import { FormsModule } from '@angular/forms';
 import { DisplayOrdersAwaitingComponent } from './display-orders-awaiting/display-orders-awaiting.component';
 import { DisplayOrdersServedComponent } from './display-orders-served/display-orders-served.component';
+import { CreateOrderComponent } from './create-order/create-order.component';
 
 
 @NgModule({
   declarations: [
     DisplayTablesComponent,
     DisplayOrdersAwaitingComponent,
-    DisplayOrdersServedComponent
+    DisplayOrdersServedComponent,
+    CreateOrderComponent
   ],
   imports: [
     CommonModule,

@@ -1,5 +1,6 @@
 import { Component } from '@angular/core';
 import { SocketService } from 'src/app/socket.service';
+import { CurveFactory } from 'd3-shape';
 
 import { UserPropertyService } from 'src/app/common/api/user-property/user-property.service';
 import { UsersRequestService } from 'src/app/common/api/http-requests/requests/users/users-request.service';
@@ -44,18 +45,6 @@ export class DisplayUsersComponent {
     });
   }
 
-  deleteCashier(cashierId: string): void {
-    this.urs.delete_cashier(cashierId).subscribe(() => {
-      this.get_cashiers();
-    });
-  }
-
-  deleteWaiter(waiterId: string): void {
-    this.urs.delete_waiter(waiterId).subscribe(() => {
-      this.get_waiters();
-    });
-  }
-
   get_cooks() {
     this.urs.get_cooks().subscribe((data: CookersResponse) => {
       this.cooks = data.cooks;
@@ -68,6 +57,19 @@ export class DisplayUsersComponent {
     });
   }
 
+  deleteCashier(cashierId: string): void {
+    this.urs.delete_cashier(cashierId).subscribe(() => {
+      this.get_cashiers();
+    });
+  }
+
+  deleteWaiter(waiterId: string): void {
+    this.urs.delete_waiter(waiterId).subscribe(() => {
+      this.get_waiters();
+    });
+  }
+
+
   deleteCook(cookerId: string): void {
     this.urs.delete_cook(cookerId).subscribe(() => {
       this.get_cooks();
@@ -79,4 +81,6 @@ export class DisplayUsersComponent {
       this.get_bartenders();
     });
   }
+
+
 }

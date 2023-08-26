@@ -1,8 +1,7 @@
 import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 import { HttpClientModule } from '@angular/common/http';
-import { FormsModule } from '@angular/forms'; // Assicurati di aver importato FormsModule
-import { RouterModule } from '@angular/router';
+import { FormsModule } from '@angular/forms';
 
 import { AppRoutingModule } from './app-routing.module';
 import { AppComponent } from './app.component';
@@ -26,7 +25,6 @@ import { WaiterModule } from './features/users/waiter/waiter.module';
 import { PermissionDeniedComponent } from './features/permission-denied/permission-denied.component';
 
 
-
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
 
 @NgModule({
@@ -41,7 +39,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     LoginUserComponent,
     AuthenticationComponent,
     NavbarComponent,
-    PermissionDeniedComponent
+    PermissionDeniedComponent,
   ],
   imports: [
     BrowserModule,

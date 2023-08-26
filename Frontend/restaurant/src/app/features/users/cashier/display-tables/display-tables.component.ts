@@ -80,8 +80,7 @@ export class DisplayTablesComponent {
     private trs : TablesRequestService,
     private ors : OrdersRequestService,
     private irs : ItemsRequestService,
-    private grs : GroupsRequestService,
-    private rrs : RecipesRequestService
+    private grs : GroupsRequestService
   ) {
     this.getTables();
     this.getMenuItems();
@@ -115,15 +114,6 @@ export class DisplayTablesComponent {
       this.socketService.emitFetchTable(this.ups.getRestaurant())
       this.socketService.emitFetchGroups(this.ups.getRestaurant())
       this.getTables();
-    });
-  }
-
-  calculateRecipe(tableId: string) {
-    this.rrs.calculateRecipe(tableId).subscribe(response => {
-      if (!response.error) {
-        this.socketService.emitFetchRecipes(this.ups.getRestaurant())
-        this.socketService.emitFetchGroups(this.ups.getRestaurant())
-      }
     });
   }
 

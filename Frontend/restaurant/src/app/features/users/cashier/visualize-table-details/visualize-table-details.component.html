@@ -1,0 +1,52 @@
+<div class="container">
+  <h2 class="my-4">Dettagli del tavolo</h2>
+
+  <!-- Elenco degli elementi di tutti gli ordini -->
+  <table *ngIf="itemsForTable.length > 0" class="table table-striped">
+    <thead>
+      <tr>
+        <th>Item Description</th>
+        <th>Item Type</th>
+        <th>Price Single</th>
+        <th>Qty.</th>
+        <th>Total</th>
+      </tr>
+    </thead>
+    <tbody>
+      <ng-container *ngFor="let item of itemsForTable">
+        <tr>
+
+          <td>{{ item.name }}</td>
+          <td>{{ item.type }}</td>
+          <td>{{ item.price.toFixed(2) }}</td>
+          <td>{{ item.quantity }}</td>
+          <td>{{ (item.price * item.quantity).toFixed(2) }}</td>
+        </tr>
+      </ng-container>
+      <tr>
+        <td></td>
+        <td></td>
+        <td></td>
+        <td><strong>Total:</strong></td>
+        <td><strong>{{ calculateTotal().toFixed(2) }}</strong></td>
+      </tr>
+    </tbody>
+  </table>
+
+
+  <!-- Pulsante 2 -->
+  <div class="mb-3">
+    <button (click)="calculateRecipe()" class="btn btn-primary">calculate recipe</button>
+  </div>
+
+
+  <!-- Messaggio se non ci sono ordini per il tavolo -->
+  <p *ngIf="itemsForTable.length === 0" class="mt-4 alert alert-info">Any orders for this table.</p>
+  <hr *ngIf="messageError">
+          <div class="alert alert-danger" role="alert" *ngIf="messageError">
+            {{messageError}}
+          </div>
+</div>
+
+
+

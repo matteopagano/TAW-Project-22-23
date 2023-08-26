@@ -32,7 +32,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.createRecipeForGroupAndAddToARestaurant = exports.getUser = exports.modifyOrder = exports.modifyItemOrder = exports.createOrderAndAddToACustomerGroup = exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getRecipesByRestaurant = exports.getGroupsByRestaurant = exports.getRecipeByRestaurantAndTable = exports.getOrdersByRestaurantAndTable = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTableAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.signup = exports.login = exports.root = void 0;
+exports.createRecipeForGroupAndAddToARestaurant = exports.getUser = exports.modifyOrder = exports.modifyItemOrder = exports.createOrderAndAddToACustomerGroup = exports.removeGroupFromTable = exports.createGroupAndAddToATable = exports.getRecipeByRestaurant = exports.getRecipesByRestaurant = exports.getGroupsByRestaurant = exports.getRecipeByRestaurantAndTable = exports.getOrdersByRestaurantAndTable = exports.getCustomerGroupByRestaurantAndTable = exports.deleteItemAndRemoveFromRestaurant = exports.createItemAndAddToARestaurant = exports.getItemsListByRestaurant = exports.deleteTableAndRemoveFromRestaurant = exports.createTableAndAddToARestaurant = exports.getTablesListByRestaurant = exports.deleteBartenderAndRemoveFromRestaurant = exports.deleteCashierAndRemoveFromRestaurant = exports.deleteWaiterAndRemoveFromRestaurant = exports.deleteCookAndRemoveFromRestaurant = exports.createBartenderAndAddToARestaurant = exports.createCashierAndAddToARestaurant = exports.createWaiterAndAddToARestaurant = exports.createCookAndAddToARestaurant = exports.createRestaurant = exports.getBartenderByRestaurant = exports.getCashiersByRestaurant = exports.getWaitersByRestaurant = exports.getCooksByRestaurant = exports.getRestaurantById = exports.signup = exports.login = exports.root = void 0;
 const mongoose_1 = require("mongoose");
 const Recipe = __importStar(require("../Model/Recipe"));
 const Restaurant = __importStar(require("../Model/Restaurant"));
@@ -136,7 +136,17 @@ exports.getRestaurantById = getRestaurantById;
 function getCooksByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRistoranteParameter = req.params.idr;
-        const restaurant = yield (Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('cookers'));
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRistoranteParameter).populate({
+            path: 'cookers',
+            model: 'Cook',
+            populate: {
+                path: 'itemsPrepared',
+                populate: {
+                    path: 'idItem',
+                    model: 'Item',
+                }
+            }
+        });
         if (restaurant) {
             return res.status(200).json({ error: false, errormessage: "", cooks: restaurant.getcookers() });
         }
@@ -175,7 +185,17 @@ exports.getCashiersByRestaurant = getCashiersByRestaurant;
 function getBartenderByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRistoranteParameter = req.params.idr;
-        const restaurant = yield Restaurant.RestaurantModel.findById(idRistoranteParameter).populate('bartenders');
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRistoranteParameter).populate({
+            path: 'bartenders',
+            model: 'Bartender',
+            populate: {
+                path: 'itemsPrepared',
+                populate: {
+                    path: 'idItem',
+                    model: 'Item',
+                }
+            }
+        });
         if (restaurant) {
             return res.status(200).json({ error: false, errormessage: "", bartenders: restaurant.getbartenders() });
         }
@@ -378,7 +398,17 @@ function deleteTableAndRemoveFromRestaurant(req, res, next) {
         const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
         if (restaurant.removeTable(idTable)) {
             yield restaurant.save();
-            yield Table.TableModel.deleteOne({ _id: idTable });
+            const tableToRemove = yield Table.TableModel.findById(idTable);
+            if (tableToRemove.isEmpty()) {
+                console.log("non ha gruppi da rimuovere");
+                yield Table.TableModel.deleteOne({ _id: idTable });
+            }
+            else {
+                console.log("ha gruppi da rimuovere");
+                restaurant.removeGroup(tableToRemove.group.toString());
+                yield restaurant.save();
+                yield Table.TableModel.deleteOne({ _id: idTable });
+            }
             return res.status(200).json({ error: false, errormessage: "", idTableDeleted: idTable });
         }
         else {
@@ -431,7 +461,7 @@ function deleteItemAndRemoveFromRestaurant(req, res, next) {
         const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
         if (restaurant.removeItem(idItem)) {
             yield restaurant.save();
-            yield Item.ItemModel.deleteOne({ _id: idItem });
+            // await Item.ItemModel.deleteOne({_id : idItem}) only logically delete from restaurant
             return res.status(200).json({ error: false, errormessage: "", idItemDeleted: idItem });
         }
         else {
@@ -475,9 +505,7 @@ function getOrdersByRestaurantAndTable(req, res, next) {
         if (notStarted) {
             queryConditions.state = "notStarted";
         }
-        console.log(queryConditions);
         const orders = yield Order.OrderModel.find(queryConditions);
-        console.log(orders);
         return res.status(200).json({ error: false, errormessage: "", orders: orders });
     });
 }
@@ -512,7 +540,19 @@ exports.getGroupsByRestaurant = getGroupsByRestaurant;
 function getRecipesByRestaurant(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
-        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant).populate("recipes");
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant)
+            .populate({
+            path: 'recipes',
+            model: 'Recipe',
+            populate: {
+                path: 'itemsBought',
+                populate: {
+                    path: '_id',
+                    model: 'Item', // Il nome del modello Item
+                }
+            },
+        })
+            .exec();
         if (restaurant) {
             return res.status(200).json({ error: false, errormessage: "", recipes: restaurant.recipes });
         }
@@ -522,6 +562,29 @@ function getRecipesByRestaurant(req, res, next) {
     });
 }
 exports.getRecipesByRestaurant = getRecipesByRestaurant;
+function getRecipeByRestaurant(req, res, next) {
+    return __awaiter(this, void 0, void 0, function* () {
+        const idRestaurant = req.params.idr;
+        const idRecipe = req.params.idre;
+        const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
+        let recipe = restaurant.recipes.find((r) => r.toString() === idRecipe);
+        const recipePop = yield Recipe.RecipeModel.findById(recipe)
+            .populate({
+            path: 'itemsBought',
+            populate: {
+                path: '_id',
+                model: 'Item', // Il nome del modello Item
+            }
+        });
+        if (restaurant) {
+            return res.status(200).json({ error: false, errormessage: "", recipe: recipePop });
+        }
+        else {
+            return next({ statusCode: 404, error: true, errormessage: "restaurant doesn't exist" });
+        }
+    });
+}
+exports.getRecipeByRestaurant = getRecipeByRestaurant;
 function createGroupAndAddToATable(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idRestaurant = req.params.idr;
@@ -566,7 +629,6 @@ function createOrderAndAddToACustomerGroup(req, res, next) {
         const waiter = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
         const drinkItems = [];
         const dishItems = [];
-        console.log(items);
         for (const itemData of itemsList.items) {
             const itemId = itemData.itemId;
             const item = yield Item.ItemModel.findById(itemId);
@@ -593,7 +655,6 @@ function createOrderAndAddToACustomerGroup(req, res, next) {
             newOrderDrink = Order.createOrder(new mongoose_1.Types.ObjectId(table.group.toString()), new mongoose_1.Types.ObjectId(idWaiterAuthenticated), drinkItems, Item.ItemType.DRINK);
             Waiter.addOrderAwaited(newOrderDrink, waiter);
             Group.addOrder(newOrderDrink, group);
-            console.log(newOrderDrink);
             yield waiter.save();
             yield newOrderDrink.save();
             yield group.save();
@@ -615,17 +676,41 @@ exports.createOrderAndAddToACustomerGroup = createOrderAndAddToACustomerGroup;
 function modifyItemOrder(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const status = req.body.status;
-        const idCook = req.body.completedBy;
+        const idUser = req.body.completedBy;
         const idItemToModify = req.params.idi;
-        const tableId = req.params.idt;
         const orderId = req.params.ido;
         const order = yield Order.OrderModel.findById(orderId);
         let itemToModify = order.items.find((item) => item.idItem.toString() === idItemToModify);
+        const user = yield User.UserModel.findById(idUser);
         if (status === Order.StateItem.COMPLETED) {
             itemToModify.state = status;
-            itemToModify.completedBy = idCook;
+            itemToModify.completedBy = idUser;
             itemToModify.timeFinished = new Date();
             order.save();
+            if (user.getRole() === User.RoleType.COOK) {
+                const cookUser = user;
+                const exist = cookUser.itemsPrepared.find(item => item.idItem.toString() === idItemToModify);
+                if (exist) {
+                    exist.count += itemToModify.count;
+                }
+                else {
+                    const newItem = Cook.createItemPrepared(itemToModify.count, new mongoose_1.Types.ObjectId(idItemToModify));
+                    cookUser.itemsPrepared.push(newItem);
+                }
+                cookUser.save();
+            }
+            else {
+                const bartenderUser = user;
+                const exist = bartenderUser.itemsPrepared.find(item => item.idItem.toString() === idItemToModify);
+                if (exist) {
+                    exist.count += itemToModify.count;
+                }
+                else {
+                    const newItem = Cook.createItemPrepared(itemToModify.count, new mongoose_1.Types.ObjectId(idItemToModify));
+                    bartenderUser.itemsPrepared.push(newItem);
+                }
+                bartenderUser.save();
+            }
             return res.status(200).json({ error: false, errormessage: "", orderModifyied: order });
         }
         else {
@@ -636,9 +721,9 @@ function modifyItemOrder(req, res, next) {
 exports.modifyItemOrder = modifyItemOrder;
 function modifyOrder(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
-        console.log("ordine di modifica");
         const status = req.body.status;
         const orderId = req.params.ido;
+        const restaurantId = req.params.idr;
         const order = yield Order.OrderModel.findById(orderId);
         const waiter = yield Waiter.WaiterModel.findById(order.idWaiter);
         if (status === Order.StateOrder.READY) {
@@ -654,6 +739,17 @@ function modifyOrder(req, res, next) {
                 order.state = Order.StateOrder.SERVED;
                 order.timeCompleted = new Date();
                 order.save();
+                const itemsToUpdate = yield Item.ItemModel.find({ idRestaurant: restaurantId });
+                for (const item of itemsToUpdate) {
+                    const itemId = item._id;
+                    for (const itemElement of order.items) {
+                        if (itemElement.idItem.toString() == itemId.toString()) {
+                            item.countServered = (item.countServered || 0) + itemElement.count;
+                        }
+                    }
+                    console.log(item);
+                    yield item.save();
+                }
                 return res.status(200).json({ error: false, errormessage: "", orderModifyied: order });
             }
             else {

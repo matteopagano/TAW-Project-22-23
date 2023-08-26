@@ -1,0 +1,4 @@
+.cart-scroll {
+  max-height: 400px; /* Altezza massima della barra laterale del carrello */
+  overflow-y: auto; /* Aggiunge una barra di scorrimento verticale se necessario */
+}

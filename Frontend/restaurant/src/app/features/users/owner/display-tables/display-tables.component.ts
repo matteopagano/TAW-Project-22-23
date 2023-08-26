@@ -1,5 +1,6 @@
-import { Component } from '@angular/core';
+import { Component, ElementRef, OnInit, ViewChild } from '@angular/core';
 import { SocketService } from 'src/app/socket.service';
+import { Chart } from 'chart.js';
 
 import { UserPropertyService } from 'src/app/common/api/user-property/user-property.service';
 import { TablesRequestService } from 'src/app/common/api/http-requests/requests/tables/tables-request.service';
@@ -25,11 +26,9 @@ interface TablesResponse {
   templateUrl: './display-tables.component.html',
   styleUrls: ['./display-tables.component.css']
 })
-export class DisplayTablesComponent {
+export class DisplayTablesComponent{
 
   tables: Table[] = [];
-
-
   constructor(private ups : UserPropertyService,
     private socketService: SocketService,
     private trs : TablesRequestService,
@@ -55,4 +54,7 @@ export class DisplayTablesComponent {
       this.getTables();
     });
   }
+
+
+
 }

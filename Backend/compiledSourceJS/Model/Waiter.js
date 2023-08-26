@@ -27,8 +27,8 @@ function createWaiter(username, email, password, idRestaurant) {
         username: username,
         email: email,
         role: User_1.RoleType.WAITER,
-        ordersTaken: [],
-        tablesObservered: [],
+        ordersAwaiting: [],
+        ordersServed: [],
         idRestaurant: idRestaurant
     });
     newWaiter.setPassword(password);

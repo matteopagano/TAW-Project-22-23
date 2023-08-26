@@ -23,7 +23,7 @@ const routes: Routes = [
   { path : 'cashier-dashboard', loadChildren : () => {return import('./features/users/cashier/cashier.module').then((m) => m.CashierModule);}, canActivate: [authGuard, roleGuard, roleChildGuard],data: {rolePermitted: 'cashier' } },
   { path : 'authentication', loadChildren : () => {return import('./features/authentication/authentication.module').then((m) => m.AuthenticationModule)}},
   { path : 'permission-denied', component : PermissionDeniedComponent},
-  { path: '**', redirectTo: '/authentication', pathMatch: 'full' }, // Route di fallback
+  { path: '**', redirectTo: '/authentication', pathMatch: 'full' },
 ];
 
 @NgModule({

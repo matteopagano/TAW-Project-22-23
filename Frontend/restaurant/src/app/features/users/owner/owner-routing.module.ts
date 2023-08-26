@@ -8,6 +8,13 @@ import { CreateItemComponent } from './create-item/create-item.component';
 import { DisplayTablesComponent } from './display-tables/display-tables.component';
 import { CreateTableComponent } from './create-table/create-table.component';
 import { DisplayCustomersComponent } from './display-customers/display-customers.component';
+import { DisplayBartendersDataComponent } from './display-bartenders-data/display-bartenders-data.component';
+import { DisplayWaitersDataComponent } from './display-waiters-data/display-waiters-data.component';
+import { DisplayCooksDataComponent } from './display-cooks-data/display-cooks-data.component';
+import { DisplayCashiersDataComponent } from './display-cashiers-data/display-cashiers-data.component';
+import { VisualizeItemsDataComponent } from './visualize-items-data/visualize-items-data.component';
+import { VisualizeCustomerDetailsComponent } from './visualize-customer-details/visualize-customer-details.component';
+import { VisualizeCustomersDataComponent } from './visualize-customers-data/visualize-customers-data.component';
 
 const routes: Routes = [{
   path : '',
@@ -24,7 +31,21 @@ const routes: Routes = [{
     },
     {
       path: 'groups' , children : [{path:'visualize', component: DisplayCustomersComponent}]
-    }
+    },
+    {
+      path: 'groups/:id' ,component: VisualizeCustomerDetailsComponent
+    },
+
+    {
+      path: 'data-analytics' , children : [
+        {path:'bartenders', component: DisplayBartendersDataComponent},
+        {path:'waiters', component: DisplayWaitersDataComponent},
+        {path:'cooks', component: DisplayCooksDataComponent},
+        {path:'cashiers', component: DisplayCashiersDataComponent},
+        {path:'items', component: VisualizeItemsDataComponent},
+        {path:'customers', component: VisualizeCustomersDataComponent}
+      ]
+    },
     ]
 }];
 

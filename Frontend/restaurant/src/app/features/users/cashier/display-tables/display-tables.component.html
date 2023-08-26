@@ -7,12 +7,8 @@
           <h5 class="card-title">{{ table.tableNumber }}</h5>
           <p class="card-text">Table capacity: {{ table.maxSeats }}</p>
           <ng-container *ngIf="table.group !== null">
-            <button class="btn btn-danger" (click)="removeCustomer(table._id)">Remove Customer</button>
             <hr>
-            <button class="btn btn-primary" (click)="calculateRecipe(table._id)" >Calculate Recipe</button>
-            <hr>
-            <button class="btn btn-primary" (click)="toggleTableDetails(table._id)">Visualize Orders</button>
-            <hr>
+            <button [routerLink]="['/cashier-dashboard/tables', table._id]" class="btn btn-primary btn-block">Visaulize table details {{table.tableNumber}}</button>
             <ng-container *ngIf="selectedTable === table._id">
                     <div *ngIf="ordersForTable.length > 0">
                       <h5>Ordini per il tavolo</h5>

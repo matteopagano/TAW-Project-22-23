@@ -1,8 +1,8 @@
 <div class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container">
-    <a class="navbar-brand">Restaurant Manager</a>
+    <a class="navbar-brand ml-2" href="#">Restaurant Manager</a>
     <button
-      class="navbar-toggler"
+      class="navbar-toggler mr-2"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNav"
@@ -12,7 +12,7 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
+    <div class="collapse navbar-collapse ml-2" id="navbarNav">
       <ul class="navbar-nav ml-auto"></ul>
 
       <ul class="navbar-nav" style="margin-left: auto">
@@ -20,51 +20,29 @@
           <a class="nav-link" (click)="logout()">Logout</a>
         </li>
       </ul>
-    </div>
-  </div>
-</div>
-
-<div class="container-fluid">
-  <div class="row">
-    <nav
-      id="sidebar"
-      class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
-    >
-      <div class="position-sticky">
-        <h4 class="text-dark mt-4 ml-2">Users</h4>
-
-        <ul class="nav flex-column">
+      <div *ngIf="!isLargeScreen" class="d-lg-none">
+        <ul class="navbar-nav">
           <li class="nav-item">
             <a
-              class="nav-link text-dark active"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/users/visualize']"
               routerLinkActive="active"
             >
               Visualize Users
             </a>
           </li>
-
           <li class="nav-item">
             <a
-              class="nav-link text-dark"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/users/create']"
               routerLinkActive="active"
             >
               Create User
             </a>
           </li>
-        </ul>
-      </div>
-
-      <hr class="text-dark" />
-
-      <div class="position-sticky">
-        <h4 class="text-dark mt-4 ml-2">Items</h4>
-
-        <ul class="nav flex-column">
           <li class="nav-item">
             <a
-              class="nav-link text-dark active"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/items/visualize']"
               routerLinkActive="active"
             >
@@ -73,63 +51,158 @@
           </li>
           <li class="nav-item">
             <a
-              class="nav-link text-dark"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/items/create']"
               routerLinkActive="active"
             >
               Create Item
             </a>
           </li>
-        </ul>
-      </div>
-
-      <hr class="text-dark" />
-
-      <div class="position-sticky">
-        <h4 class="text-dark mt-4 ml-2">Tables</h4>
-
-        <ul class="nav flex-column">
           <li class="nav-item">
             <a
-              class="nav-link text-dark active"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/tables/visualize']"
               routerLinkActive="active"
             >
               Visualize Tables
             </a>
           </li>
-
           <li class="nav-item">
             <a
-              class="nav-link text-dark"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/tables/create']"
               routerLinkActive="active"
             >
               Create Table
             </a>
           </li>
-        </ul>
-      </div>
-
-      <div class="position-sticky">
-        <h4 class="text-dark mt-4 ml-2">Customers</h4>
-
-        <ul class="nav flex-column">
           <li class="nav-item">
             <a
-              class="nav-link text-dark active"
+              class="nav-link"
               [routerLink]="['/owner-dashboard/groups/visualize']"
               routerLinkActive="active"
             >
               Visualize Customers
             </a>
           </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics']"
+              routerLinkActive="active"
+            >
+              Visualize Data-Analytics
+            </a>
+          </li>
+
         </ul>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="container-fluid">
+  <div class="row">
+    <nav id="sidebar" class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar" *ngIf="isLargeScreen">
+      <div class="position-sticky">
+        <div style="max-height: calc(100vh - 60px); overflow-y: auto;">
+          <h4 class="text-dark mt-4 ml-2">Users</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/users/visualize']" routerLinkActive="active">
+                Visualize Users
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" [routerLink]="['/owner-dashboard/users/create']" routerLinkActive="active">
+                Create User
+              </a>
+            </li>
+          </ul>
+          <hr class="text-dark" />
+          <h4 class="text-dark mt-4 ml-2">Items</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/items/visualize']" routerLinkActive="active">
+                Visualize Items
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" [routerLink]="['/owner-dashboard/items/create']" routerLinkActive="active">
+                Create Item
+              </a>
+            </li>
+          </ul>
+          <hr class="text-dark" />
+          <h4 class="text-dark mt-4 ml-2">Tables</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/tables/visualize']" routerLinkActive="active">
+                Visualize Tables
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark" [routerLink]="['/owner-dashboard/tables/create']" routerLinkActive="active">
+                Create Table
+              </a>
+            </li>
+          </ul>
+          <hr class="text-dark" />
+          <h4 class="text-dark mt-4 ml-2">Customers</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/groups/visualize']" routerLinkActive="active">
+                Visualize Customers
+              </a>
+            </li>
+          </ul>
+          <hr class="text-dark" />
+          <h4 class="text-dark mt-4 ml-2">Data Analytics</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/bartenders']" routerLinkActive="active">
+                Bartenders Data
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/cooks']" routerLinkActive="active">
+                Cooks Data
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/waiters']" routerLinkActive="active">
+                Waiters Data
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/cashiers']" routerLinkActive="active">
+                Cashiers Data
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/items']" routerLinkActive="active">
+                Items Data
+              </a>
+            </li>
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/data-analytics/customers']" routerLinkActive="active">
+                Customers Data
+              </a>
+            </li>
+          </ul>
+        </div>
       </div>
     </nav>
 
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+    <main class="ms-sm-auto mt-5" *ngIf="!isLargeScreen; else largeScreenContent">
       <router-outlet></router-outlet>
     </main>
+
+    <ng-template #largeScreenContent>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+        <router-outlet></router-outlet>
+      </main>
+    </ng-template>
   </div>
 </div>

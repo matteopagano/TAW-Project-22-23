@@ -60,7 +60,7 @@ export class UsersRequestService extends AuthenticatedRequest{
         endpoint = this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/bartenders'
         break;
       case "cooker":
-        endpoint = this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/cooker'
+        endpoint = this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/cooks'
         break;
       case "waiter":
         endpoint = this.baseUrl + '/restaurants/' + this.ups.getRestaurant() +'/waiters'

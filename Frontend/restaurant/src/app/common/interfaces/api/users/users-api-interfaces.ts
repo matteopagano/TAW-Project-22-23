@@ -42,6 +42,7 @@ export interface Cooker {
   email: string;
   role: string;
   idRestaurant: string;
+  itemsPrepared: itemPrepared[];
 }
 
 export interface Bartender {
@@ -50,6 +51,23 @@ export interface Bartender {
   email: string;
   role: string;
   idRestaurant: string;
+  itemsPrepared: itemPrepared[];
+}
+
+export interface itemPrepared {
+  idItem: Item;
+  count: number;
+}
+
+export interface Item {
+  _id: string;
+  itemName: string;
+  itemType: string;
+  price: number;
+  preparationTime: number;
+  idRestaurant: string;
+  countServered : number
+
 }
 
 

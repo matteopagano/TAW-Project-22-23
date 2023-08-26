@@ -207,10 +207,10 @@ restaurantSchema.methods.removeItem = function (item) {
         return false;
     }
 };
-restaurantSchema.methods.removeDay = function (day) {
-    let index = this.daysList.indexOf(new mongoose_1.Types.ObjectId(day));
+restaurantSchema.methods.removeGroup = function (group) {
+    let index = this.groups.indexOf(new mongoose_1.Types.ObjectId(group));
     if (index !== -1) {
-        this.daysList.splice(index, 1);
+        this.groups.splice(index, 1);
         return true;
     }
     else {

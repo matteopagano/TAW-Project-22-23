@@ -7,6 +7,7 @@ export interface MenuItem {
   price: number;
   preparationTime: number;
   idRestaurant: string;
+  countServered : number
   __v: number;
 }
 

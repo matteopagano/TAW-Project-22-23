@@ -4,6 +4,7 @@ import { WaiterComponent } from './waiter.component';
 import { DisplayTablesComponent } from './display-tables/display-tables.component';
 import { DisplayOrdersAwaitingComponent } from './display-orders-awaiting/display-orders-awaiting.component';
 import { DisplayOrdersServedComponent } from './display-orders-served/display-orders-served.component';
+import { CreateOrderComponent } from './create-order/create-order.component';
 
 const routes: Routes = [{
   path : '',
@@ -17,6 +18,9 @@ const routes: Routes = [{
     },
     {
       path: 'orders-served' , component: DisplayOrdersServedComponent
+    },
+    {
+      path: 'tables/:id' , component: CreateOrderComponent
     },
 
   ]

@@ -131,11 +131,6 @@ export class DisplayOrdersAwaitingComponent {
     this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
     const socket = socketService.getSocket()
 
-    socket.fromEvent("fetchTableNeeded").subscribe((data) => {
-      console.log("fetchItemsNeeded")
-      this.getTables()
-    });
-
 
     socket.fromEvent("fetchOrdersNeeded").subscribe((data) => {
       console.log("fetchItemsNeeded")
