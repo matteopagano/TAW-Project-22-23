@@ -8,7 +8,7 @@ FROM node:14
 RUN mkdir -p /app/Backend
 WORKDIR /app/Backend
 COPY package.json package-lock.json /app/Backend/
-RUN npm install
+RUN npm ci
 
 COPY /compiledSourceJS/ /app/Backend/compiledSourceJS
 
