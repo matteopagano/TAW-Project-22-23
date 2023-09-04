@@ -1,7 +1,7 @@
 # Usa un'immagine di base Node.js
 FROM node:14
 
-RUN npm install -g typescript
+#RUN npm install -g typescript
 
 
 
@@ -10,7 +10,9 @@ WORKDIR /app/Backend
 COPY package.json package-lock.json /app/Backend/
 RUN npm install
 
-COPY . /app/Backend/
+COPY /compiledSourceJS/ /app/Backend/compiledSourceJS
+
+COPY /tsconfig.json /app/Backend/
 
 # Copia il resto del codice sorgente nell'immagine
 
@@ -20,4 +22,5 @@ EXPOSE 3000
 
 #ENTRYPOINT ["tail", "-f", "/dev/null"]
 # Comando da eseguire quando il container viene avviato
-CMD ["npm", "run", "test"]
+#CMD ["npm", "run", "test"]
+CMD ["node", "./compiledSourceJS/Backend/server.js"]
