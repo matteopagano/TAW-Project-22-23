@@ -1,7 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse, HttpParamsOptions } from '@angular/common/http';
 import { environment } from 'src/env/enviroment';
-import { JwtService } from '../jwt/jwt.service';
-import { credential } from 'firebase-admin';
 
 
 export interface RequestOptions {

@@ -644,7 +644,6 @@ function deleteItemAndRemoveFromRestaurant(req, res, next) {
         const restaurant = yield Restaurant.RestaurantModel.findById(idRestaurant);
         if (restaurant.removeItem(idItem)) {
             yield restaurant.save();
-            // await Item.ItemModel.deleteOne({_id : idItem}) only logically delete from restaurant
             return res
                 .status(200)
                 .json({ error: false, errormessage: "", idItemDeleted: idItem });
@@ -1093,11 +1092,11 @@ function getUser(req, res, next) {
                 const waiter = yield Waiter.WaiterModel.findById(idUser)
                     .populate({
                     path: "ordersAwaiting",
-                    populate: { path: "idGroup", model: "Group", populate: { path: "idTable", model: "Table" } }, // Popola il campo idGroup all'interno di ordersAwaiting
+                    populate: { path: "idGroup", model: "Group", populate: { path: "idTable", model: "Table" } },
                 })
                     .populate({
                     path: "ordersServed",
-                    populate: { path: "idGroup", model: "Group" }, // Popola il campo idGroup all'interno di ordersServed
+                    populate: { path: "idGroup", model: "Group" },
                 })
                     .exec();
                 return res

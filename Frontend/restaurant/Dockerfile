@@ -2,7 +2,7 @@
 FROM node as build
 
 # Crea e imposta la directory di lavoro all'interno del container
-WORKDIR /app
+WORKDIR /app/Frontend
 
 # Copia il package.json e package-lock.json nella directory di lavoro
 COPY package*.json ./
@@ -14,6 +14,16 @@ RUN npm install
 COPY . .
 
 # Build dell'app Angular
-CMD ["ng", "serve"]
+RUN npm run build
 
-#prova
+# Utilizza un'immagine di produzione più leggera
+FROM nginx:alpine
+
+# Copia i file di produzione dell'app Angular nella directory corretta di Nginx
+COPY --from=build /app/Frontend/dist/restaurant /usr/share/nginx/html
+
+# Esponi la porta 80 per il server Nginx
+EXPOSE 80
+
+# Avvia il server Nginx
+CMD ["nginx", "-g", "daemon off;"]

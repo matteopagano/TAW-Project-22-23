@@ -1,6 +1,5 @@
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse, HttpParamsOptions } from '@angular/common/http';
 import { environment } from 'src/env/enviroment';
-import { JwtService } from '../jwt/jwt.service';
 
 export interface RequestOptions {
   headers: HttpHeaders;

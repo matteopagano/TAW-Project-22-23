@@ -26,6 +26,8 @@ export class AuthRequestService extends AuthRequest {
   login(mail: string, password: string): Observable<any> {
     const url: string = `${this.baseUrl}/login`;
 
+    console.log(this.baseUrl)
+
     const credentials: Credentials = { email: mail, password: password };
     const reqOptions: RequestOptions = super.create_options(credentials);
 
