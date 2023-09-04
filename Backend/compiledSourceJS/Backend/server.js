@@ -74,6 +74,7 @@ app.delete('/restaurants/:idr/waiters/:idu', MW.verifyJWT, MW.isOwner, MW.isOwne
 app.delete('/restaurants/:idr/cashiers/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isCashierMemberOfThatRestaurant, EP.deleteCashierAndRemoveFromRestaurant);
 app.delete('/restaurants/:idr/bartenders/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isBartenderMemberOfThatRestaurant, EP.deleteBartenderAndRemoveFromRestaurant);
 app.get('/users/:idu', MW.verifyJWT, MW.isThatUser, EP.getUser);
+app.put('/users/:idu', MW.verifyJWT, MW.isThatUser, EP.modifyPassword);
 // TABLES ENDPOINTS
 app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isWorkerOfThisRestaurant, EP.getTablesListByRestaurant);
 app.post('/restaurants/:idr/tables', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isTableAlreadyExist, EP.createTableAndAddToARestaurant);
@@ -95,8 +96,8 @@ app.put('/restaurants/:idr/tables/:idt/group/orders/:ido/items/:idi', MW.verifyJ
 // RECIPES ENDPOINTS
 app.get('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.groupHasARecipe, EP.getRecipeByRestaurantAndTable);
 app.post('/restaurants/:idr/tables/:idt/group/recipe', MW.verifyJWT, MW.isCashier, MW.isWorkerOfThisRestaurant, MW.isTableOfThatRestaurant, MW.tableHasAGroup, MW.areOrdersFinished, MW.groupHasNotARecipeYet, EP.createRecipeForGroupAndAddToARestaurant);
-app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant); // For visualizing all the recipes
-app.get('/restaurants/:idr/recipes/:idre', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipeByRestaurant); // For visualizing all the recipes
+app.get('/restaurants/:idr/recipes', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipesByRestaurant);
+app.get('/restaurants/:idr/recipes/:idre', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, EP.getRecipeByRestaurant);
 app.use(function (err, req, res, next) {
     console.log("Request error: " + JSON.stringify(err));
     res.status(err.statusCode || 500).json(err);
@@ -137,6 +138,44 @@ function InitExpressServer() {
         socket.on('fetchOrders', (room) => {
             console.log("Inviato fetchOrdersNeeded");
             io.to(room).emit('fetchOrdersNeeded');
+        });
+        socket.on('newOrderDrink', (room, order, idTable) => {
+            console.log("Inviato fetchNewOrderDrink");
+            socket.broadcast.to(room).emit('fetchNewOrderDrink', { order: order, idTable: idTable });
+        });
+        socket.on('newOrderDish', (room, order, idTable) => {
+            console.log("Inviato fetchNewOrderDish");
+            //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+            socket.broadcast.to(room).emit('fetchNewOrderDish', { order: order, idTable: idTable });
+        });
+        socket.on('setItemOfOrderDrinkStatus', (room, order, idTable) => {
+            console.log("Inviato fetchItemOfOrderDrinkStatus");
+            //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+            socket.broadcast.to(room).emit('fetchItemOfOrderDrinkStatus', { order: order });
+        });
+        socket.on('setItemOfOrderDishStatus', (room, order) => {
+            console.log("Inviato fetchItemOfOrderDishStatus");
+            //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+            socket.broadcast.to(room).emit('fetchItemOfOrderDishStatus', { order: order });
+        });
+        ////////////////////////
+        socket.on('setOrderDrinkStatus', (room, order) => {
+            console.log("Inviato setOrderDishStatus");
+            //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+            socket.broadcast.to(room).emit('fetchOrderDrinkStatus', { order: order });
+            console.log("Inviato newOrderCompleted");
+            const str = room + order.idWaiter + "ordersAwaited";
+            console.log("iviando nella stanza: " + str);
+            io.to(room + order.idWaiter + "ordersAwaited").emit('fetchOrderReady', { order: order });
+        });
+        socket.on('setOrderDishStatus', (room, order) => {
+            console.log("Inviato setOrderDishStatus");
+            //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+            socket.broadcast.to(room).emit('fetchOrderDishStatus', { order: order });
+            console.log("Inviato newOrderCompleted");
+            const str = room + order.idWaiter + "ordersAwaited";
+            console.log("iviando nella stanza: " + str);
+            io.to(room + order.idWaiter + "ordersAwaited").emit('fetchOrderReady', { order: order });
         });
         socket.on('disconnect', () => {
             console.log(`Socket ${socket.id} si è disconnesso`);

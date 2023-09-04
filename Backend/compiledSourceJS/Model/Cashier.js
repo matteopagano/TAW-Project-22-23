@@ -4,7 +4,9 @@ exports.CashierModel = exports.addRecipe = exports.createCashier = void 0;
 const User_1 = require("./User");
 const mongoose_1 = require("mongoose");
 const cashierSchema = new mongoose_1.Schema({
-    recipesPrinted: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Restaurant', required: true }],
+    recipesPrinted: [
+        { type: mongoose_1.Schema.Types.ObjectId, ref: "Restaurant", required: true },
+    ],
 }, User_1.options);
 function createCashier(username, email, password, idRestaurant) {
     const newCashier = new exports.CashierModel({
@@ -12,7 +14,7 @@ function createCashier(username, email, password, idRestaurant) {
         email: email,
         role: User_1.RoleType.CASHIER,
         receiptsPrinted: [],
-        idRestaurant: idRestaurant
+        idRestaurant: idRestaurant,
     });
     newCashier.setPassword(password);
     return newCashier;
@@ -25,4 +27,4 @@ exports.addRecipe = addRecipe;
 cashierSchema.methods.isCashierOf = function (restaurantId) {
     return this.idRestaurant.toString() === restaurantId;
 };
-exports.CashierModel = User_1.UserModel.discriminator('Cashier', cashierSchema, User_1.RoleType.CASHIER);
+exports.CashierModel = User_1.UserModel.discriminator("Cashier", cashierSchema, User_1.RoleType.CASHIER);

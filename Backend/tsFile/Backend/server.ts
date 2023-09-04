@@ -15,6 +15,7 @@ app.use(cors());
 
 
 
+
 export const http = require('http');
 
 
@@ -28,7 +29,6 @@ app.use((req, res, next) => {
   console.log(`Nuova richiesta in entrata: ${req.method} ${req.url}`);
   next();
 });
-
 
 
 // AUTH ENDPOINTS
@@ -57,6 +57,7 @@ app.delete('/restaurants/:idr/cashiers/:idu', MW.verifyJWT, MW.isOwner, MW.isOwn
 app.delete('/restaurants/:idr/bartenders/:idu', MW.verifyJWT, MW.isOwner, MW.isOwnerOfThisRestaurant, MW.isBartenderMemberOfThatRestaurant, EP.deleteBartenderAndRemoveFromRestaurant);
 
 app.get('/users/:idu', MW.verifyJWT, MW.isThatUser, EP.getUser)
+app.put('/users/:idu', MW.verifyJWT, MW.isThatUser, EP.modifyPassword)
 
 // TABLES ENDPOINTS
 app.get('/restaurants/:idr/tables', MW.verifyJWT, MW.isWorkerOfThisRestaurant, EP.getTablesListByRestaurant);
@@ -147,12 +148,62 @@ function InitExpressServer(): void {
       io.to(room).emit('fetchOrdersNeeded');
     });
 
+    socket.on('newOrderDrink', (room, order, idTable) => {
+      console.log("Inviato fetchNewOrderDrink")
+  
+      socket.broadcast.to(room).emit('fetchNewOrderDrink', {order : order, idTable : idTable});
+    });
+
+    socket.on('newOrderDish', (room, order, idTable) => {
+      console.log("Inviato fetchNewOrderDish");
+      //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+      socket.broadcast.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+    });
+
+    socket.on('setItemOfOrderDrinkStatus', (room, order, idTable) => {
+      console.log("Inviato fetchItemOfOrderDrinkStatus");
+      //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+      socket.broadcast.to(room).emit('fetchItemOfOrderDrinkStatus', {order : order});
+    });
+
+    socket.on('setItemOfOrderDishStatus', (room, order) => {
+      console.log("Inviato fetchItemOfOrderDishStatus");
+      //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+      socket.broadcast.to(room).emit('fetchItemOfOrderDishStatus', {order : order});
+    });
+
+    ////////////////////////
+
+    socket.on('setOrderDrinkStatus', (room, order) => {
+      console.log("Inviato setOrderDishStatus");
+      //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+      socket.broadcast.to(room).emit('fetchOrderDrinkStatus', {order : order});
+      console.log("Inviato newOrderCompleted");
+      const str = room + order.idWaiter + "ordersAwaited"
+      console.log("iviando nella stanza: " + str)
+      io.to(room + order.idWaiter + "ordersAwaited").emit('fetchOrderReady', {order : order});
+    });
+
+    socket.on('setOrderDishStatus', (room, order) => {
+      console.log("Inviato setOrderDishStatus");
+      //io.to(room).emit('fetchNewOrderDish', {order : order, idTable : idTable});
+      socket.broadcast.to(room).emit('fetchOrderDishStatus', {order : order});
+      console.log("Inviato newOrderCompleted");
+      const str = room + order.idWaiter + "ordersAwaited"
+      console.log("iviando nella stanza: " + str)
+      io.to(room + order.idWaiter + "ordersAwaited").emit('fetchOrderReady', {order : order});
+    });
+
+
     socket.on('disconnect', () => {
       console.log(`Socket ${socket.id} si è disconnesso`);
     });
   });
   server.listen(3000, () => console.log("HTTP Server started on port 3000"));
 }
+
+
+
 
 mongoose.connect("mongodb://mongodb:27017/MioDB",)
 .then(() => {

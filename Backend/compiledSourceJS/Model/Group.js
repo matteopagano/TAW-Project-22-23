@@ -20,29 +20,29 @@ const groupSchema = new mongoose_1.Schema({
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Order'
-            }
+                ref: "Order",
+            },
         ],
-        required: false
+        required: false,
     },
     idRestaurant: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: false,
-        ref: 'Restaurant'
+        ref: "Restaurant",
     },
     idRecipe: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: false,
-        ref: 'Recipe'
+        ref: "Recipe",
     },
     idTable: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: false,
-        ref: 'Table'
+        ref: "Table",
     },
 });
 groupSchema.methods.hasRecipe = function () {
-    return (!(this.idRecipe === null));
+    return !(this.idRecipe === null);
 };
 groupSchema.methods.isOrderPresent = function (order) {
     try {
@@ -73,4 +73,4 @@ function addRecipeToGroup(recipe, group) {
     group.idRecipe = recipe._id;
 }
 exports.addRecipeToGroup = addRecipeToGroup;
-exports.GroupModel = (0, mongoose_1.model)('Group', groupSchema);
+exports.GroupModel = (0, mongoose_1.model)("Group", groupSchema);

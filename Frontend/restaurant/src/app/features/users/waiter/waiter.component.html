@@ -1,4 +1,4 @@
-<!-- Navbar -->
+
 <nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container">
     <a class="navbar-brand ml-2" href="#">Restaurant Manager</a>
@@ -13,6 +13,7 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
+
     <div class="collapse navbar-collapse ml-2" id="navbarNav">
       <ul class="navbar-nav ml-auto"></ul>
 
@@ -48,6 +49,15 @@
               routerLinkActive="active"
             >
               Orders Served
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/waiter-dashboard/manage-account']"
+              routerLinkActive="active"
+            >
+              Manage Account
             </a>
           </li>
         </ul>
@@ -108,6 +118,21 @@
                 routerLinkActive="active"
               >
                 Visualize Orders
+              </a>
+            </li>
+          </ul>
+        </div>
+        <hr class="text-dark" />
+        <div class="position-sticky">
+          <h4 class="text-dark mt-4 ml-2">Manage Account</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a
+                class="nav-link text-dark active"
+                [routerLink]="['/waiter-dashboard/manage-account']"
+                routerLinkActive="active"
+              >
+                Visualize Account
               </a>
             </li>
           </ul>

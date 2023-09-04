@@ -45,7 +45,12 @@ export class CreateOrderComponent {
       this.idTable = params['id'];
       console.log('ID recuperato dalla route:', this.idTable);
 
+      this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
+      const socket = socketService.getSocket()
+
     });
+
+
   }
 
   getMenuItems() {
@@ -85,12 +90,16 @@ export class CreateOrderComponent {
   avviaOrdine() {
     if (this.cartItems.length > 0) {
       const order = {
-        items: this.cartItems
+        items: this.cartItems,
       };
 
       this.ors.createGroupOrder(this.idTable, order).subscribe((response) => {
-        console.log('Ordine inviato con successo', response);
-        this.socketService.emitFetchOrders(this.ups.getRestaurant())
+        if(response.newOrder.newOrderDish){
+          this.socketService.emitNewOrderDish(this.ups.getRestaurant(), response.newOrder.newOrderDish, response.newOrder.idTable)
+        }
+        if(response.newOrder.newOrderDrink){
+          this.socketService.emitNewOrderDrink(this.ups.getRestaurant(), response.newOrder.newOrderDrink, response.newOrder.idTable)
+        }
       }, (error) => {
         console.error('Errore nell\'invio dell\'ordine', error);
       });

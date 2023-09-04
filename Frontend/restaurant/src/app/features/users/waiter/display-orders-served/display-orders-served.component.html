@@ -1,12 +1,37 @@
-
 <div class="container mt-4">
-  <h1>List orders served</h1>
+  <h3 class="bg-success text-white p-2">List Orders Served</h3>
+
+  <div class="form-group">
+    <label for="orderCount">Number of Orders to Display:</label>
+    <select class="form-control" id="orderCount" [(ngModel)]="ordersToShow" (change)="updateOrdersToShow()">
+      <option value="5">5</option>
+      <option value="20">20</option>
+      <option value="50">50</option>
+      <option value="100">100</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="orderSort">Order Sort:</label>
+    <select class="form-control" id="orderSort" [(ngModel)]="orderSort" (change)="updateOrdersToShow()">
+      <option value="asc">Most Recent First</option>
+      <option value="desc">Oldest First</option>
+    </select>
+  </div>
+
+  <div class="form-group">
+    <label for="orderDate">Order Date:</label>
+    <input type="date" class="form-control" id="orderDate" [(ngModel)]="orderDate" (change)="updateOrdersToShow()" />
+  </div>
+
+  <br>
+
   <div class="row">
-    <div class="col-md-4" *ngFor="let order of ordersServed">
+    <div class="col-md-4" *ngFor="let order of filteredOrders">
       <div class="card mb-4" [ngClass]="{'bg-light': order.state === 'served'}">
         <div class="card-body">
-          <p class="card-text">Started Time: {{ order.timeStarted | date:'dd/MM HH:mm' }}</p>
-          <p class="card-text">Finish Fine: {{ order.timeCompleted| date:'dd/MM HH:mm' }}</p>
+          <p class="card-text">Order Placed at: {{ order.timeStarted | date:'HH:mm on dd/MM' }}</p>
+          <p class="card-text">Order Served at: {{ order.timeCompleted | date:'HH:mm on dd/MM' }}</p>
         </div>
       </div>
     </div>

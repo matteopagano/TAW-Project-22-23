@@ -15,6 +15,7 @@ import { DisplayCashiersDataComponent } from './display-cashiers-data/display-ca
 import { VisualizeItemsDataComponent } from './visualize-items-data/visualize-items-data.component';
 import { VisualizeCustomerDetailsComponent } from './visualize-customer-details/visualize-customer-details.component';
 import { VisualizeCustomersDataComponent } from './visualize-customers-data/visualize-customers-data.component';
+import { ManageAccountComponent } from '../manage-account/manage-account.component';
 
 const routes: Routes = [{
   path : '',
@@ -45,6 +46,10 @@ const routes: Routes = [{
         {path:'items', component: VisualizeItemsDataComponent},
         {path:'customers', component: VisualizeCustomersDataComponent}
       ]
+    },
+
+    {
+      path: 'manage-account' ,component: ManageAccountComponent
     },
     ]
 }];

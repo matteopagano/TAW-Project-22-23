@@ -2,6 +2,25 @@
   <div class="row">
     <div class="col-md-12">
       <h3 class="bg-success text-white p-2">Items</h3>
+
+      <div class="form-group">
+        <label for="showType">Show:</label>
+        <select class="form-control" id="showType" [(ngModel)]="showType" (change)="applyFilters()">
+          <option value="All">All</option>
+          <option value="dish">Dish</option>
+          <option value="drink">Drink</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label for="sortBy">Sort By:</label>
+        <select class="form-control" id="sortBy" [(ngModel)]="sortBy" (change)="applyFilters()">
+          <option value="name">Name</option>
+          <option value="priceLE">Price from less expensive</option>
+          <option value="priceME">Price from most expensive</option>
+        </select>
+      </div>
+
       <table class="table table-bordered">
         <thead>
           <tr>
@@ -13,7 +32,7 @@
           </tr>
         </thead>
         <tbody>
-          <tr *ngFor="let item of items">
+          <tr *ngFor="let item of filteredItems">
             <td>{{ item.itemName }}</td>
             <td>{{ item.itemType }}</td>
             <td>{{ item.price }}</td>
@@ -27,3 +46,4 @@
     </div>
   </div>
 </div>
+

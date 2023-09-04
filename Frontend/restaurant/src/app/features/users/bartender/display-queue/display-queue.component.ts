@@ -3,22 +3,8 @@ import { SocketService } from 'src/app/socket.service';
 import { UserPropertyService } from 'src/app/common/api/user-property/user-property.service';
 import { TablesRequestService } from 'src/app/common/api/http-requests/requests/tables/tables-request.service';
 import { OrdersRequestService } from 'src/app/common/api/http-requests/requests/orders/orders-request.service';
-import { ItemsRequestService } from 'src/app/common/api/http-requests/requests/items/items-request.service';
-import { Router } from '@angular/router';
 
 
-interface TablesResponse {
-  error: boolean;
-  errormessage: string;
-  tables: {
-      _id: string;
-      tableNumber: string;
-      maxSeats: number;
-      group: string;
-      restaurantId: string;
-      __v: number;
-  }[];
-}
 
 export interface Table {
   _id: string;
@@ -37,34 +23,31 @@ export interface Order {
   state: string;
   timeCompleted: string | null;
   timeStarted: string;
-  tableId : string
+  idTable : string
   __v: number;
 }
 
 export interface OrderItem {
   timeFinished: string | null;
-  idItem: string;
+  idItem: idItem;
   state: string;
   completedBy: string | null;
   count: number;
   _id: string;
 }
 
-interface MenuItem {
-  _id: string;
+interface idItem {
+  countServered: number;
+  idRestaurant: string;
   itemName: string;
   itemType: string;
-  price: number;
   preparationTime: number;
-  idRestaurant: string;
+  price: number;
   __v: number;
+  _id: string;
 }
 
-interface MenuItemsResponse {
-  error: boolean;
-  errormessage: string;
-  tables: MenuItem[];
-}
+
 @Component({
   selector: 'app-display-queue',
   templateUrl: './display-queue.component.html',
@@ -73,18 +56,14 @@ interface MenuItemsResponse {
 export class DisplayQueueComponent {
   tables: Table[] = [];
   orders: Order[] = [];
-  menuItems: MenuItem[] = [];
 
   constructor(
       private ups : UserPropertyService,
       private socketService: SocketService,
       private trs : TablesRequestService,
       private ors : OrdersRequestService,
-      private irs : ItemsRequestService,
-      private router : Router
     ) {
     this.getOrders()
-    this.getMenuItems()
 
     this.socketService.joinRestaurantRoom(ups.getRestaurant());
     const socket = socketService.getSocket()
@@ -94,17 +73,42 @@ export class DisplayQueueComponent {
       this.getOrders()
     });
 
+    socket.fromEvent("fetchNewOrderDrink").subscribe((data : any) => {
+      console.log("fetchNewOrderDrink")
+      data.order.idTable = data.idTable
+      this.orders.push(data.order)
+    })
 
+    socket.fromEvent("fetchItemOfOrderDrinkStatus").subscribe((data: any) => {
+      console.log("fetchItemOfOrderDrinkStatus");
+      console.log(data);
 
-    socket.fromEvent("fetchOrdersNeeded").subscribe((data) => {
-      console.log("fetchOrdersNeeded")
-      this.getOrders()
+      const index = this.orders.findIndex((order) => order._id === data.order._id);
+
+      if (index !== -1) {
+        this.orders[index] = data.order;
+
+        console.log("Ordine modificato:", this.orders[index]);
+      } else {
+        console.log("Ordine non trovato");
+      }
     });
 
-    socket.fromEvent("fetchItemsNeeded").subscribe((data) => {
-      console.log("fetchItemsNeeded")
-      this.getMenuItems()
+
+    socket.fromEvent("fetchOrderDrinkStatus").subscribe((data: any) => {
+      console.log("fetchOrderDrinkStatus");
+      console.log(data);
+
+      const index = this.orders.findIndex((order) => order._id === data.order._id);
+
+      if (index !== -1) {
+        this.orders.splice(index, 1);
+      } else {
+        console.log("Ordine non trovato");
+      }
+
     });
+
 
 
   }
@@ -122,8 +126,8 @@ export class DisplayQueueComponent {
           const orderPromise = new Promise<void>((resolve, reject) => {
             this.ors.getOrdersDrinkNotStartedByTable(table._id).subscribe(
               (data) => {
-                data.orders.forEach((order: { tableId: string; }) => {
-                  order.tableId = table._id;
+                data.orders.forEach((order: { idTable: string; }) => {
+                  order.idTable = table._id;
                 });
 
                 tempOrders = tempOrders.concat(data.orders);
@@ -154,30 +158,44 @@ export class DisplayQueueComponent {
   }
 
 
-  getMenuItems() {
-    this.irs.getItems().subscribe((data: MenuItemsResponse) => {
-      this.menuItems = data.tables;
-    });
-  }
-
-  findItemName(target : string){
-    return this.menuItems.find(item => item._id === target)?.itemName
-  }
 
   itemCompleted(table : string, order: string, item : string) {
     this.ors.modifyItemOfOrderCompleted(table, order, item).subscribe((data) => {
-      this.socketService.emitFetchOrders(this.ups.getRestaurant())
 
+      console.log("stampo data")
+      console.log(data)
+
+      const orderToModify = this.orders.find((orderObj) => orderObj._id === order);
+      if (orderToModify) {
+        console.log(orderToModify)
+        console.log(item)
+
+        const targetItem = orderToModify.items.find((orderItem) => orderItem.idItem._id === item);
+
+        if (targetItem) {
+          targetItem.state = "completed";
+          this.socketService.emitItemOfOrderDrinkStatus(this.ups.getRestaurant(), data.orderModified)
+        } else {
+          console.log("Elemento non trovato");
+        }
+      } else {
+        console.log("Ordine non trovato");
+      }
     })
-
-
   }
 
 
   orderCompleted(tableId: string, orderId: string) {
     this.ors.modifyOrderReady(tableId, orderId).subscribe((data) => {
-      this.socketService.emitFetchOrders(this.ups.getRestaurant())
-      console.log(data)
+      const orderIndexToRemove = this.orders.findIndex((orderObj) => orderObj._id === orderId);
+
+      if (orderIndexToRemove !== -1) {
+        this.orders.splice(orderIndexToRemove, 1);
+        console.log(data.orderModifyied)
+        this.socketService.emitOrderDrinkCompleted(this.ups.getRestaurant(), data.orderModifyied);
+      } else {
+        console.log("Ordine non trovato");
+      }
 
     })
   }

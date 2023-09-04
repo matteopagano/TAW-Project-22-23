@@ -33,7 +33,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.basicAuthentication = exports.isItemOfThatRestaurant = exports.tableHasAGroup = exports.isTableEmpty = exports.isOrderOfThatGroup = exports.isTableOfThatRestaurant = exports.isTableAlreadyExist = exports.isItemAlreadyExist = exports.isUserAlreadyExist = exports.isValidRestaurantInput = exports.isDayOfThatRestaurant = exports.isBartenderMemberOfThatRestaurant = exports.isCashierMemberOfThatRestaurant = exports.isWaiterMemberOfThatRestaurant = exports.isCookMemberOfThatRestaurant = exports.hasNotAlreadyARestaurant = exports.areOrdersFinished = exports.groupHasARecipeYet = exports.groupHasNotARecipeYet = exports.groupHasARecipe = exports.groupHasATable = exports.isTableRestaurantTheSameAsCashier = exports.isTableRestaurantTheSameAsWaiter = exports.isCustomerRestaurantTheSameAsWaiter = exports.isCashierOfThisRestaurant = exports.isWorkerOfThisRestaurant = exports.isOwnerOfThisRestaurant = exports.isCashier = exports.isWaiter = exports.isCookOrWaiter = exports.isCookOrWaiterOrBartender = exports.isCookOrBartender = exports.isOwnerOrCashierOrWaiter = exports.isOwnerOrWaiter = exports.isThatUser = exports.isOwner = exports.verifyJWT = void 0;
-const passport = require("passport"); // authentication middleware for Express
+const passport = require("passport");
 const passportHTTP = require("passport-http");
 const User = __importStar(require("../Model/User"));
 const Owner = __importStar(require("../Model/Owner"));
@@ -54,19 +54,19 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
         }
         if (user.isPasswordCorrect(password)) {
             switch (user.role) {
-                case 'owner':
+                case "owner":
                     user = new Owner.OwnerModel(user);
                     break;
-                case 'bartender':
+                case "bartender":
                     user = new Bartender.BartenderModel(user);
                     break;
-                case 'cashier':
+                case "cashier":
                     user = new Cashier.CashierModel(user);
                     break;
-                case 'cook':
+                case "cook":
                     user = new Cooker.CookModel(user);
                     break;
-                case 'waiter':
+                case "waiter":
                     user = new Waiter.WaiterModel(user);
                     break;
             }
@@ -79,7 +79,7 @@ passport.use(new passportHTTP.BasicStrategy(function (username, password, done) 
 }));
 exports.verifyJWT = (0, express_jwt_1.expressjwt)({
     secret: process.env.JWT_SECRET,
-    algorithms: ["HS256"]
+    algorithms: ["HS256"],
 });
 function isOwner(req, res, next) {
     const user = new User.UserModel(req.auth);
@@ -87,7 +87,11 @@ function isOwner(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Owner" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Owner",
+        });
     }
 }
 exports.isOwner = isOwner;
@@ -97,7 +101,11 @@ function isThatUser(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not this user " + idUser });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not this user " + idUser,
+        });
     }
 }
 exports.isThatUser = isThatUser;
@@ -107,7 +115,11 @@ function isOwnerOrWaiter(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Owner or Waiter" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Owner or Waiter",
+        });
     }
 }
 exports.isOwnerOrWaiter = isOwnerOrWaiter;
@@ -117,7 +129,11 @@ function isOwnerOrCashierOrWaiter(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Owner or Waiter or Cashier" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Owner or Waiter or Cashier",
+        });
     }
 }
 exports.isOwnerOrCashierOrWaiter = isOwnerOrCashierOrWaiter;
@@ -127,7 +143,11 @@ function isCookOrBartender(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Cook or Bartender" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Cook or Bartender",
+        });
     }
 }
 exports.isCookOrBartender = isCookOrBartender;
@@ -137,7 +157,11 @@ function isCookOrWaiterOrBartender(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Cook or Bartender" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Cook or Bartender",
+        });
     }
 }
 exports.isCookOrWaiterOrBartender = isCookOrWaiterOrBartender;
@@ -147,7 +171,11 @@ function isCookOrWaiter(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Cook or Waiter" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Cook or Waiter",
+        });
     }
 }
 exports.isCookOrWaiter = isCookOrWaiter;
@@ -157,7 +185,11 @@ function isWaiter(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Waiter" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Waiter",
+        });
     }
 }
 exports.isWaiter = isWaiter;
@@ -167,7 +199,11 @@ function isCashier(req, res, next) {
         return next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "You are not Cashier" });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "You are not Cashier",
+        });
     }
 }
 exports.isCashier = isCashier;
@@ -182,11 +218,21 @@ function isOwnerOfThisRestaurant(req, res, next) {
                     return next();
                 }
                 else {
-                    next({ statusCode: 404, error: true, errormessage: "You are not owner of id: " + idRistoranteParameter + " restaurant." });
+                    next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: "You are not owner of id: " +
+                            idRistoranteParameter +
+                            " restaurant.",
+                    });
                 }
             }
             else {
-                return next({ statusCode: 404, error: true, errormessage: "owner:" + ownerAuthenticated._id + " has not restaurant" });
+                return next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "owner:" + ownerAuthenticated._id + " has not restaurant",
+                });
             }
         }
         else {
@@ -206,7 +252,11 @@ function isWorkerOfThisRestaurant(req, res, next) {
                 return next();
             }
             else {
-                return next({ statusCode: 404, error: true, errormessage: "You are not user of id: " + idRistoranteParameter + " restaurant." });
+                return next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "You are not user of id: " + idRistoranteParameter + " restaurant.",
+                });
             }
         }
         else {
@@ -225,7 +275,13 @@ function isCashierOfThisRestaurant(req, res, next) {
                 return next();
             }
             else {
-                next({ statusCode: 404, error: true, errormessage: "You are not cashier of id: " + idRistoranteParameter + " restaurant." });
+                next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "You are not cashier of id: " +
+                        idRistoranteParameter +
+                        " restaurant.",
+                });
             }
         }
         else {
@@ -242,15 +298,26 @@ function isCustomerRestaurantTheSameAsWaiter(req, res, next) {
         const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
         if (waiterAuthenticated !== null) {
             if (customerGroup !== null) {
-                if (waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()) {
+                if (waiterAuthenticated.idRestaurant.toString() ===
+                    customerGroup.idRestaurant.toString()) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: customerGroup._id +
+                            " is not customergroup of the waiter " +
+                            waiterAuthenticated._id,
+                    });
                 }
             }
             else {
-                next({ statusCode: 404, error: true, errormessage: "customerGroup not found" });
+                next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "customerGroup not found",
+                });
             }
         }
         else {
@@ -267,11 +334,18 @@ function isTableRestaurantTheSameAsWaiter(req, res, next) {
         const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
         if (waiterAuthenticated !== null) {
             if (table !== null) {
-                if (waiterAuthenticated.idRestaurant.toString() === table.restaurantId.toString()) {
+                if (waiterAuthenticated.idRestaurant.toString() ===
+                    table.restaurantId.toString()) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: table._id + " is not table of restaurant" + waiterAuthenticated.idRestaurant });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: table._id +
+                            " is not table of restaurant" +
+                            waiterAuthenticated.idRestaurant,
+                    });
                 }
             }
             else {
@@ -296,7 +370,11 @@ function isTableRestaurantTheSameAsCashier(req, res, next) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: table._id + " is not table of restaurant " + cashier.idRestaurant });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: table._id + " is not table of restaurant " + cashier.idRestaurant,
+                    });
                 }
             }
             else {
@@ -317,15 +395,26 @@ function groupHasATable(req, res, next) {
         const waiterAuthenticated = yield Waiter.WaiterModel.findById(idWaiterAuthenticated);
         if (waiterAuthenticated !== null) {
             if (customerGroup !== null) {
-                if (waiterAuthenticated.idRestaurant.toString() === customerGroup.idRestaurant.toString()) {
+                if (waiterAuthenticated.idRestaurant.toString() ===
+                    customerGroup.idRestaurant.toString()) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: customerGroup._id + " is not customergroup of the waiter " + waiterAuthenticated._id });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: customerGroup._id +
+                            " is not customergroup of the waiter " +
+                            waiterAuthenticated._id,
+                    });
                 }
             }
             else {
-                next({ statusCode: 404, error: true, errormessage: "customerGroup not found not found" });
+                next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "customerGroup not found not found",
+                });
             }
         }
         else {
@@ -346,7 +435,11 @@ function groupHasARecipe(req, res, next) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: group._id + " has not a recipe " });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: group._id + " has not a recipe ",
+                    });
                 }
             }
             else {
@@ -371,7 +464,11 @@ function groupHasNotARecipeYet(req, res, next) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: group._id + " has a recipe " });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: group._id + " has a recipe ",
+                    });
                 }
             }
             else {
@@ -396,7 +493,11 @@ function groupHasARecipeYet(req, res, next) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: group._id + " doesn't have a recipe " });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: group._id + " doesn't have a recipe ",
+                    });
                 }
             }
             else {
@@ -419,13 +520,16 @@ function areOrdersFinished(req, res, next) {
         if (table !== null) {
             if (group !== null) {
                 const orders = group.ordersList;
-                console.log(orders);
-                const allServed = orders.every((orderItem) => orderItem.state === 'served');
+                const allServed = orders.every((orderItem) => orderItem.state === "served");
                 if (allServed) {
                     return next();
                 }
                 else {
-                    return next({ statusCode: 404, error: true, errormessage: group._id + " has orders not servered " });
+                    return next({
+                        statusCode: 404,
+                        error: true,
+                        errormessage: group._id + " has orders not servered ",
+                    });
                 }
             }
             else {
@@ -447,11 +551,22 @@ function hasNotAlreadyARestaurant(req, res, next) {
                 next();
             }
             else {
-                return next({ statusCode: 404, error: true, errormessage: "Owner: " + owner._id + " has already a restaurant. restaurantId:" + owner.restaurantOwn.toString() });
+                return next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: "Owner: " +
+                        owner._id +
+                        " has already a restaurant. restaurantId:" +
+                        owner.restaurantOwn.toString(),
+                });
             }
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Owner with id: " + req.auth._id + " doesn't exist" });
+            return next({
+                statusCode: 404,
+                error: true,
+                errormessage: "Owner with id: " + req.auth._id + " doesn't exist",
+            });
         }
     });
 }
@@ -465,7 +580,14 @@ function isCookMemberOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "cook " + cookIdToRemove + " is not member of " + restaurantIdInWhichRemoveCook });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "cook " +
+                    cookIdToRemove +
+                    " is not member of " +
+                    restaurantIdInWhichRemoveCook,
+            });
         }
     });
 }
@@ -479,7 +601,14 @@ function isWaiterMemberOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "waiter " + waiterIdToRemove + " is not member of " + restaurantIdInWhichRemoveWaiter });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "waiter " +
+                    waiterIdToRemove +
+                    " is not member of " +
+                    restaurantIdInWhichRemoveWaiter,
+            });
         }
     });
 }
@@ -493,7 +622,14 @@ function isCashierMemberOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "cashier " + cashierIdToRemove + " is not member of " + restaurantIdInWhichRemoveCashier });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "cashier " +
+                    cashierIdToRemove +
+                    " is not member of " +
+                    restaurantIdInWhichRemoveCashier,
+            });
         }
     });
 }
@@ -507,7 +643,14 @@ function isBartenderMemberOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "bartender " + bartenderIdToRemove + " is not member of " + restaurantIdInWhichRemoveBartender });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "bartender " +
+                    bartenderIdToRemove +
+                    " is not member of " +
+                    restaurantIdInWhichRemoveBartender,
+            });
         }
     });
 }
@@ -521,7 +664,14 @@ function isDayOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "day " + idDayToRemove + " is not day of " + restaurantIdInWhichRemoveDay });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "day " +
+                    idDayToRemove +
+                    " is not day of " +
+                    restaurantIdInWhichRemoveDay,
+            });
         }
     });
 }
@@ -532,7 +682,12 @@ function isValidRestaurantInput(req, res, next) {
         next();
     }
     else {
-        return next({ statusCode: 404, error: true, errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " + restaurantNameBody });
+        return next({
+            statusCode: 404,
+            error: true,
+            errormessage: "Restaurant name not valid. Name's length must be less than 16. restaurant name : " +
+                restaurantNameBody,
+        });
     }
 }
 exports.isValidRestaurantInput = isValidRestaurantInput;
@@ -544,7 +699,11 @@ function isUserAlreadyExist(req, res, next) {
             next();
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "User : " + emailBody + " already exist." });
+            return next({
+                statusCode: 404,
+                error: true,
+                errormessage: "User : " + emailBody + " already exist.",
+            });
         }
     });
 }
@@ -557,7 +716,11 @@ function isItemAlreadyExist(req, res, next) {
             next();
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Item : " + itemName + " already exist." });
+            return next({
+                statusCode: 404,
+                error: true,
+                errormessage: "Item : " + itemName + " already exist.",
+            });
         }
     });
 }
@@ -570,7 +733,11 @@ function isTableAlreadyExist(req, res, next) {
             next();
         }
         else {
-            return next({ statusCode: 404, error: true, errormessage: "Table : " + tableNumber + " already exist." });
+            return next({
+                statusCode: 404,
+                error: true,
+                errormessage: "Table : " + tableNumber + " already exist.",
+            });
         }
     });
 }
@@ -584,7 +751,14 @@ function isTableOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "table " + tableIdToRemove + " is not table of " + restaurantIdInWhichRemoveTable });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "table " +
+                    tableIdToRemove +
+                    " is not table of " +
+                    restaurantIdInWhichRemoveTable,
+            });
         }
     });
 }
@@ -599,7 +773,11 @@ function isOrderOfThatGroup(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "order " + orderId + " is not order of group" + group._id });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "order " + orderId + " is not order of group" + group._id,
+            });
         }
     });
 }
@@ -615,11 +793,22 @@ function isTableEmpty(req, res, next) {
                 next();
             }
             else {
-                next({ statusCode: 404, error: true, errormessage: numberOfPerson + ">" + table.maxSeats + ", table capacity is not sufficient" });
+                next({
+                    statusCode: 404,
+                    error: true,
+                    errormessage: numberOfPerson +
+                        ">" +
+                        table.maxSeats +
+                        ", table capacity is not sufficient",
+                });
             }
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "table " + tableIdToAdd + " is not empty" });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "table " + tableIdToAdd + " is not empty",
+            });
         }
     });
 }
@@ -628,12 +817,15 @@ function tableHasAGroup(req, res, next) {
     return __awaiter(this, void 0, void 0, function* () {
         const idTable = req.params.idt;
         const table = yield Table.TableModel.findById(idTable);
-        //If the table ha s group sitted
         if (table.group) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "table " + idTable + " doesn't have a group sitted" });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "table " + idTable + " doesn't have a group sitted",
+            });
         }
     });
 }
@@ -647,9 +839,18 @@ function isItemOfThatRestaurant(req, res, next) {
             next();
         }
         else {
-            next({ statusCode: 404, error: true, errormessage: "item " + itemIdToRemove + " is not item of " + restaurantIdInWhichRemoveTable });
+            next({
+                statusCode: 404,
+                error: true,
+                errormessage: "item " +
+                    itemIdToRemove +
+                    " is not item of " +
+                    restaurantIdInWhichRemoveTable,
+            });
         }
     });
 }
 exports.isItemOfThatRestaurant = isItemOfThatRestaurant;
-exports.basicAuthentication = passport.authenticate('basic', { session: false });
+exports.basicAuthentication = passport.authenticate("basic", {
+    session: false,
+});

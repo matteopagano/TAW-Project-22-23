@@ -45,25 +45,29 @@ var RoleType;
     RoleType["COOK"] = "cook";
     RoleType["BARTENDER"] = "bartender";
 })(RoleType || (exports.RoleType = RoleType = {}));
-exports.options = { discriminatorKey: 'role' };
+exports.options = { discriminatorKey: "role" };
 const userSchema = new mongoose_1.Schema({
     username: { type: mongoose_1.Schema.Types.String, required: true },
     email: { type: mongoose_1.Schema.Types.String, required: true },
     digest: { type: mongoose_1.Schema.Types.String, required: true },
     role: { type: mongoose_1.Schema.Types.String, enum: RoleType, required: true },
     salt: { type: mongoose_1.Schema.Types.String, required: true },
-    idRestaurant: { type: mongoose_1.Schema.Types.ObjectId, required: false, ref: 'Restaurant' },
+    idRestaurant: {
+        type: mongoose_1.Schema.Types.ObjectId,
+        required: false,
+        ref: "Restaurant",
+    },
 }, exports.options);
 userSchema.methods.setPassword = function (password) {
-    this.salt = crypto.randomBytes(16).toString('hex');
-    const hmac = crypto.createHmac('sha512', this.salt);
+    this.salt = crypto.randomBytes(16).toString("hex");
+    const hmac = crypto.createHmac("sha512", this.salt);
     hmac.update(password);
-    this.digest = hmac.digest('hex');
+    this.digest = hmac.digest("hex");
 };
 userSchema.methods.isPasswordCorrect = function (password) {
-    const hmac = crypto.createHmac('sha512', this.salt);
+    const hmac = crypto.createHmac("sha512", this.salt);
     hmac.update(password);
-    return (this.digest === hmac.digest('hex'));
+    return this.digest === hmac.digest("hex");
 };
 userSchema.methods.isOwner = function () {
     return this.role === RoleType.OWNER;
@@ -123,4 +127,4 @@ function checkNameCorrectness(name) {
     });
 }
 exports.checkNameCorrectness = checkNameCorrectness;
-exports.UserModel = (0, mongoose_1.model)('User', userSchema);
+exports.UserModel = (0, mongoose_1.model)("User", userSchema);

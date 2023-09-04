@@ -1,10 +1,8 @@
 <div class="container mt-4">
   <div class="row">
     <div class="col-md-8">
-      <!-- Contenuto principale (elementi del menu) -->
       <div class="row">
         <div class="col-md-4" *ngFor="let item of menuItems">
-          <!-- Card degli elementi del menu -->
           <div class="card mb-3">
             <div class="card-body">
               <h5 class="card-title">{{ item.itemName }}</h5>
@@ -23,13 +21,10 @@
         </div>
       </div>
     </div>
-    <!-- Barra laterale con carrello e pulsante Invia Ordine -->
     <div class="col-md-4">
       <div class="sticky-top" style="top: 100px">
-        <!-- Elementi del carrello con barra di scorrimento -->
         <div class="mt-4">
           <h3>Cart</h3>
-          <!-- Aggiungi condizione *ngIf per il pulsante "Svuota Carrello" -->
           <button
             *ngIf="cartItems.length > 0"
             class="btn btn-danger mb-2"
@@ -38,13 +33,11 @@
             Empty Cart
           </button>
           <div class="cart-scroll mt-4">
-            <!-- Aggiungi classe CSS "cart-scroll" per abilitare la barra di scorrimento -->
             <div *ngFor="let item of cartItems; let i = index">
               <div class="card mb-3">
                 <div class="card-body">
                   <h5 class="card-title">{{ item.itemName }}</h5>
                   <p class="card-text">Count: {{ item.count }}</p>
-                  <!-- Aggiungi spazio tra i bottoni -->
                   <button
                     class="btn btn-danger mr-2"
                     (click)="rimuoviElemento(i)"

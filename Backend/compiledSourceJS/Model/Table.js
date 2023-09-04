@@ -14,12 +14,12 @@ const tableSchema = new mongoose_1.Schema({
     group: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: false,
-        ref: 'Group'
+        ref: "Group",
     },
     restaurantId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        ref: 'Restaurant'
+        ref: "Restaurant",
     },
 });
 tableSchema.methods.isEmpty = function () {
@@ -31,7 +31,7 @@ function createTable(tableNumber, maxSeats, idRestaurant) {
         isFree: true,
         maxSeats: maxSeats,
         restaurantId: idRestaurant,
-        group: null
+        group: null,
     });
     return newTable;
 }
@@ -44,4 +44,4 @@ function removeGroupFromTable(table) {
     table.group = null;
 }
 exports.removeGroupFromTable = removeGroupFromTable;
-exports.TableModel = (0, mongoose_1.model)('Table', tableSchema);
+exports.TableModel = (0, mongoose_1.model)("Table", tableSchema);

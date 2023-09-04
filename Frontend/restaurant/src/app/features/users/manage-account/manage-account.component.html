@@ -1,0 +1,60 @@
+<div class="container mt-5">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="card">
+        <div class="card-header bg-primary text-white">
+          Your Account
+        </div>
+        <div class="card-body">
+          <div>
+            <form>
+              <div class="form-group">
+                <label for="username">Username:</label>
+                <input type="text" class="form-control" id="username" [(ngModel)]="username" name="username" disabled>
+              </div>
+              <div class="form-group">
+                <label for="email">Email:</label>
+                <input type="email" class="form-control" id="email" [(ngModel)]="email" name="email" disabled>
+              </div>
+            </form>
+            <button class="btn btn-primary" (click)="editAccount()">Edit password</button>
+          </div>
+
+          <br>
+          <div *ngIf="editing">
+            <form (submit)="saveChanges()">
+              <div class="form-group">
+                <label for="currentPassword">Current Password:</label>
+                <input type="password" class="form-control" id="currentPassword" [(ngModel)]="currentPassword" name="currentPassword" required>
+              </div>
+              <div class="form-group">
+                <label for="newPassword">New Password:</label>
+                <input type="password" class="form-control" id="newPassword" [(ngModel)]="newPassword" name="newPassword" required>
+              </div>
+              <div class="form-group">
+                <label for="newPasswordConfirmed">Confirm New Password:</label>
+                <input type="password" class="form-control" id="newPasswordConfirmed" [(ngModel)]="newPasswordConfirmed" name="newPasswordConfirmed" required>
+              </div>
+              <button type="submit" class="btn btn-success mr-3 border" [disabled]="!areFieldsFilled()">Save</button>
+
+              <button type="button" class="btn btn-secondary ml-3" (click)="cancelEdit()">Cancel</button>
+            </form>
+          </div>
+
+          <div>
+            <div *ngIf="messageError" class="alert alert-danger my-3 border">
+              {{ messageError }}
+            </div>
+            <div *ngIf="message" class="alert alert-success my-3 border">
+              {{ message }}
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+

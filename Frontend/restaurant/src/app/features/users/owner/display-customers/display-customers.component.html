@@ -1,34 +1,77 @@
 <div class="container mt-5">
   <div class="row">
     <div class="col-md-12">
-      <!-- Rimuovi la card -->
-      <div class="table-responsive">
-        <table class="table table-bordered">
-          <thead>
-            <tr>
-              <th>Number of People</th>
-              <th>Start consuming</th>
-              <th>End consuming</th>
-              <th>Cost Amount</th>
-              <th>Action</th>
-            </tr>
-          </thead>
-          <tbody>
-            <tr *ngFor="let group of groups">
-              <td>{{ group.numberOfPerson }}</td>
-              <td>{{ group.dateStart | date : "dd/MM HH:mm" }}</td>
-              <td>{{ group.dateFinish | date : "dd/MM HH:mm" || "NA" }}</td>
-              <td *ngIf="group.idRecipe">
-                {{ getRecipeById(group.idRecipe)?.costAmount?.toFixed(2) }} $
-              </td>
-              <td *ngIf="group.idRecipe">
-                <button [routerLink]="['/owner-dashboard/groups', group.idRecipe]" class="btn btn-primary btn-block">Visualize orders details</button>
-              </td>
-              <td *ngIf="!group.idRecipe"></td>
-            </tr>
-          </tbody>
-        </table>
+      <h3 class="bg-success text-white p-2">Groups</h3>
+
+      <button class="btn btn-primary mb-3" (click)="toggleFilters()">Show/Hide Filters</button>
+
+      <div *ngIf="showFilters">
+        <div class="form-group">
+          <label for="orderCount">Number of Orders to Display:</label>
+          <select class="form-control" id="orderCount" [(ngModel)]="ordersToShow" (change)="applyFilters()">
+            <option value="5">5</option>
+            <option value="20">20</option>
+            <option value="50">50</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="orderSort">Order Sort (By start consuming):</label>
+          <select class="form-control" id="orderSort" [(ngModel)]="orderSort" (change)="applyFilters()">
+            <option value="asc">Most Recent First</option>
+            <option value="desc">Oldest First</option>
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label for="startDate">Start Date:</label>
+          <input type="date" class="form-control" id="startDate" [(ngModel)]="startDate" (change)="applyFilters()" />
+        </div>
+
+        <div class="form-group">
+          <label for="endDate">End Date:</label>
+          <input type="date" class="form-control" id="endDate" [(ngModel)]="endDate" (change)="applyFilters()" />
+        </div>
+
+        <div class="form-group">
+          <label for="finished">Group state:</label>
+          <select class="form-control" id="finished" [(ngModel)]="finished" (change)="applyFilters()">
+            <option value="">All</option>
+            <option value="true">Finished</option>
+            <option value="false">Not Finished</option>
+          </select>
+        </div>
+      </div>
+      <div class="container mt-4">
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-bordered">
+              <thead>
+                <tr>
+                  <th>Number of People</th>
+                  <th>Start Consuming</th>
+                  <th>End Consuming</th>
+                  <th>Cost Amount</th>
+                  <th>Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let group of filteredGroups">
+                  <td>{{ group.numberOfPerson }}</td>
+                  <td>{{ group.dateStart | date : "dd/MM HH:mm" }}</td>
+                  <td>{{ group.dateFinish | date : "dd/MM HH:mm" || "NA" }}</td>
+                  <td *ngIf="group.idRecipe">{{ group.idRecipe.costAmount }} €</td>
+                  <td *ngIf="group.idRecipe">
+                    <button [routerLink]="['/owner-dashboard/groups', group.idRecipe._id]" class="btn btn-primary btn-block">Visualize Orders Details</button>
+                  </td>
+                  <td *ngIf="!group.idRecipe"></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </div>
+

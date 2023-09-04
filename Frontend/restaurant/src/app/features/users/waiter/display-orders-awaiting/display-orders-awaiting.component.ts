@@ -2,25 +2,19 @@ import { Component } from '@angular/core';
 import { SocketService } from 'src/app/socket.service';
 
 import { UserPropertyService } from 'src/app/common/api/user-property/user-property.service';
-import { TablesRequestService } from 'src/app/common/api/http-requests/requests/tables/tables-request.service';
 import { OrdersRequestService } from 'src/app/common/api/http-requests/requests/orders/orders-request.service';
-import { ItemsRequestService } from 'src/app/common/api/http-requests/requests/items/items-request.service';
-import { GroupsRequestService } from 'src/app/common/api/http-requests/requests/groups/groups-request.service';
-import { RecipesRequestService } from 'src/app/common/api/http-requests/requests/recipes/recipes-request.service';
 import { SelfUserRequestService } from 'src/app/common/api/http-requests/requests/self-user/self-user-request.service';
-import { Router } from '@angular/router';
-
 
 interface TablesResponse {
   error: boolean;
   errormessage: string;
   tables: {
-      _id: string;
-      tableNumber: string;
-      maxSeats: number;
-      group: string;
-      restaurantId: string;
-      __v: number;
+    _id: string;
+    tableNumber: string;
+    maxSeats: number;
+    group: string;
+    restaurantId: string;
+    __v: number;
   }[];
 }
 
@@ -49,9 +43,6 @@ interface MenuItemsResponse {
   tables: MenuItem[];
 }
 
-
-
-
 interface OrdersList {
   items: OrderItem[];
 }
@@ -76,13 +67,35 @@ interface OrderItem {
 
 export interface Order {
   _id: string;
-  idGroup: string;
+  idGroup: IdGroup;
   idWaiter: string;
   items: OrderItem[];
   state: string;
   timeCompleted: Date | null;
   timeStarted: Date;
   type: string;
+  __v: number;
+}
+
+export interface IdGroup {
+  _id: string;
+  dateFinish: Date | null;
+  dateStart: Date;
+  idRecipe: string | null;
+  idRestaurant: string;
+  idTable: IdTable;
+  numberOfPerson: number;
+  ordersList: string[];
+  __v: number;
+}
+
+export interface IdTable {
+  _id: string;
+  group: string;
+  maxSeats: number;
+  restaurantId: string;
+  tableNumber: string;
+  numberOfPerson: number;
   __v: number;
 }
 
@@ -106,69 +119,64 @@ export interface WaiterData {
 @Component({
   selector: 'app-display-orders-awaiting',
   templateUrl: './display-orders-awaiting.component.html',
-  styleUrls: ['./display-orders-awaiting.component.css']
+  styleUrls: ['./display-orders-awaiting.component.css'],
 })
 export class DisplayOrdersAwaitingComponent {
-
-  tables: Table[] = [];
-
   ordersAwaiting: Order[] = [];
-  ordersServed: Order[] = [];
 
-
-
-
-  constructor(private ups : UserPropertyService,
+  constructor(
+    private ups: UserPropertyService,
     private socketService: SocketService,
-    private trs : TablesRequestService,
-    private ors : OrdersRequestService,
-    private srus : SelfUserRequestService,
-    private router: Router
+    private ors: OrdersRequestService,
+    private srus: SelfUserRequestService
   ) {
-    this.getTables();
-    this.get_myself()
+    this.get_myself();
 
-    this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
-    const socket = socketService.getSocket()
+    this.socketService.joinRestaurantRoom(
+      this.ups.getRestaurant() + ups.getId() + 'ordersAwaited'
+    );
+    const socket = socketService.getSocket();
 
+    socket.fromEvent('fetchOrderReady').subscribe((data: any) => {
+      console.log('fetchOrderReady');
 
-    socket.fromEvent("fetchOrdersNeeded").subscribe((data) => {
-      console.log("fetchItemsNeeded")
-      this.get_myself()
-    });
-  }
+      const index = this.ordersAwaiting.findIndex(
+        (order) => order._id === data.order._id
+      );
 
-  getTables() {
-    this.trs.getTables().subscribe((data: TablesResponse) => {
-      this.tables = data.tables;
+      if (index !== -1) {
+        this.ordersAwaiting[index] = data.order;
+
+      } else {
+        console.log('Ordine non trovato');
+      }
     });
   }
 
   get_myself() {
     this.srus.getMySelf().subscribe((data: WaiterData) => {
-      console.log(data);
       this.ordersAwaiting = data.userDetails.ordersAwaiting;
-      this.ordersServed = data.userDetails.ordersServed
     });
   }
 
-  getTableByGroup(idGroup: string): string | undefined {
-    const table = this.tables.find(table => table.group === idGroup);
-    return table ? table._id : undefined;
-  }
-
-  getTableNameByGroup(idGroup: string): string | undefined {
-    const table = this.tables.find(table => table.group === idGroup);
-    return table ? table.tableNumber : undefined;
-  }
-
   serveOrder(order: Order) {
-    const idTable = this.getTableByGroup(order.idGroup);
+    const idTable = order.idGroup.idTable;
 
     if (idTable) {
-      this.ors.modifyOrderServed(idTable, order._id).subscribe((data: WaiterData) => {
-        this.get_myself();
-      });
+      this.ors
+        .modifyOrderServed(order.idGroup.idTable._id, order._id)
+        .subscribe((data: WaiterData) => {
+          const index = this.ordersAwaiting.findIndex(
+            (orderAwaited) => orderAwaited._id === order._id
+          );
+
+          if (index !== -1) {
+            this.ordersAwaiting.splice(index, 1);
+
+          } else {
+            console.log('Ordine non trovato');
+          }
+        });
     } else {
       console.error('Tavolo non trovato per il gruppo:', order.idGroup);
     }

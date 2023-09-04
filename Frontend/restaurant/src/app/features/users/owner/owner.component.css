@@ -13,3 +13,11 @@
   border-right: 0.1px solid #000000;
   padding-right: 15px;
 }
+
+.text-dark {
+  font-size: 16px; /* Imposta la grandezza del carattere desiderata, ad esempio 14px */
+  margin-bottom: 0px; /* Riduci il margine inferiore */
+  padding-bottom: 0px; /* Riduci il padding inferiore */
+  font-family: 'Helvetica Neue', sans-serif;
+}
+

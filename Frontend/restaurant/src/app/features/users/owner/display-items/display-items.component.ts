@@ -3,6 +3,7 @@ import { SocketService } from 'src/app/socket.service';
 
 import { UserPropertyService } from 'src/app/common/api/user-property/user-property.service';
 import { ItemsRequestService } from 'src/app/common/api/http-requests/requests/items/items-request.service';
+import { Item } from 'src/app/common/interfaces/api/users/users-api-interfaces';
 
 
 @Component({
@@ -12,14 +13,12 @@ import { ItemsRequestService } from 'src/app/common/api/http-requests/requests/i
 })
 export class DisplayItemsComponent {
 
-  items: any[] = [];
+  items: Item[] = [];
+  sortBy: string = 'name';
+  showType: string = 'All';
 
-  newItem: any = {
-    itemName: '',
-    itemType: 'dish',
-    price: 0,
-    preparationTime: 0
-  };
+  filteredItems : any[] = [];
+
 
 
   constructor(private ups : UserPropertyService,
@@ -27,6 +26,7 @@ export class DisplayItemsComponent {
     private irs : ItemsRequestService,
   ){
     this.fetchItems()
+
 
     this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
     const socket = socketService.getSocket()
@@ -44,6 +44,7 @@ export class DisplayItemsComponent {
     this.irs.getItems().subscribe(
       response => {
         this.items = response.tables;
+        this.applyFilters()
       },
       error => {
         console.error('Errore durante il recupero degli item:', error);
@@ -63,6 +64,25 @@ export class DisplayItemsComponent {
       }
     );
   }
+
+  applyFilters() {
+    let filteredItems = [...this.items];
+
+    if (this.showType !== 'All') {
+      filteredItems = filteredItems.filter((item) => item.itemType === this.showType);
+    }
+
+    if (this.sortBy === 'name') {
+      filteredItems.sort((a, b) => a.itemName.localeCompare(b.itemName));
+    } else if (this.sortBy === 'priceLE') {
+      filteredItems.sort((a, b) => a.price - b.price);
+    }else {
+      filteredItems.sort((a, b) => b.price - a.price);
+    }
+
+    this.filteredItems = filteredItems;
+  }
+
 
 
 }

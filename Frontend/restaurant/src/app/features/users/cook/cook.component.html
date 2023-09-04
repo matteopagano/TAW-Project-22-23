@@ -1,8 +1,9 @@
-<div class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
   <div class="container">
-    <a class="navbar-brand">Restaurant Manager</a>
+    <a class="navbar-brand ml-2" href="#">Restaurant Manager</a>
     <button
-      class="navbar-toggler"
+      class="navbar-toggler mr-2"
       type="button"
       data-bs-toggle="collapse"
       data-bs-target="#navbarNav"
@@ -12,43 +13,95 @@
     >
       <span class="navbar-toggler-icon"></span>
     </button>
-    <div class="collapse navbar-collapse" id="navbarNav">
+
+    <div class="collapse navbar-collapse ml-2" id="navbarNav">
       <ul class="navbar-nav ml-auto"></ul>
 
-      <ul class="navbar-nav" style="margin-left: auto">
+      <ul class="navbar-nav">
         <li class="nav-item">
           <a class="nav-link" (click)="logout()">Logout</a>
         </li>
       </ul>
+      <div *ngIf="!isLargeScreen" class="d-lg-none">
+        <ul class="navbar-nav">
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/cooker-dashboard/queue']"
+              routerLinkActive="active"
+            >
+              Orders Served
+            </a>
+          </li>
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/cooker-dashboard/manage-account']"
+              routerLinkActive="active"
+            >
+              Manage Account
+            </a>
+          </li>
+        </ul>
+      </div>
     </div>
   </div>
-</div>
+</nav>
 
 <div class="container-fluid">
   <div class="row">
     <nav
       id="sidebar"
       class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
+      *ngIf="isLargeScreen"
     >
-      <div class="position-sticky">
-        <h4 class="text-dark mt-4 ml-2">Queue</h4>
+      <nav
+        id="sidebar"
+        class="col-md-3 col-lg-2 d-md-block bg-light text-light sidebar"
+        *ngIf="isLargeScreen"
+      >
+        <div class="position-sticky">
+          <h4 class="text-dark mt-4 ml-2">Queue</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a
+                class="nav-link text-dark active"
+                [routerLink]="['/cooker-dashboard/queue']"
+                routerLinkActive="active"
+              >
+                Visualize Queue
+              </a>
+            </li>
+          </ul>
+        </div>
+        <hr class="text-dark" />
 
-        <ul class="nav flex-column">
-          <li class="nav-item">
-            <a
-              class="nav-link text-dark active"
-              [routerLink]="['/cooker-dashboard/queue']"
-              routerLinkActive="active"
-            >
-              Visualize Queue
-            </a>
-          </li>
-        </ul>
-      </div>
+        <div class="position-sticky">
+          <h4 class="text-dark mt-4 ml-2">Manage Account</h4>
+          <ul class="nav flex-column">
+            <li class="nav-item">
+              <a
+                class="nav-link text-dark active"
+                [routerLink]="['/cooker-dashboard/manage-account']"
+                routerLinkActive="active"
+              >
+                Visualize Account
+              </a>
+            </li>
+          </ul>
+        </div>
+      </nav>
     </nav>
-
-    <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+    <main class="ms-sm-auto mt-5"
+      *ngIf="!isLargeScreen; else largeScreenContent">
       <router-outlet></router-outlet>
     </main>
+
+    <ng-template #largeScreenContent>
+      <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 my-5">
+        <router-outlet></router-outlet>
+      </main>
+    </ng-template>
   </div>
 </div>

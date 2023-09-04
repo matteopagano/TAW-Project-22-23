@@ -497,7 +497,6 @@ export async function areOrdersFinished(req, res, next) {
       const orders: Order.Order[] =
         group.ordersList as unknown as Order.Order[];
 
-      console.log(orders);
 
       const allServed = orders.every(
         (orderItem) => orderItem.state === "served"

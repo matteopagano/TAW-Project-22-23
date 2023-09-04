@@ -21,7 +21,7 @@ function createBartender(username, email, password, idRestaurant) {
         role: User_1.RoleType.BARTENDER,
         drinkPrepared: [],
         idRestaurant: idRestaurant,
-        itemsPrepared: []
+        itemsPrepared: [],
     });
     newBartender.setPassword(password);
     return newBartender;
@@ -30,7 +30,7 @@ exports.createBartender = createBartender;
 function createItemPrepared(count, idItem) {
     const newItemPrepared = {
         idItem: idItem,
-        count: count
+        count: count,
     };
     return newItemPrepared;
 }

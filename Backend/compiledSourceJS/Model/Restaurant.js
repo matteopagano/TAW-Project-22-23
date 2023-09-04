@@ -10,86 +10,88 @@ const restaurantSchema = new mongoose_1.Schema({
     ownerId: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        ref: 'Owner'
+        ref: "Owner",
     },
     tables: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Table'
-            }
+                ref: "Table",
+            },
         ],
-        required: true
+        required: true,
     },
     items: {
-        type: [{
+        type: [
+            {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Item'
-            }],
-        required: true
+                ref: "Item",
+            },
+        ],
+        required: true,
     },
     cookers: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Cook'
-            }
+                ref: "Cook",
+            },
         ],
-        required: true
+        required: true,
     },
     waiters: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Waiter'
-            }
+                ref: "Waiter",
+            },
         ],
-        required: true
+        required: true,
     },
     cashiers: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Cashier'
-            }
+                ref: "Cashier",
+            },
         ],
-        required: true
+        required: true,
     },
     bartenders: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Bartender'
-            }
+                ref: "Bartender",
+            },
         ],
-        required: true
+        required: true,
     },
     recipes: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Recipe'
-            }
+                ref: "Recipe",
+            },
         ],
-        required: true
+        required: true,
     },
     groups: {
         type: [
             {
                 type: mongoose_1.Schema.Types.ObjectId,
                 required: false,
-                ref: 'Group'
-            }
+                ref: "Group",
+            },
         ],
-        required: true
-    }
+        required: true,
+    },
 });
 restaurantSchema.methods.isCookPresent = function (cookId) {
     try {
@@ -291,4 +293,4 @@ function addRecipeToRestaurant(recipe, restaurant) {
     restaurant.recipes.push(recipe._id);
 }
 exports.addRecipeToRestaurant = addRecipeToRestaurant;
-exports.RestaurantModel = (0, mongoose_1.model)('Restaurant', restaurantSchema);
+exports.RestaurantModel = (0, mongoose_1.model)("Restaurant", restaurantSchema);

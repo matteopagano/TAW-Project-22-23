@@ -4,8 +4,12 @@ exports.WaiterModel = exports.createWaiter = exports.removeOrderAwaited = export
 const User_1 = require("./User");
 const mongoose_1 = require("mongoose");
 const waiterSchema = new mongoose_1.Schema({
-    ordersAwaiting: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Order', required: true }],
-    ordersServed: [{ type: mongoose_1.Schema.Types.ObjectId, ref: 'Order', required: true }],
+    ordersAwaiting: [
+        { type: mongoose_1.Schema.Types.ObjectId, ref: "Order", required: true },
+    ],
+    ordersServed: [
+        { type: mongoose_1.Schema.Types.ObjectId, ref: "Order", required: true },
+    ],
 }, User_1.options);
 function addOrderAwaited(order, waiter) {
     waiter.ordersAwaiting.push(order._id);
@@ -29,10 +33,10 @@ function createWaiter(username, email, password, idRestaurant) {
         role: User_1.RoleType.WAITER,
         ordersAwaiting: [],
         ordersServed: [],
-        idRestaurant: idRestaurant
+        idRestaurant: idRestaurant,
     });
     newWaiter.setPassword(password);
     return newWaiter;
 }
 exports.createWaiter = createWaiter;
-exports.WaiterModel = User_1.UserModel.discriminator('Waiter', waiterSchema, User_1.RoleType.WAITER);
+exports.WaiterModel = User_1.UserModel.discriminator("Waiter", waiterSchema, User_1.RoleType.WAITER);

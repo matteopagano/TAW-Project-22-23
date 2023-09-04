@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
 import { BartenderComponent } from './bartender.component';
 import { DisplayQueueComponent } from './display-queue/display-queue.component';
+import { ManageAccountComponent } from '../manage-account/manage-account.component';
 
 const routes: Routes = [{
   path : '',
@@ -9,6 +10,9 @@ const routes: Routes = [{
   children: [
     {
       path: 'queue' , component: DisplayQueueComponent
+    },
+    {
+      path: 'manage-account' , component: ManageAccountComponent
     },
 
 

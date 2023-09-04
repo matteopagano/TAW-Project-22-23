@@ -23,6 +23,7 @@ import { CookModule } from './features/users/cook/cook.module';
 import { BartenderModule } from './features/users/bartender/bartender.module';
 import { WaiterModule } from './features/users/waiter/waiter.module';
 import { PermissionDeniedComponent } from './features/permission-denied/permission-denied.component';
+import { ManageAccountComponent } from './features/users/manage-account/manage-account.component';
 
 
 const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
@@ -40,6 +41,7 @@ const config: SocketIoConfig = { url: 'http://localhost:3000', options: {} };
     AuthenticationComponent,
     NavbarComponent,
     PermissionDeniedComponent,
+    ManageAccountComponent,
   ],
   imports: [
     BrowserModule,

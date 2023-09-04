@@ -1,0 +1,8 @@
+.responsive-image {
+  width: 100%;
+  height: auto;
+  filter: brightness(3);
+
+  filter: contrast(0.5);
+}
+

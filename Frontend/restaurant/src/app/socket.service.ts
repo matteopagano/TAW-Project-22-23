@@ -13,7 +13,6 @@ export class SocketService {
   joinRestaurantRoom(restaurantId: string) {
     console.log("mi inserisco nella stanza ")
     console.log(restaurantId)
-
     this.socket.emit('join-room', restaurantId);
   }
 
@@ -32,6 +31,29 @@ export class SocketService {
 
   emitFetchOrders(restaurantId : string) {
     this.socket.emit('fetchOrders', restaurantId);
+  }
+
+  emitNewOrderDrink(restaurantId : string, order : any, idTable : string) {
+    this.socket.emit('newOrderDrink', restaurantId, order, idTable);
+  }
+  emitNewOrderDish(restaurantId : string, order : any, idTable : string) {
+    this.socket.emit('newOrderDish', restaurantId, order, idTable);
+  }
+
+  emitItemOfOrderDishStatus(restaurantId : string, order : any) {
+    this.socket.emit('setItemOfOrderDishStatus', restaurantId, order);
+  }
+
+  emitItemOfOrderDrinkStatus(restaurantId : string, order : any) {
+    this.socket.emit('setItemOfOrderDrinkStatus', restaurantId, order);
+  }
+
+  emitOrderDrinkCompleted(restaurantId : string, order : any) {
+    this.socket.emit('setOrderDrinkStatus', restaurantId, order);
+  }
+
+  emitOrderDishCompleted(restaurantId : string, order : any) {
+    this.socket.emit('setOrderDishStatus', restaurantId, order);
   }
 
   emitFetchRecipes(restaurantId : string) {

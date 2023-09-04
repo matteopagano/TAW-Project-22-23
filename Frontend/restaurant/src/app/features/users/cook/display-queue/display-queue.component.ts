@@ -37,34 +37,31 @@ export interface Order {
   state: string;
   timeCompleted: string | null;
   timeStarted: string;
-  tableId : string
+  idTable : string
   __v: number;
 }
 
 export interface OrderItem {
   timeFinished: string | null;
-  idItem: string;
+  idItem: idItem;
   state: string;
   completedBy: string | null;
   count: number;
   _id: string;
 }
 
-interface MenuItem {
-  _id: string;
+interface idItem {
+  countServered: number;
+  idRestaurant: string;
   itemName: string;
   itemType: string;
-  price: number;
   preparationTime: number;
-  idRestaurant: string;
+  price: number;
   __v: number;
+  _id: string;
 }
 
-interface MenuItemsResponse {
-  error: boolean;
-  errormessage: string;
-  tables: MenuItem[];
-}
+
 @Component({
   selector: 'app-display-queue',
   templateUrl: './display-queue.component.html',
@@ -73,16 +70,13 @@ interface MenuItemsResponse {
 export class DisplayQueueComponent {
   tables: Table[] = [];
   orders: Order[] = [];
-  menuItems: MenuItem[] = [];
 
   constructor(private ups : UserPropertyService,
     private socketService: SocketService,
     private trs : TablesRequestService,
     private ors : OrdersRequestService,
-    private irs : ItemsRequestService
   ) {
     this.getOrders()
-    this.getMenuItems()
 
     this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
     const socket = socketService.getSocket()
@@ -93,17 +87,41 @@ export class DisplayQueueComponent {
     });
 
 
+    socket.fromEvent("fetchNewOrderDish").subscribe((data : any) => {
+      console.log("fetchNewOrderDish")
+      data.order.idTable = data.idTable
+      this.orders.push(data.order)
+    })
 
-    socket.fromEvent("fetchOrdersNeeded").subscribe((data) => {
-      console.log("fetchOrdersNeeded")
-      this.getOrders()
+    socket.fromEvent("fetchItemOfOrderDishStatus").subscribe((data: any) => {
+      console.log("fetchItemOfOrderDishStatus");
+      console.log(data);
+
+      const index = this.orders.findIndex((order) => order._id === data.order._id);
+
+      if (index !== -1) {
+        this.orders[index] = data.order;
+
+        console.log("Ordine modificato:", this.orders[index]);
+      } else {
+        console.log("Ordine non trovato");
+      }
     });
 
-    socket.fromEvent("fetchItemsNeeded").subscribe((data) => {
-      console.log("fetchItemsNeeded")
-      this.getMenuItems()
-    });
 
+    socket.fromEvent("fetchOrderDishStatus").subscribe((data: any) => {
+      console.log("fetchOrderDishStatus");
+      console.log(data);
+
+      const index = this.orders.findIndex((order) => order._id === data.order._id);
+
+      if (index !== -1) {
+        this.orders.splice(index, 1);
+      } else {
+        console.log("Ordine non trovato");
+      }
+
+    });
 
   }
 
@@ -120,8 +138,8 @@ export class DisplayQueueComponent {
           const orderPromise = new Promise<void>((resolve, reject) => {
             this.ors.getOrdersDishNotStartedByTable(table._id).subscribe(
               (data) => {
-                data.orders.forEach((order: { tableId: string; }) => {
-                  order.tableId = table._id;
+                data.orders.forEach((order: { idTable: string; }) => {
+                  order.idTable = table._id;
                 });
                 tempOrders = tempOrders.concat(data.orders);
                 resolve();
@@ -137,16 +155,11 @@ export class DisplayQueueComponent {
 
       try {
         await Promise.all(orderPromises);
-
         tempOrders.sort((a, b) => {
           return new Date(a.timeStarted).getTime() - new Date(b.timeStarted).getTime();
         });
         console.log(tempOrders)
-
         this.orders = tempOrders
-
-
-
       } catch (error) {
         console.error('Errore durante il recupero degli ordini:', error);
       }
@@ -154,26 +167,43 @@ export class DisplayQueueComponent {
   }
 
 
-  getMenuItems() {
-    this.irs.getItems().subscribe((data: MenuItemsResponse) => {
-      this.menuItems = data.tables;
-    });
-  }
-
-  findItemName(target : string){
-    return this.menuItems.find(item => item._id === target)?.itemName
-  }
-
   itemCompleted(table : string, order: string, item : string) {
     this.ors.modifyItemOfOrderCompleted(table, order, item).subscribe((data) => {
-      this.socketService.emitFetchOrders(this.ups.getRestaurant())
+
+      console.log("stampo data")
+      console.log(data)
+
+      const orderToModify = this.orders.find((orderObj) => orderObj._id === order);
+      if (orderToModify) {
+        console.log(orderToModify)
+        console.log(item)
+
+        const targetItem = orderToModify.items.find((orderItem) => orderItem.idItem._id === item);
+
+        if (targetItem) {
+          targetItem.state = "completed";
+          this.socketService.emitItemOfOrderDishStatus(this.ups.getRestaurant(), data.orderModified)
+        } else {
+          console.log("Elemento non trovato");
+        }
+      } else {
+        console.log("Ordine non trovato");
+      }
     })
   }
 
-
   orderCompleted(tableId: string, orderId: string) {
     this.ors.modifyOrderReady(tableId, orderId).subscribe((data) => {
-      this.socketService.emitFetchOrders(this.ups.getRestaurant())
+
+      const orderIndexToRemove = this.orders.findIndex((orderObj) => orderObj._id === orderId);
+
+      if (orderIndexToRemove !== -1) {
+        this.orders.splice(orderIndexToRemove, 1);
+        console.log(data)
+        this.socketService.emitOrderDishCompleted(this.ups.getRestaurant(), data.orderModifyied);
+      } else {
+        console.log("Ordine non trovato");
+      }
 
     })
   }

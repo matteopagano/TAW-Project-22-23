@@ -49,6 +49,27 @@ export class UserPropertyService {
     return tokenData.restaurantId.toString()
   }
 
+
+  getEmail(){
+    const token : string = this.jwts.getToken();
+
+    const tokenData = (jwt_decode(token) as TokenData)
+    if(token === null){
+      throw new Error("User not authenticated")
+    }
+    return tokenData.email.toString()
+  }
+
+  getUsername(){
+    const token : string = this.jwts.getToken();
+
+    const tokenData = (jwt_decode(token) as TokenData)
+    if(token === null){
+      throw new Error("User not authenticated")
+    }
+    return tokenData.username.toString()
+  }
+
   isLogged() : boolean {
     const rule : string | null = localStorage.getItem(environment.localStorageTokenKey);
     if(rule === null){

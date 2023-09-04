@@ -24,10 +24,21 @@ interface Order {
 }
 interface OrderItem {
   timeFinished: string | null;
-  idItem: string;
+  idItem: idItem;
   state: string;
   completedBy: string | null;
   count: number;
+  _id: string;
+}
+
+interface idItem {
+  countServered: number;
+  idRestaurant: string;
+  itemName: string;
+  itemType: string;
+  preparationTime: number;
+  price: number;
+  __v: number;
   _id: string;
 }
 
@@ -63,7 +74,6 @@ export interface ItemForTable {
 export class VisualizeTableDetailsComponent {
   idTable: string = '';
   itemsForTable: ItemForTable[] = [];
-  menuItems: MenuItem[] = [];
   messageError = '';
 
   constructor(
@@ -82,44 +92,38 @@ export class VisualizeTableDetailsComponent {
       console.log('ID recuperato dalla route:', this.idTable);
       this.socketService.joinRestaurantRoom(this.ups.getRestaurant());
       const socket = socketService.getSocket();
+
+      socket.fromEvent('fetchOrdersNeeded').subscribe((data) => {
+        console.log('fetchOrdersNeeded');
+        this.getOrdersByTable();
+      });
+
+      socket.fromEvent('fetchOrdersNeeded').subscribe((data) => {
+        console.log('fetchOrdersNeeded');
+        this.getOrdersByTable();
+      });
+
+
       socket.fromEvent('fetchOrdersNeeded').subscribe((data) => {
         console.log('fetchOrdersNeeded');
         this.getOrdersByTable();
       });
     });
     this.getOrdersByTable();
-    this.getMenuItems();
   }
   getOrdersByTable() {
     this.ors.getOrdersByTable(this.idTable).subscribe((response) => {
       if (!response.error) {
-        console.log(response.orders);
+        console.log("orders")
+        console.log(response);
         this.itemsForTable = this.convertOrdersToItems(response.orders);
       }
     });
   }
 
-  getMenuItems() {
-    this.irs.getItems().subscribe((data: MenuItemsResponse) => {
-      console.log('menu items');
-      console.log(data.tables);
-      this.menuItems = data.tables;
-    });
-  }
 
-  findItemName(target: string): string {
-    const menuItem = this.menuItems.find((item) => item._id === target);
-    return menuItem ? menuItem.itemName : '';
-  }
-  findItemPrice(target: string): number {
-    const menuItem = this.menuItems.find((item) => item._id === target);
-    return menuItem ? menuItem.price : 0;
-  }
 
-  findItemType(target: string): string {
-    const menuItem = this.menuItems.find((item) => item._id === target);
-    return menuItem ? menuItem.itemType : '';
-  }
+
 
   multiply(a: number, b: number | undefined): number {
     if (b === undefined) {
@@ -135,19 +139,19 @@ export class VisualizeTableDetailsComponent {
         const idItem = item.idItem;
         const quantity = item.count;
 
-        const existingItem = itemsMap.get(idItem);
+        const existingItem = itemsMap.get(idItem._id);
 
         if (existingItem) {
           existingItem.quantity += quantity;
         } else {
           const newItem: ItemForTable = {
-            _id: idItem,
-            name: this.findItemName(idItem),
-            price: this.findItemPrice(idItem),
+            _id: idItem._id,
+            name: idItem.itemName,
+            price: idItem.price,
             quantity,
-            type: this.findItemType(idItem),
+            type: idItem.itemType
           };
-          itemsMap.set(idItem, newItem);
+          itemsMap.set(idItem._id, newItem);
         }
       }
     }
@@ -160,7 +164,7 @@ export class VisualizeTableDetailsComponent {
     let total = 0;
     for (const item of this.itemsForTable) {
       if (item._id !== undefined) {
-        total += this.multiply(item.quantity, this.findItemPrice(item._id));
+        total += this.multiply(item.quantity, item.price);
       }
     }
     return total;

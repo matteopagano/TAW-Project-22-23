@@ -649,10 +649,8 @@ export async function deleteTableAndRemoveFromRestaurant(
     await restaurant.save();
     const tableToRemove: Table.Table = await Table.TableModel.findById(idTable);
     if (tableToRemove.isEmpty()) {
-      console.log("non ha gruppi da rimuovere");
       await Table.TableModel.deleteOne({ _id: idTable });
     } else {
-      console.log("ha gruppi da rimuovere");
       restaurant.removeGroup(tableToRemove.group.toString());
       await restaurant.save();
       await Table.TableModel.deleteOne({ _id: idTable });
@@ -750,7 +748,6 @@ export async function deleteItemAndRemoveFromRestaurant(
     await Restaurant.RestaurantModel.findById(idRestaurant);
   if (restaurant.removeItem(idItem)) {
     await restaurant.save();
-    // await Item.ItemModel.deleteOne({_id : idItem}) only logically delete from restaurant
     return res
       .status(200)
       .json({ error: false, errormessage: "", idItemDeleted: idItem });
@@ -830,7 +827,16 @@ export async function getOrdersByRestaurantAndTable(
     queryConditions.state = "notStarted";
   }
 
-  const orders = await Order.OrderModel.find(queryConditions);
+  const orders = await Order.OrderModel.find(queryConditions)
+  .populate({
+    path: "items.idItem",
+    model: "Item",
+  })
+  .populate({
+    path: "idGroup",
+    model: "Group"}) 
+  .exec();
+
 
   return res
     .status(200)
@@ -872,7 +878,10 @@ export async function getGroupsByRestaurant(
 ) {
   const idRestaurant = req.params.idr;
   const restaurant: Restaurant.Restaurant =
-    await Restaurant.RestaurantModel.findById(idRestaurant).populate("groups");
+    await Restaurant.RestaurantModel.findById(idRestaurant).populate({
+      path : "groups",
+      model : "Group",
+      populate : { path : "idRecipe", model : "Recipe"}});
 
   if (restaurant) {
     return res
@@ -1022,7 +1031,6 @@ export async function createOrderAndAddToACustomerGroup(
   const idTable = req.params.idt;
   const idWaiterAuthenticated = req.auth._id;
   const itemsList: ItemRequest = req.body;
-  const items: ItemData[] = itemsList.items;
 
   const table: Table.Table = await Table.TableModel.findById(idTable);
   const group: Group.Group = await Group.GroupModel.findById(table.group);
@@ -1051,7 +1059,6 @@ export async function createOrderAndAddToACustomerGroup(
     } else if (item.itemType === "dish") {
       dishItems.push(itemData);
     } else {
-      console.log(`Tipo sconosciuto per l'item con ID ${itemId}`);
       next({
         statusCode: 404,
         error: true,
@@ -1076,6 +1083,11 @@ export async function createOrderAndAddToACustomerGroup(
     await waiter.save();
     await newOrderDrink.save();
     await group.save();
+
+    newOrderDrink = await newOrderDrink.populate({
+      path: "items.idItem",
+      model: "Item",
+    });
   }
 
   if (dishItems.length > 0) {
@@ -1091,14 +1103,21 @@ export async function createOrderAndAddToACustomerGroup(
     await waiter.save();
     await newOrderDish.save();
     await group.save();
+
+    newOrderDish = await newOrderDish.populate({
+      path: "items.idItem",
+      model: "Item",
+    });
   }
+
+
 
   return res
     .status(200)
     .json({
       error: false,
       errormessage: "",
-      newOrder: { newOrderDrink: newOrderDrink, newOrderDish: newOrderDish },
+      newOrder: { newOrderDrink: newOrderDrink, newOrderDish: newOrderDish, idTable : idTable },
     });
 }
 
@@ -1108,7 +1127,7 @@ export async function modifyItemOrder(req, res, next: NextFunction) {
   const idItemToModify = req.params.idi;
 
   const orderId = req.params.ido;
-  const order: Order.Order = await Order.OrderModel.findById(orderId);
+  let order: Order.Order = await Order.OrderModel.findById(orderId);
 
   let itemToModify = order.items.find(
     (item) => item.idItem.toString() === idItemToModify
@@ -1153,9 +1172,14 @@ export async function modifyItemOrder(req, res, next: NextFunction) {
       bartenderUser.save();
     }
 
+    order = await order.populate({
+      path: "items.idItem",
+      model: "Item",
+    });
+
     return res
       .status(200)
-      .json({ error: false, errormessage: "", orderModifyied: order });
+      .json({ error: false, errormessage: "", orderModified: order });
   } else {
     next({
       statusCode: 404,
@@ -1169,18 +1193,39 @@ export async function modifyOrder(req, res, next: NextFunction) {
   const status = req.body.status;
   const orderId = req.params.ido;
   const restaurantId = req.params.idr;
-  const order: Order.Order = await Order.OrderModel.findById(orderId);
+  let order: Order.Order = await Order.OrderModel.findById(orderId);
   const waiter: Waiter.Waiter = await Waiter.WaiterModel.findById(
     order.idWaiter
   );
+  console.log("order:")
+  console.log(order)
+  console.log("Statis")
+  console.log(status)
 
   if (status === Order.StateOrder.READY) {
+
+    
     order.state = Order.StateOrder.READY;
     order.save();
+
+    order = await order
+        .populate({
+          path: "items.idItem",
+          model: "Item",
+      })
+
+      order = await order
+        .populate({
+          path: "idGroup",
+          model: "Group",
+          populate : ({path:"idTable", model : "Table"})
+      })
+
     return res
       .status(200)
       .json({ error: false, errormessage: "", orderModifyied: order });
   } else if (status === Order.StateOrder.SERVED) {
+    
     if (order.state === Order.StateOrder.READY) {
       Waiter.addOrderServed(order, waiter);
       Waiter.removeOrderAwaited(order, waiter);
@@ -1201,9 +1246,14 @@ export async function modifyOrder(req, res, next: NextFunction) {
             item.countServered = (item.countServered || 0) + itemElement.count;
           }
         }
-        console.log(item);
         await item.save();
       }
+
+      order = await order
+        .populate({
+          path: "items.idItem",
+          model: "Item",
+      })
 
       return res
         .status(200)
@@ -1253,9 +1303,19 @@ export async function getUser(req, res, next: NextFunction) {
         .status(200)
         .json({ error: false, errormessage: "", userDetails: cook });
     case "waiter":
-      const waiter: Waiter.Waiter = await Waiter.WaiterModel.findById(
-        idUser
-      ).populate("ordersAwaiting ordersServed");
+      const waiter = await Waiter.WaiterModel.findById(idUser)
+      .populate({
+        path: "ordersAwaiting",
+        populate: { path: "idGroup", model : "Group" , populate : { path : "idTable", model : "Table"}}, 
+      })
+      .populate({
+        path: "ordersServed",
+        populate: { path: "idGroup", model : "Group" }, 
+      })
+      .exec();
+
+
+
       return res
         .status(200)
         .json({ error: false, errormessage: "", userDetails: waiter });
@@ -1267,6 +1327,80 @@ export async function getUser(req, res, next: NextFunction) {
       });
       break;
   }
+}
+
+export async function modifyPassword(req, res, next: NextFunction) {
+  const idUser = req.params.idu;
+  const passwordToChange = req.body.passwordToChange
+  const newPassword = req.body.newPassword
+
+  let user: User.User = await User.UserModel.findById(idUser);
+
+  switch (user.getRole()) {
+    case "owner":
+      const owner: Owner.Owner = await Owner.OwnerModel.findById(idUser);
+      if(owner.isPasswordCorrect(passwordToChange)){
+        owner.setPassword(newPassword)
+        owner.save()
+        return res
+          .status(200)
+          .json({ error: false, errormessage: "", userDetails: owner });
+      }
+      
+    case "bartender":
+      const bartender: Bartender.Bartender = await Bartender.BartenderModel.findById(idUser);
+      if(bartender.isPasswordCorrect(passwordToChange)){
+        bartender.setPassword(newPassword)
+        bartender.save()
+        return res
+          .status(200)
+          .json({ error: false, errormessage: "", userDetails: bartender });
+      }
+      break;
+    case "cashier":
+      const cashier: Cashier.Cashier = await Cashier.CashierModel.findById(idUser);
+      if(cashier.isPasswordCorrect(passwordToChange)){
+        cashier.setPassword(newPassword)
+        cashier.save()
+        return res
+          .status(200)
+          .json({ error: false, errormessage: "", userDetails: cashier });
+      }
+      break;
+    case "cook":
+      const cook: Cook.Cook = await Cook.CookModel.findById(idUser);
+      
+      if(cook.isPasswordCorrect(passwordToChange)){
+        cook.setPassword(newPassword)
+        cook.save()
+        return res
+          .status(200)
+          .json({ error: false, errormessage: "", userDetails: cook });
+      }
+      break;
+    case "waiter":
+      const waiter = await Waiter.WaiterModel.findById(idUser)
+      if(waiter.isPasswordCorrect(passwordToChange)){
+        waiter.setPassword(newPassword)
+        waiter.save()
+        return res
+          .status(200)
+          .json({ error: false, errormessage: "", userDetails: waiter });
+      }
+      break;
+    default:
+      next({
+        statusCode: 404,
+        error: true,
+        errormessage: "Role " + user.getRole() + " not known",
+      });
+      break;
+  }
+  return next({
+    statusCode: 404,
+    error: true,
+    errormessage: "Password Error",
+  });
 }
 
 export async function createRecipeForGroupAndAddToARestaurant(

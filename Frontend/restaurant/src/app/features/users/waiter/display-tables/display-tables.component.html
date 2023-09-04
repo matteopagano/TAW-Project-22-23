@@ -1,35 +1,40 @@
 <div class="container mt-4">
-  <h2 class="text-center">Tavoli</h2>
   <div class="row">
-    <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let table of tables">
-      <div class="card">
-        <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
-          <h5 class="card-title">{{ table.tableNumber }}</h5>
-          <p class="card-text">Table Capacity: {{ table.maxSeats }}</p>
-          <ng-container *ngIf="table.group !== null; else addCustomerGroupButton">
-            <p class="card-text">The table has a group associated with it</p>
-            <button [routerLink]="['/waiter-dashboard/tables', table._id]" class="btn btn-primary btn-block">Create order for {{table.tableNumber}}</button>
-          </ng-container>
-          <ng-template #addCustomerGroupButton>
-            <div class="card mt-3">
-              <div class="card-body">
-                <form (submit)="addCustomerGroup(table._id)">
-                  <div class="form-group">
-                    <label for="numberOfPerson-{{ table._id }}">Number of person:</label>
-                    <input
-                      type="number"
-                      class="form-control"
-                      id="numberOfPerson-{{ table._id }}"
-                      name="numberOfPerson"
-                      [(ngModel)]="numberOfPersons[table._id]"
-                      required
-                    >
+
+    <div class="col-md-12">
+      <h3 class="bg-success text-white p-2">Tables</h3>
+      <div class="row">
+        <div class="col-12 col-md-6 col-lg-4 col-xl-3 mb-4" *ngFor="let table of tables">
+          <div class="card">
+            <div class="card-body" [ngClass]="{'bg-warning': table.group !== null, 'bg-success': table.group === null}">
+              <h5 class="card-title">{{ table.tableNumber }}</h5>
+              <p class="card-text">Table Capacity: {{ table.maxSeats }}</p>
+              <ng-container *ngIf="table.group !== null; else addCustomerGroupButton">
+                <p class="card-text">The table has a group associated with it</p>
+                <button [routerLink]="['/waiter-dashboard/tables', table._id]" class="btn btn-primary btn-block">Create order for {{table.tableNumber}}</button>
+              </ng-container>
+              <ng-template #addCustomerGroupButton>
+                <div class="card mt-3">
+                  <div class="card-body">
+                    <form (submit)="addCustomerGroup(table._id)">
+                      <div class="form-group">
+                        <label for="numberOfPerson-{{ table._id }}">Number of person:</label>
+                        <input
+                          type="number"
+                          class="form-control"
+                          id="numberOfPerson-{{ table._id }}"
+                          name="numberOfPerson"
+                          [(ngModel)]="numberOfPersons[table._id]"
+                          required
+                        >
+                      </div>
+                      <button type="submit" class="btn btn-success btn-block">Add Group</button>
+                    </form>
                   </div>
-                  <button type="submit" class="btn btn-success btn-block">Add Group</button>
-                </form>
-              </div>
+                </div>
+              </ng-template>
             </div>
-          </ng-template>
+          </div>
         </div>
       </div>
     </div>

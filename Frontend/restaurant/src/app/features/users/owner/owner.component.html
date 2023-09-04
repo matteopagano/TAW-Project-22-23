@@ -86,13 +86,75 @@
             </a>
           </li>
 
+
+
           <li class="nav-item">
             <a
               class="nav-link"
-              [routerLink]="['/owner-dashboard/data-analytics']"
+              [routerLink]="['/owner-dashboard/data-analytics/bartenders']"
               routerLinkActive="active"
             >
-              Visualize Data-Analytics
+              Bartender Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics/cooks']"
+              routerLinkActive="active"
+            >
+              Cooks Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics/waiters']"
+              routerLinkActive="active"
+            >
+              Waiters Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics/cashiers']"
+              routerLinkActive="active"
+            >
+              Cashiers Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics/items']"
+              routerLinkActive="active"
+            >
+              Items Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/data-analytics/customers']"
+              routerLinkActive="active"
+            >
+              Customers Data
+            </a>
+          </li>
+
+          <li class="nav-item">
+            <a
+              class="nav-link"
+              [routerLink]="['/owner-dashboard/manage-account']"
+              routerLinkActive="active"
+            >
+              Visualize Account
             </a>
           </li>
 
@@ -191,6 +253,16 @@
               </a>
             </li>
           </ul>
+          <hr class="text-dark" />
+          <h4 class="text-dark mt-4 ml-2">Manage Account</h4>
+          <ul class="nav flex-column mb-5">
+            <li class="nav-item">
+              <a class="nav-link text-dark active" [routerLink]="['/owner-dashboard/manage-account']" routerLinkActive="active">
+                Visualize Account
+              </a>
+            </li>
+          </ul>
+
         </div>
       </div>
     </nav>

@@ -3,6 +3,7 @@ import { RouterModule, Routes } from '@angular/router';
 import { CashierComponent } from './cashier.component';
 import { DisplayTablesComponent } from './display-tables/display-tables.component';
 import { VisualizeTableDetailsComponent } from './visualize-table-details/visualize-table-details.component';
+import { ManageAccountComponent } from '../manage-account/manage-account.component';
 
 const routes: Routes = [{
   path : '',
@@ -13,6 +14,9 @@ const routes: Routes = [{
     },
     {
       path: 'tables/:id' , component: VisualizeTableDetailsComponent
+    },
+    {
+      path: 'manage-account' , component: ManageAccountComponent
     },
 
   ]

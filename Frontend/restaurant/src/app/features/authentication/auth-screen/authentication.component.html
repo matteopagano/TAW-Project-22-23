@@ -1,21 +1,22 @@
 <div class="container mt-5">
   <div class="text-center">
-    <h1 class="display-4">Welcome to Restaurant Manager</h1>
-    <p class="lead">Please log in or sign up to continue.</p>
+
+    <div style="position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%);">
+      <h1 class="display-4">Welcome to Restaurant Manager</h1>
+      <p class="lead">Your Ultimate Dining Experience Awaits!</p>
+      <p>Explore a world of culinary delights, manage your restaurant, and enhance your dining experience with us.</p>
+
+      <div class="text-center mt-4">
+        <button class="btn btn-primary btn-lg mr-3" (click)="navigateToLogin()">Login</button>
+        <button class="btn btn-secondary btn-lg" (click)="navigateToSignup()">Signup</button>
+      </div>
+
+      <div class="mt-4">
+        <router-outlet></router-outlet>
+      </div>
+    </div>
   </div>
 
-  <div class="text-center mt-4">
-    <button class="btn btn-primary btn-lg mr-3" (click)="navigateToLogin()">Login</button>
-    <button class="btn btn-secondary btn-lg" (click)="navigateToSignup()">Signup</button>
-  </div>
 
-  <div class="mt-4">
-    <router-outlet></router-outlet>
-  </div>
 </div>
-
-
-
-
-
 

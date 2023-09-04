@@ -19,43 +19,51 @@ const orderSchema = new mongoose_1.Schema({
     idGroup: {
         type: mongoose_1.Schema.Types.ObjectId,
         required: true,
-        ref: "Group"
+        ref: "Group",
     },
     idWaiter: {
         type: mongoose_1.Schema.Types.ObjectId,
         ref: "Waiter",
-        required: true
+        required: true,
     },
     items: {
-        type: [{
+        type: [
+            {
                 timeFinished: { type: mongoose_1.Schema.Types.Date, required: false },
-                idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: 'Item', required: true },
+                idItem: { type: mongoose_1.Schema.Types.ObjectId, ref: "Item", required: true },
                 state: { type: mongoose_1.Schema.Types.String, enum: StateItem, required: true },
-                completedBy: { type: mongoose_1.Schema.Types.ObjectId, ref: 'User', required: false },
-                count: { type: mongoose_1.Schema.Types.Number, required: true }
-            }],
-        required: true
+                completedBy: {
+                    type: mongoose_1.Schema.Types.ObjectId,
+                    ref: "User",
+                    required: false,
+                },
+                count: { type: mongoose_1.Schema.Types.Number, required: true },
+            },
+        ],
+        required: true,
     },
     state: {
         type: mongoose_1.Schema.Types.String,
         enum: StateOrder,
-        required: true
+        required: true,
     },
     timeCompleted: {
         type: mongoose_1.Schema.Types.Date,
-        required: false
+        required: false,
     },
     timeStarted: {
         type: mongoose_1.Schema.Types.Date,
-        required: true
+        required: true,
     },
     type: {
-        type: mongoose_1.Schema.Types.String, enum: Item_1.ItemType, required: true
+        type: mongoose_1.Schema.Types.String,
+        enum: Item_1.ItemType,
+        required: true,
     },
 });
 function createOrder(idGroup, idWaiter, items, type) {
     const itemsList = [];
-    items.forEach(item => {
+    items.forEach((item) => {
         const itemId = item.itemId;
         const count = item.count;
         const newItem = {
@@ -74,9 +82,9 @@ function createOrder(idGroup, idWaiter, items, type) {
         state: StateOrder.NOTSTARTED,
         timeCompleted: null,
         timeStarted: new Date(),
-        type: type
+        type: type,
     });
     return newOrder;
 }
 exports.createOrder = createOrder;
-exports.OrderModel = (0, mongoose_1.model)('Order', orderSchema);
+exports.OrderModel = (0, mongoose_1.model)("Order", orderSchema);

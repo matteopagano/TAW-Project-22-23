@@ -1,22 +1,22 @@
 
 <div class="container mt-4">
+  <h3 class="bg-success text-white p-2">List Orders Awaited</h3>
+
   <h3>Legenda</h3>
   <ul class="list-unstyled">
     <li><span class="badge badge-success">Ready</span></li>
     <li><span class="badge badge-warning">Not started</span></li>
-    <li><span class="badge badge-light text-dark">served</span></li>
+    <li><span class="badge badge-light text-dark">Served</span></li>
   </ul>
-</div>
-
-
-<div class="container">
-  <h1>List orders awaited</h1>
   <div class="row">
     <div class="col-md-4" *ngFor="let order of ordersAwaiting">
       <div class="card mb-4" [ngClass]="{'bg-success': order.state === 'ready', 'bg-warning': order.state === 'notStarted'}">
         <div class="card-body">
-          <p class="card-text">Started Time: {{ order.timeStarted | date:'dd/MM HH:mm' }}</p>
-          <p class="card-text">Table: {{ getTableNameByGroup(order.idGroup) }}</p>
+          <p class="card-text">Order Placed at: {{ order.timeStarted | date:'HH:mm on dd/MM' }}</p>
+          <p class="card-text">Table Name: {{ order.idGroup.idTable.tableNumber }}</p>
+          <p class="card-text">Order Type: {{ order.type }}</p>
+          <p class="card-text">Order status: {{ order.state }}</p>
+          <p class="card-text">Order id: {{ order._id }}</p>
           <button class="btn btn-primary" (click)="serveOrder(order)" *ngIf="order.state === 'ready'">Serve Order</button>
         </div>
       </div>

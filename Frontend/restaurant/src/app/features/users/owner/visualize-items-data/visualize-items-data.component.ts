@@ -42,7 +42,7 @@ export class VisualizeItemsDataComponent {
     const data = this.items.map(item => item.countServered);
 
     this.chartItems = new Chart("itemsChartCanvas", {
-      type: 'doughnut',
+      type: 'bar',
       data: {
         labels: labels,
         datasets: [
