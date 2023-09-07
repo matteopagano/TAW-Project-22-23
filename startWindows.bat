@@ -1,26 +1,31 @@
 @echo off
-REM Verifica se è stato passato un argomento e se l'argomento è '--restore'
-IF "%~1"=="--restore" (
-    REM Copia il dump nella cartella del container Docker
+@echo off
+
+set restore=false
+set electron=false
+
+for %%a in (%*) do (
+    if "%%a" == "--restore" (
+        set restore=true
+    ) 
+    if "%%a" == "--electron" (
+        set electron=true
+    )
+)
+
+if %restore% == true (
+    echo ------------ RESTORE ------------
     docker cp .\DBDump\dump mongodb:/dump 
-    REM Esegui il ripristino nel container Docker
     docker exec mongodb mongorestore --db MioDB --drop /dump/MioDB
-    
-    REM Vai nella cartella "ElectronView"
+)
+
+if %electron% == true (
+    echo ------------ ELECTRON ------------
     cd .\ElectronView
-    
-    REM Esegui npm install
     npm install
-    
-    REM Esegui npm start (o il comando specifico per avviare Electron)
     npm start
-) ELSE (
-    REM Vai nella cartella "ElectronView"
-    cd .\ElectronView
-    
-    REM Esegui npm install
-    npm install
-    
-    REM Esegui npm start (o il comando specifico per avviare Electron)
-    npm start
+)
+
+if "%restore%" == "false" && "%electron%" == "false" (
+    echo Any command found!
 )
