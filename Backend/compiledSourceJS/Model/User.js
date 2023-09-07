@@ -44,7 +44,7 @@ var RoleType;
     RoleType["WAITER"] = "waiter";
     RoleType["COOK"] = "cook";
     RoleType["BARTENDER"] = "bartender";
-})(RoleType || (exports.RoleType = RoleType = {}));
+})(RoleType = exports.RoleType || (exports.RoleType = {}));
 exports.options = { discriminatorKey: "role" };
 const userSchema = new mongoose_1.Schema({
     username: { type: mongoose_1.Schema.Types.String, required: true },

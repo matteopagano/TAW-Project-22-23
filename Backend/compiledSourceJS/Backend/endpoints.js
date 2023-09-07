@@ -76,6 +76,7 @@ function root(req, res) {
 exports.root = root;
 function login(req, res, next) {
     // If it's reached this point, req.user has been injected.
+    console.log("ciao");
     const authenticatedUser = new User.UserModel(req.user);
     var token;
     if (authenticatedUser.role === "owner") {

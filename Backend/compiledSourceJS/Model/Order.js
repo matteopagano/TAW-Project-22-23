@@ -9,12 +9,12 @@ var StateOrder;
     StateOrder["SERVED"] = "served";
     StateOrder["INPROGRESS"] = "inProgress";
     StateOrder["NOTSTARTED"] = "notStarted";
-})(StateOrder || (exports.StateOrder = StateOrder = {}));
+})(StateOrder = exports.StateOrder || (exports.StateOrder = {}));
 var StateItem;
 (function (StateItem) {
     StateItem["COMPLETED"] = "completed";
     StateItem["NOTCOMPLETED"] = "notcompleted";
-})(StateItem || (exports.StateItem = StateItem = {}));
+})(StateItem = exports.StateItem || (exports.StateItem = {}));
 const orderSchema = new mongoose_1.Schema({
     idGroup: {
         type: mongoose_1.Schema.Types.ObjectId,

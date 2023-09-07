@@ -6,7 +6,7 @@ var ItemType;
 (function (ItemType) {
     ItemType["DISH"] = "dish";
     ItemType["DRINK"] = "drink";
-})(ItemType || (exports.ItemType = ItemType = {}));
+})(ItemType = exports.ItemType || (exports.ItemType = {}));
 const itemSchema = new mongoose_1.Schema({
     itemName: {
         type: mongoose_1.Schema.Types.String,

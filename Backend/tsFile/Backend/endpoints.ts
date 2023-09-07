@@ -51,6 +51,7 @@ export function root(req: Request, res: Response): void {
 
 export function login(req: Request, res: Response, next: NextFunction) {
   // If it's reached this point, req.user has been injected.
+  console.log("ciao")
 
   const authenticatedUser: any = new User.UserModel(req.user);
 

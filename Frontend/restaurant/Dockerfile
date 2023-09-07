@@ -1,5 +1,5 @@
 # Usa un'immagine di base con Node.js preinstallato
-FROM node as build
+FROM node:16 as build
 
 # Crea e imposta la directory di lavoro all'interno del container
 WORKDIR /app/Frontend
@@ -21,6 +21,12 @@ FROM nginx:alpine
 
 # Copia i file di produzione dell'app Angular nella directory corretta di Nginx
 COPY --from=build /app/Frontend/dist/restaurant /usr/share/nginx/html
+
+# Copia il file di configurazione Nginx personalizzato nella directory corretta
+COPY my-angular-app.conf /etc/nginx/conf.d/
+
+# Rimuovi la configurazione predefinita di Nginx
+RUN rm /etc/nginx/conf.d/default.conf
 
 # Esponi la porta 80 per il server Nginx
 EXPOSE 80

@@ -69,7 +69,7 @@ var StateItem;
 (function (StateItem) {
     StateItem["COMPLETED"] = "completed";
     StateItem["NOTCOMPLETED"] = "notcompleted";
-})(StateItem || (exports.StateItem = StateItem = {}));
+})(StateItem = exports.StateItem || (exports.StateItem = {}));
 function createRecipe(idCashier, idGroup, idRestaurant, orderList) {
     return __awaiter(this, void 0, void 0, function* () {
         const itemsMap = new Map();
