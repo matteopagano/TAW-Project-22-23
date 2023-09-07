@@ -26,6 +26,3 @@ if %electron% == true (
     npm start
 )
 
-if "%restore%" == "false" && "%electron%" == "false" (
-    echo Any command found!
-)
