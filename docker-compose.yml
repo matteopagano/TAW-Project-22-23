@@ -15,8 +15,8 @@ services:
       - "3000:3000"
     depends_on:
       - mongodb
-    volumes:
-      - ./Backend:/app/Backend
+    #volumes:
+    #  - ./Backend:/app/Backend
     networks:
       - taw-subnet  
 
