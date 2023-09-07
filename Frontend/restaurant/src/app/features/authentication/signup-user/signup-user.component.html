@@ -25,6 +25,10 @@
           Sign Up Error: {{ errorMessage }}
         </div>
 
+        <div *ngIf="message" class="alert alert-success" role="alert">
+          {{message}}
+        </div>
+
         <button class="btn btn-lg btn-primary btn-block" [disabled]="!signupForm.form.valid">Sign Up</button>
       </form>
 

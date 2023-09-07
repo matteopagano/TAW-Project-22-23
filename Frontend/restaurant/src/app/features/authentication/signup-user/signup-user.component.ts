@@ -13,6 +13,7 @@ export class SignupUserComponent {
   password: string = '';
   restaurantName :string = '';
   errorMessage :string = ''
+  message:string=''
 
 
   constructor(private sures : SignupRequestService) {
@@ -20,12 +21,14 @@ export class SignupUserComponent {
   }
 
   signup() {
+    this.message = ''
+    this.errorMessage = ''
     this.sures.signup(this.username, this.email, this.password, this.restaurantName).subscribe({
       next: (d) => {
-        console.log('Signup granted: ' + JSON.stringify(d));
+        this.message = 'Signup granted'
       },
       error: (err) => {
-        console.log('Signup error: ' + JSON.stringify(err));
+        this.errorMessage = 'Signup error'
       }
     });
   }
