@@ -16,11 +16,10 @@ This is a step-by-step guide for bot the application
 
         docker-compose up
 
-5)  Now it's all setupped, so you can visit in a Broswer : http://localhost (is not necessary include the port)
+5) Now it's all setupped, so you can visit in a browser like Chrome or Safari : http://localhost (is not necessary include the port)
 
-7) now the application is correctly setupped, so you can access with the various kinds of users and visualize the content of the application
-
-8) This last step is unnecessay, but if you want you can use electron to run the web application, you must just type the command
+8) This last step is unnecessay, but if you want you can use electron to run the web application or you want some data in the mongoDB, 
+you must type the commands:
 
         ./startMacOrLinux.sh
 
@@ -33,8 +32,37 @@ This is a step-by-step guide for bot the application
                  --electron     for start the electron view
 
 
+Users credentials
+-------------------------------------
+Owner
+metiupaga8@gmail.com
+admin
+-------------------------------------
+Waiters
+alice@gmail.com
+ciao
 
+giovanni@gmail.com
+ddgcmDZd
+-------------------------------------
+cashiers
+francesco@gmail.com
+JOrNpfZF
+-------------------------------------
+Bartenders
+ilaria@gmail.com
+ZQ7vTstZ
 
+paola@gmail.com
+821s8Gy4
+-------------------------------------
+Cooks
+francesca@gmail.com
+NFRKUd8L
+
+graziano@gmail.com
+dQ4UnZRF
+-------------------------------------
 
 
 
