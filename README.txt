@@ -19,7 +19,7 @@ This is a step-by-step guide for bot the application
 5)  Now it's all setupped, so you can visit in a Broswer : http://localhost (is not necessary include the port)
 
 6)  The last step is to restore the database with a set of data already prebuilds. 
-    So If you are using a MAC or Linux machine you must type the following command in the terminal (in the root folder)
+    So If you are using a MAC or Linux machine you must type the following command in the terminal (N.B The componets must be started before you run the command)
 
         bash mac_linux_restore.sh
 
